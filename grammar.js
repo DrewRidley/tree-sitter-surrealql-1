@@ -73,7 +73,13 @@ export default grammar({
 		['prefix', 'range', 'method', 'binary', 'union', 'filter', 'for', 'clause'],
 	],
 
-	conflicts: ($) => [[$.RecordId, $.RecordIdRange], [$.WhereClause]],
+	conflicts: ($) => [
+		[$.RecordId, $.RecordIdRange],
+		[$.WhereClause],
+		[$._value, $.Path],
+		[$._prefixOperand, $.Path],
+		[$._idName, $._singleType],
+	],
 
 	rules: {
 		// ================================================================
@@ -215,7 +221,12 @@ export default grammar({
 				alias($._kw_for, $.Keyword),
 				alias($._kw_table, $.Keyword),
 				$.Ident,
-				optional(seq(alias($._kw_since, $.Keyword), $.String)),
+				optional(
+					seq(
+						alias($._kw_since, $.Keyword),
+						choice($.String, $.Number),
+					),
+				),
 				optional(seq(alias($._kw_limit, $.Keyword), $.Number)),
 			),
 
@@ -923,7 +934,7 @@ export default grammar({
 		PatchClause: ($) => seq(alias($._kw_patch, $.Keyword), $.Array),
 		ReplaceClause: ($) => seq(alias($._kw_replace, $.Keyword), $.Object),
 		UnsetClause: ($) =>
-			seq(alias($._kw_unset, $.Keyword), csep($.FieldAssignment)),
+			seq(alias($._kw_unset, $.Keyword), csep($._inclusivePredicate)),
 		OmitClause: ($) =>
 			seq(alias($._kw_omit, $.Keyword), csep($._inclusivePredicate)),
 
@@ -1462,16 +1473,18 @@ export default grammar({
 
 		// Paths
 		Path: ($) =>
-			choice(
-				seq($._baseValue, repeat1($._pathElement)),
-				seq(
-					$.At,
-					choice(
-						seq($._dotPart, repeat($._pathElement)),
-						repeat1($._pathElement),
+			prec.right(
+				choice(
+					seq($._baseValue, repeat1($._pathElement)),
+					seq(
+						$.At,
+						choice(
+							seq($._dotPart, repeat($._pathElement)),
+							repeat1($._pathElement),
+						),
 					),
+					seq($.Lookup, repeat($._pathElement)),
 				),
-				seq($.Lookup, repeat($._pathElement)),
 			),
 		_pathElement: ($) =>
 			choice($.Lookup, $.Subscript, alias($._pathFilter, $.Filter)),
@@ -1494,6 +1507,9 @@ export default grammar({
 					// `[? value]` shorthand — wrap in WhereClause to match lezer's
 					// inline `WhereClause { "?" value }` rule.
 					alias($._questionWhere, $.WhereClause),
+					// `[*]` selects every element, `[$]` the last one.
+					alias('*', $.Any),
+					alias('$', $.Last),
 					$._expression,
 				),
 				']',
@@ -1600,13 +1616,32 @@ export default grammar({
 		TypeCast: ($) => seq('<', $._type, '>', $._baseValue),
 
 		// Closure
+		// The body extends as far right as possible (`|$x| $x + 1` is one
+		// closure, not a closure plus a trailing binary expression). A
+		// declared return type requires a block body: after `-> type` a bare
+		// expression would be unbounded against the type syntax.
 		Closure: ($) =>
-			seq(
-				$.Pipe,
-				optional(csep($.ParamDefinition)),
-				$.Pipe,
-				optional(seq($.LookupRight, $._type)),
-				$.Block,
+			choice(
+				prec.right(
+					1,
+					seq(
+						$.Pipe,
+						optional(csep($.ParamDefinition)),
+						$.Pipe,
+						choice($.Block, $._value),
+					),
+				),
+				prec.right(
+					1,
+					seq(
+						$.Pipe,
+						optional(csep($.ParamDefinition)),
+						$.Pipe,
+						$.LookupRight,
+						$._type,
+						$.Block,
+					),
+				),
 			),
 
 		ParamDefinition: ($) =>
@@ -2624,4 +2659,4 @@ export default grammar({
 				$._kw_with,
 			),
 	},
-});
+})
