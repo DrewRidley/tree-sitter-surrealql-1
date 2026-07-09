@@ -5426,10 +5426,6 @@
           "named": true
         },
         {
-          "type": "Keyword",
-          "named": true
-        },
-        {
           "type": "Number",
           "named": true
         }

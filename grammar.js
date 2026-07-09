@@ -1597,8 +1597,80 @@ export default grammar({
 		Idiom: ($) => seq($.Ident, repeat(seq('.', $.Ident))),
 
 		// Binary expression
-		BinaryExpression: ($) =>
-			prec.left('binary', seq($._value, $.Operator, $._value)),
+		// Operator precedence tiers (loosest to tightest). Every tier still
+		// surfaces as BinaryExpression with a single Operator child, so
+		// consumers see the same shape — only the nesting is now correct:
+		// `a > 1 AND b > 2` is `(a > 1) AND (b > 2)`.
+		BinaryExpression: ($) => {
+			const tier = (level, ops) =>
+				prec.left(
+					level,
+					seq($._value, alias(ops, $.Operator), $._value),
+				);
+			return choice(
+				tier(1, $._binop_disjunct),
+				tier(2, $._binop_conjunct),
+				tier(3, $._binop_compare),
+				tier(4, $._binop_additive),
+				tier(5, $._binop_multiplicative),
+				tier(6, $._binop_power),
+			);
+		},
+
+		_binop_disjunct: ($) => choice($._kw_or, '||', '??', '?:'),
+		_binop_conjunct: ($) => choice($._kw_and, '&&'),
+		_binop_compare: ($) =>
+			choice(
+				'=',
+				'==',
+				'!=',
+				'?=',
+				'*=',
+				'~',
+				'!~',
+				'*~',
+				'<',
+				'<=',
+				'>',
+				'>=',
+				$._kw_is,
+				seq($._kw_is, $._kw_not),
+				$._kw_in,
+				seq($._kw_not, $._kw_in),
+				$._kw_contains,
+				$._kw_containsnot,
+				$._kw_containsall,
+				$._kw_containsany,
+				$._kw_containsnone,
+				$._kw_inside,
+				$._kw_notinside,
+				$._kw_allinside,
+				$._kw_anyinside,
+				$._kw_noneinside,
+				$._kw_outside,
+				$._kw_intersects,
+				'@@',
+				seq('@', $.Number, '@'),
+				seq(
+					'<|',
+					$.Number,
+					optional(
+						seq(
+							',',
+							choice(
+								$.Number,
+								$.Distance,
+								seq(alias($._kw_minkowski, $.Distance), $.Number),
+							),
+						),
+					),
+					'|>',
+				),
+				...['∋', '∌', '⊇', '⊃', '⊅', '∈', '∉', '⊆', '⊂', '⊄'],
+			),
+		_binop_additive: ($) => choice('+', '-', '+=', '-='),
+		_binop_multiplicative: ($) => choice('*', '×', '/', '÷'),
+		_binop_power: ($) => '**',
 
 		// Range
 		Range: ($) =>
