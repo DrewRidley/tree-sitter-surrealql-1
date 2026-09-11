@@ -139,6 +139,133 @@
     }
   },
   {
+    "type": "AccessGrantClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "RecordId",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "AccessPurgeClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "AccessRevokeClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "WhereClause",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "AccessShowClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "WhereClause",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "AccessStatement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "AccessGrantClause",
+          "named": true
+        },
+        {
+          "type": "AccessPurgeClause",
+          "named": true
+        },
+        {
+          "type": "AccessRevokeClause",
+          "named": true
+        },
+        {
+          "type": "AccessShowClause",
+          "named": true
+        },
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "OnRootNsDbClause",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "AccessTypeClause",
     "named": true,
     "fields": {},
@@ -1205,6 +1332,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "AccessStatement",
+          "named": true
+        },
         {
           "type": "AlterStatement",
           "named": true
@@ -2435,6 +2566,10 @@
       "required": true,
       "types": [
         {
+          "type": "AccessStatement",
+          "named": true
+        },
+        {
           "type": "AlterStatement",
           "named": true
         },
@@ -3218,6 +3353,10 @@
       "multiple": false,
       "required": false,
       "types": [
+        {
+          "type": "AccessStatement",
+          "named": true
+        },
         {
           "type": "AlterStatement",
           "named": true
@@ -4499,6 +4638,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "AccessStatement",
+          "named": true
+        },
         {
           "type": "AlterStatement",
           "named": true
@@ -7434,6 +7577,10 @@
       "required": true,
       "types": [
         {
+          "type": "AccessStatement",
+          "named": true
+        },
+        {
           "type": "AlterStatement",
           "named": true
         },
@@ -7846,6 +7993,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "AccessStatement",
+          "named": true
+        },
         {
           "type": "AlterStatement",
           "named": true
@@ -8602,6 +8753,10 @@
       "required": false,
       "types": [
         {
+          "type": "AccessStatement",
+          "named": true
+        },
+        {
           "type": "AlterStatement",
           "named": true
         },
@@ -8860,6 +9015,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "AccessStatement",
+          "named": true
+        },
         {
           "type": "AlterStatement",
           "named": true
@@ -9709,6 +9868,10 @@
       "required": true,
       "types": [
         {
+          "type": "AccessStatement",
+          "named": true
+        },
+        {
           "type": "AlterStatement",
           "named": true
         },
@@ -9971,6 +10134,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "AccessStatement",
+          "named": true
+        },
         {
           "type": "AlterStatement",
           "named": true
