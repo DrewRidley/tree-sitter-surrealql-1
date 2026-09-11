@@ -1,3 +1,247 @@
+========================
+access :: Grant for user
+========================
+
+ACCESS api ON DB GRANT FOR USER tobie
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessGrantClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Ident))))
+
+==========================
+access :: Grant for record
+==========================
+
+ACCESS api ON DB GRANT FOR RECORD user:tobie
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessGrantClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent)))))
+
+===============================
+access :: Grant without a level
+===============================
+
+ACCESS api GRANT FOR USER tobie
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (AccessGrantClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Ident))))
+
+==================
+access :: Show all
+==================
+
+ACCESS api ON DB SHOW ALL
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessShowClause
+      (Keyword)
+      (Keyword))))
+
+========================
+access :: Show one grant
+========================
+
+ACCESS api ON DB SHOW GRANT gnt
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessShowClause
+      (Keyword)
+      (Keyword)
+      (Ident))))
+
+===============================
+access :: Show with a condition
+===============================
+
+ACCESS api ON DB SHOW WHERE revocation = NONE
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessShowClause
+      (Keyword)
+      (WhereClause
+        (Keyword)
+        (BinaryExpression
+          (Ident)
+          (Operator)
+          (None))))))
+
+====================
+access :: Revoke all
+====================
+
+ACCESS api ON DB REVOKE ALL
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessRevokeClause
+      (Keyword)
+      (Keyword))))
+
+==========================
+access :: Revoke one grant
+==========================
+
+ACCESS api ON DB REVOKE GRANT gnt
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessRevokeClause
+      (Keyword)
+      (Keyword)
+      (Ident))))
+
+=================================
+access :: Revoke with a condition
+=================================
+
+ACCESS api ON DB REVOKE WHERE revocation = NONE
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessRevokeClause
+      (Keyword)
+      (WhereClause
+        (Keyword)
+        (BinaryExpression
+          (Ident)
+          (Operator)
+          (None))))))
+
+=======================
+access :: Purge expired
+=======================
+
+ACCESS api ON DB PURGE EXPIRED
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessPurgeClause
+      (Keyword)
+      (Keyword))))
+
+=======================================================
+access :: Purge expired and revoked with a grace period
+=======================================================
+
+ACCESS api ON DB PURGE EXPIRED, REVOKED FOR 90d
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessPurgeClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Duration
+        (DurationPart)))))
+
+============================================
+access :: Grant for user rejects a parameter
+:error
+============================================
+
+-- The grantee is an identifier and only an identifier. The engine answers
+--   Unexpected token `a parameter`, expected an identifier
+ACCESS api ON DB GRANT FOR USER $u
+
+---
+
+(ERROR)
+
 ==========================
 alter :: Alter table basic
 ==========================

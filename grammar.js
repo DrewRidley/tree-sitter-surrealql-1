@@ -198,12 +198,68 @@ export default grammar({
 				$.ContinueStatement,
 				$.ForStatement,
 				$.ThrowStatement,
+				$.AccessStatement,
 				$._subqueryStatement,
 			),
 
 		// ----------------------------------------------------------------
 		// Transaction statements
 		// ----------------------------------------------------------------
+
+		// ACCESS — operate on the grants of a `DEFINE ACCESS ... TYPE BEARER`
+		// method. The level clause is optional; without it the engine uses the
+		// session's own level. Each verb carries its own operand shape.
+		AccessStatement: ($) =>
+			seq(
+				alias($._kw_access, $.Keyword),
+				$.Ident,
+				optional($.OnRootNsDbClause),
+				choice(
+					$.AccessGrantClause,
+					$.AccessShowClause,
+					$.AccessRevokeClause,
+					$.AccessPurgeClause,
+				),
+			),
+		// A grant is issued to a user by name or to a record by id. The user
+		// is an `Ident` and only an `Ident`: the engine answers ``Unexpected
+		// token `a parameter`, expected an identifier`` for `FOR USER $u`.
+		AccessGrantClause: ($) =>
+			seq(
+				alias($._kw_grant, $.Keyword),
+				alias($._kw_for, $.Keyword),
+				choice(
+					seq(alias($._kw_user, $.Keyword), $.Ident),
+					seq(alias($._kw_record, $.Keyword), $.RecordId),
+				),
+			),
+		AccessShowClause: ($) =>
+			seq(alias($._kw_show, $.Keyword), $._accessSubject),
+		AccessRevokeClause: ($) =>
+			seq(alias($._kw_revoke, $.Keyword), $._accessSubject),
+		// SHOW and REVOKE select the same way: everything, one grant by id, or
+		// a predicate over the grant records. The id is an `Ident` here too —
+		// `SHOW GRANT $g` is the same parse error as above.
+		_accessSubject: ($) =>
+			choice(
+				alias($._kw_all, $.Keyword),
+				seq(alias($._kw_grant, $.Keyword), $.Ident),
+				$.WhereClause,
+			),
+		// `PURGE EXPIRED`, `PURGE REVOKED` or both, optionally keeping grants
+		// younger than a duration. `FOR` takes a duration and not `NONE`
+		// (``Unexpected token `NONE`, expected a duration``).
+		AccessPurgeClause: ($) =>
+			seq(
+				alias($._kw_purge, $.Keyword),
+				csep(
+					choice(
+						alias($._kw_expired, $.Keyword),
+						alias($._kw_revoked, $.Keyword),
+					),
+				),
+				optional(seq(alias($._kw_for, $.Keyword), $.Duration)),
+			),
 
 		BeginStatement: ($) =>
 			seq(

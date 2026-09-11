@@ -191,7 +191,301 @@
         },
         {
           "type": "SYMBOL",
+          "name": "AccessStatement"
+        },
+        {
+          "type": "SYMBOL",
           "name": "_subqueryStatement"
+        }
+      ]
+    },
+    "AccessStatement": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_access"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Ident"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "OnRootNsDbClause"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "AccessGrantClause"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "AccessShowClause"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "AccessRevokeClause"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "AccessPurgeClause"
+            }
+          ]
+        }
+      ]
+    },
+    "AccessGrantClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_grant"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_for"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_user"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "Ident"
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_record"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "RecordId"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "AccessShowClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_show"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_accessSubject"
+        }
+      ]
+    },
+    "AccessRevokeClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_revoke"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_accessSubject"
+        }
+      ]
+    },
+    "_accessSubject": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_all"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_grant"
+              },
+              "named": true,
+              "value": "Keyword"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "Ident"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "WhereClause"
+        }
+      ]
+    },
+    "AccessPurgeClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_purge"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_expired"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_revoked"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                }
+              ]
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": ","
+                  },
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_kw_expired"
+                        },
+                        "named": true,
+                        "value": "Keyword"
+                      },
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_kw_revoked"
+                        },
+                        "named": true,
+                        "value": "Keyword"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_for"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "Duration"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
