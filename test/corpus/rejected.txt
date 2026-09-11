@@ -135,3 +135,67 @@ CREATE t SET $x = 1
     (VariableName))
   (Number
     (Int)))
+
+====================================================
+types :: A LET annotation rejects the bracketed form
+====================================================
+
+-- The bracketed type is a closure-parameter spelling only. The engine
+-- rejects it here:
+--   Unexpected token `<`, expected a kind name
+-- Unchanged from master; pinned so a refactor cannot hand the bracket back.
+-- The parser recovers rather than failing outright, hence MISSING not ERROR.
+LET $a: <int> = 2
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
+  (Comment)
+  (Comment)
+  (LetStatement
+    (Keyword)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (ParameterizedType
+          (MISSING TypeName)
+          (TypeName))))
+    (Number
+      (Int))))
+
+========================================================
+types :: A function parameter rejects the bracketed form
+========================================================
+
+-- Same rule inside a DEFINE FUNCTION argument list:
+--   Unexpected token `<`, expected a kind name
+-- Unchanged from master, and recovers the same way.
+DEFINE FUNCTION fn::g($x: <int>) { RETURN $x; }
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (FunctionName)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (ParameterizedType
+          (MISSING TypeName)
+          (TypeName))))
+    (Block
+      (BraceOpen)
+      (ReturnStatement
+        (Keyword)
+        (VariableName))
+      (BraceClose))))

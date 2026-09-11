@@ -502,6 +502,25 @@ closures :: Closure with bracketed union param type
     (Pipe)
     (VariableName)))
 
+===============================================
+closures :: Closure with a bracketed param type
+===============================================
+
+|$x: <int>| $x
+
+---
+
+(SurrealQL
+  (Closure
+    (Pipe)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (TypeName)))
+    (Pipe)
+    (VariableName)))
+
 ========================================
 closures :: Closure with multiple params
 ========================================
