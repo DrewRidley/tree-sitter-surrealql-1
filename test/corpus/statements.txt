@@ -819,6 +819,32 @@ DEFINE DB test
     (Keyword)
     (Ident)))
 
+=========================
+define :: Define sequence
+=========================
+
+DEFINE SEQUENCE sq BATCH 100 START 5 TIMEOUT 2s
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (BatchClause
+      (Keyword)
+      (Number
+        (Int)))
+    (StartClause
+      (Keyword)
+      (Number
+        (Int)))
+    (TimeoutClause
+      (Keyword)
+      (Duration
+        (DurationPart)))))
+
 ========================================
 define :: Define namespace if not exists
 ========================================
@@ -2724,6 +2750,20 @@ DELETE person
     (Keyword)
     (Ident)))
 
+==========================
+delete :: Delete with FROM
+==========================
+
+DELETE FROM test
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
 =====================
 delete :: Delete ONLY
 =====================
@@ -4131,6 +4171,53 @@ REMOVE USER tobie ON ROOT
     (Keyword)
     (Keyword)
     (Ident)
+    (Keyword)
+    (Keyword)))
+
+=======================
+remove :: Remove access
+=======================
+
+REMOVE ACCESS a ON DB
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (Keyword)
+    (Keyword)))
+
+=========================
+remove :: Remove sequence
+=========================
+
+REMOVE SEQUENCE IF EXISTS sq
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (IfExistsClause
+      (Keyword)
+      (Keyword))
+    (Ident)))
+
+=======================
+remove :: Remove config
+=======================
+
+REMOVE CONFIG GRAPHQL
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
     (Keyword)
     (Keyword)))
 

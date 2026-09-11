@@ -1997,36 +1997,111 @@
                   "value": "Keyword"
                 },
                 {
+                  "type": "SYMBOL",
+                  "name": "_levelKeyword"
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_access"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
                   "type": "CHOICE",
                   "members": [
                     {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "_kw_root"
-                      },
-                      "named": true,
-                      "value": "Keyword"
+                      "type": "SYMBOL",
+                      "name": "IfExistsClause"
                     },
                     {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "_kw_namespace"
-                      },
-                      "named": true,
-                      "value": "Keyword"
-                    },
-                    {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "_kw_database"
-                      },
-                      "named": true,
-                      "value": "Keyword"
+                      "type": "BLANK"
                     }
                   ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_value"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_on"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_levelKeyword"
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_sequence"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "IfExistsClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_value"
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_config"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "IfExistsClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_configType"
                 }
               ]
             },
@@ -2674,6 +2749,24 @@
                 {
                   "type": "SYMBOL",
                   "name": "_defineConfigOptions"
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_sequence"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_defineSequenceOptions"
                 }
               ]
             },
@@ -3520,6 +3613,29 @@
         }
       ]
     },
+    "_configType": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_graphql"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_api"
+          },
+          "named": true,
+          "value": "Keyword"
+        }
+      ]
+    },
     "_defineConfigOptions": {
       "type": "SEQ",
       "members": [
@@ -3582,6 +3698,134 @@
                   "name": "ApiOptions"
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    "_defineSequenceOptions": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "IfNotExistsClause"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "OverwriteClause"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_value"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "BatchClause"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "StartClause"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "TimeoutClause"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "BatchClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_batch"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_value"
+        }
+      ]
+    },
+    "StartClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_start"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_at"
+              },
+              "named": true,
+              "value": "Keyword"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "Number"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "VariableName"
             }
           ]
         }
@@ -4462,6 +4706,23 @@
           },
           "named": true,
           "value": "Keyword"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_from"
+              },
+              "named": true,
+              "value": "Keyword"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         },
         {
           "type": "CHOICE",
@@ -6074,50 +6335,6 @@
         ]
       }
     },
-    "StartClause": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "ALIAS",
-          "content": {
-            "type": "SYMBOL",
-            "name": "_kw_start"
-          },
-          "named": true,
-          "value": "Keyword"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_at"
-              },
-              "named": true,
-              "value": "Keyword"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "Number"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "VariableName"
-            }
-          ]
-        }
-      ]
-    },
     "LimitClause": {
       "type": "SEQ",
       "members": [
@@ -6468,6 +6685,28 @@
               "name": "_dbKeyword"
             }
           ]
+        }
+      ]
+    },
+    "_levelKeyword": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_root"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_nsKeyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_dbKeyword"
         }
       ]
     },

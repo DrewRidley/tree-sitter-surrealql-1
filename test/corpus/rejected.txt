@@ -157,3 +157,39 @@ INFO FOR USER tobie VERSION d'2024-01-01T00:00:00Z'
 ---
 
 (ERROR)
+========================================
+define :: DEFINE SEQUENCE has no COMMENT
+:error
+========================================
+
+-- The engine rejects this too:
+--   Unexpected token `COMMENT`, expected Eof
+DEFINE SEQUENCE sq COMMENT 'x'
+
+---
+
+(ERROR)
+===============================================
+define :: DEFINE SEQUENCE's clauses are ordered
+:error
+===============================================
+
+-- BATCH, then START, then TIMEOUT. The engine answers:
+--   Unexpected token `BATCH`, expected Eof
+DEFINE SEQUENCE sq START 5 BATCH 100
+
+---
+
+(ERROR)
+===================================
+remove :: REMOVE ACCESS requires ON
+:error
+===================================
+
+-- The engine rejects this too:
+--   Unexpected token `;`, expected ON
+REMOVE ACCESS a
+
+---
+
+(ERROR)

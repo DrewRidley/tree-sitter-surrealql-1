@@ -544,16 +544,36 @@ export default grammar({
 							),
 						),
 					),
+					// The level keywords stay a flat run here, as they were,
+					// rather than moving into `OnRootNsDbClause`: that would
+					// reshape an existing node and belongs with the other
+					// shape changes. Only the `NS`/`DB` spellings are added.
 					seq(
 						alias($._kw_user, $.Keyword),
 						optional($.IfExistsClause),
 						$._value,
 						alias($._kw_on, $.Keyword),
-						choice(
-							alias($._kw_root, $.Keyword),
-							alias($._kw_namespace, $.Keyword),
-							alias($._kw_database, $.Keyword),
-						),
+						$._levelKeyword,
+					),
+					// `REMOVE ACCESS <name> ON <level>` — the `ON` is required:
+					// without it the engine answers ``Unexpected token `;`,
+					// expected ON``.
+					seq(
+						alias($._kw_access, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						alias($._kw_on, $.Keyword),
+						$._levelKeyword,
+					),
+					seq(
+						alias($._kw_sequence, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+					),
+					seq(
+						alias($._kw_config, $.Keyword),
+						optional($.IfExistsClause),
+						$._configType,
 					),
 					seq(
 						alias($._kw_token, $.Keyword),
@@ -653,6 +673,10 @@ export default grammar({
 					$.ScopeDefinition,
 					seq(alias($._kw_table, $.Keyword), $._defineTableOptions),
 					seq(alias($._kw_config, $.Keyword), $._defineConfigOptions),
+					seq(
+						alias($._kw_sequence, $.Keyword),
+						$._defineSequenceOptions,
+					),
 					seq(alias($._kw_api, $.Keyword), $._defineApiOptions),
 					seq(alias($._kw_bucket, $.Keyword), $._defineBucketOptions),
 				),
@@ -811,6 +835,13 @@ export default grammar({
 				),
 			),
 
+		// The two config kinds, shared by DEFINE and REMOVE.
+		_configType: ($) =>
+			choice(
+				alias($._kw_graphql, $.Keyword),
+				alias($._kw_api, $.Keyword),
+			),
+
 		_defineConfigOptions: ($) =>
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
@@ -822,6 +853,23 @@ export default grammar({
 					seq(alias($._kw_api, $.Keyword), $.ApiOptions),
 				),
 			),
+		// `DEFINE SEQUENCE <name> [BATCH <v>] [START <v>] [TIMEOUT <v>]`.
+		// The order is fixed — the engine answers ``Unexpected token `BATCH`,
+		// expected Eof`` for `START … BATCH …` — each clause appears at most
+		// once, and there is **no `COMMENT`**: `DEFINE SEQUENCE sq COMMENT 'x'`
+		// is ``Unexpected token `COMMENT`, expected Eof``. All three operands
+		// are ordinary values, checked at run time.
+		_defineSequenceOptions: ($) =>
+			seq(
+				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
+				$._value,
+				optional($.BatchClause),
+				optional($.StartClause),
+				optional($.TimeoutClause),
+			),
+		BatchClause: ($) => seq(alias($._kw_batch, $.Keyword), $._value),
+		StartClause: ($) => seq(alias($._kw_start, $.Keyword), $._value),
+
 		_defineConfigGraphqlOptions: ($) =>
 			repeat1(
 				choice(
@@ -973,6 +1021,9 @@ export default grammar({
 		DeleteStatement: ($) =>
 			seq(
 				alias($._kw_delete, $.Keyword),
+				// `DELETE FROM test` — the engine takes an optional `FROM`
+				// before the targets, the SQL spelling.
+				optional(alias($._kw_from, $.Keyword)),
 				optional(alias($._kw_only, $.Keyword)),
 				choice(
 					$._statement,
@@ -1260,6 +1311,13 @@ export default grammar({
 					$._nsKeyword,
 					$._dbKeyword,
 				),
+			),
+		// ROOT / NAMESPACE / NS / DATABASE / DB, as a bare run of keywords.
+		_levelKeyword: ($) =>
+			choice(
+				alias($._kw_root, $.Keyword),
+				$._nsKeyword,
+				$._dbKeyword,
 			),
 		_nsKeyword: ($) =>
 			choice(
