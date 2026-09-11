@@ -1587,6 +1587,9 @@ export default grammar({
 				$.Object,
 				$.Duration,
 				$.Point,
+				// `|table:10|` and `|table:1..10|` generate records anywhere a
+				// value is wanted, not only as a CREATE target.
+				$.RangeRecordId,
 			),
 
 		// Paths

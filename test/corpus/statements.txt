@@ -3430,6 +3430,31 @@ SELECT * FROM test
     (Keyword)
     (Ident)))
 
+============================
+select :: Select from a mock
+============================
+
+SELECT * FROM |test:1..4|
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdRange
+          (RecordIdIdent)
+          (RangeOp)
+          (RecordIdIdent)))
+      (Pipe))))
+
 ================================
 select :: Select specific fields
 ================================

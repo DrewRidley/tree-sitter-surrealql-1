@@ -1931,6 +1931,28 @@ test:u"my-uuid-here"
     (RecordIdString
       (String))))
 
+====================================
+record-ids :: Mock in value position
+====================================
+
+RETURN |test:1..4|
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdRange
+          (RecordIdIdent)
+          (RangeOp)
+          (RecordIdIdent)))
+      (Pipe))))
+
 ====================
 regex :: Basic regex
 ====================
