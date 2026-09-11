@@ -2036,7 +2036,10 @@ export default grammar({
 				$.ParameterizedType,
 				$.LiteralType,
 			),
-		ParameterizedType: ($) => seq($._singleType, '<', $._type, '>'),
+		// `array<int, 3>` and `set<int, 5>` carry a length bound after the
+		// element type; nothing else takes a second argument.
+		ParameterizedType: ($) =>
+			seq($._singleType, '<', $._type, optional(seq(',', $.Number)), '>'),
 		_type: ($) => choice($._singleType, $.UnionType),
 		UnionType: ($) =>
 			prec.right(

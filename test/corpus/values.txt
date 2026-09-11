@@ -300,6 +300,29 @@ casting :: Parameterized type cast
       (TypeName))
     (Ident)))
 
+================================
+casting :: Sized array type cast
+================================
+
+<array<float, 3>> [1f, 2f, 3f]
+
+---
+
+(SurrealQL
+  (TypeCast
+    (ParameterizedType
+      (TypeName)
+      (TypeName)
+      (Number
+        (Int)))
+    (Array
+      (Number
+        (Float))
+      (Number
+        (Float))
+      (Number
+        (Float)))))
+
 =========================================
 casting :: Complex union object type cast
 =========================================

@@ -699,6 +699,31 @@ DEFINE FIELD data ON TABLE person FLEXIBLE TYPE object
       (Keyword)
       (TypeName))))
 
+==========================================
+define :: Define field with sized set type
+==========================================
+
+DEFINE FIELD a ON t TYPE set<int, 3>
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
+      (Keyword)
+      (ParameterizedType
+        (TypeName)
+        (TypeName)
+        (Number
+          (Int))))))
+
 =====================================================
 define :: Define field with flexible after type clause
 =====================================================
@@ -2634,6 +2659,28 @@ LET $name: string = "Tobie"
       (Type
         (TypeName)))
     (String)))
+
+================================
+let :: Let with sized array type
+================================
+
+LET $b: array<float, 10> = []
+
+---
+
+(SurrealQL
+  (LetStatement
+    (Keyword)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (ParameterizedType
+          (TypeName)
+          (TypeName)
+          (Number
+            (Int)))))
+    (Array)))
 
 =======================
 live :: Live select all
