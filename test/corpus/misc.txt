@@ -330,6 +330,42 @@ operators :: Subtraction without space
     (Number
       (Int))))
 
+=========================================================
+operators :: A sign separated from its digits is a prefix
+=========================================================
+
+-- `-5` is one signed `Number` token; `- 5` is a prefix applied to `5`.
+-- The engine answers -5 either way; joining the sign lexically is what
+-- keeps the two readings out of the parser.
+RETURN - 5
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
+  (ReturnStatement
+    (Keyword)
+    (PrefixExpression
+      (Operator)
+      (Number
+        (Int)))))
+
+======================================================
+operators :: A sign joined to its digits is one Number
+======================================================
+
+RETURN -5
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (Number
+      (Int))))
+
 ===========================
 operators :: Multiplication
 ===========================
