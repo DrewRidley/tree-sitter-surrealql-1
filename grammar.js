@@ -1,8 +1,16 @@
 /**
  * SurrealQL tree-sitter grammar.
  *
- * Mirrors the lezer-surrealql grammar 1:1 in tree-sitter form so that the
- * parsed tree can be compared against the lezer parser for parity.
+ * This grammar began as a 1:1 port of lezer-surrealql, and its rule names and
+ * node shapes still come from there — see the naming conventions below, which
+ * are why the rules are PascalCase rather than snake_case.
+ *
+ * What it tracks, though, is the SurrealDB engine: the shapes `surrealdb-core`
+ * accepts, and the trees its `BindingPower` implies. Where lezer and the engine
+ * disagree, the engine wins. The divergences that already exist are deliberate,
+ * each one checked against a live server before it was written, and each one
+ * pinned by a corpus case — so do not treat a difference from lezer as a bug to
+ * be closed. Check the engine first.
  *
  * Naming conventions (intentionally NOT snake_case):
  *   - Visible rules use the same PascalCase names as lezer node types.
