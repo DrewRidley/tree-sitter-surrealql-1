@@ -2033,15 +2033,27 @@ export default grammar({
 		// Field assignment
 		// ----------------------------------------------------------------
 
-		// The target is an `Idiom`, not a bare `Ident`: the engine assigns to a
-		// nested field, `CREATE person SET name.first = 'John'`, and
-		// `DEFINE FIELD name.first ON person` already used `Idiom` here — so
-		// without this a schema could declare a field no `SET` could assign.
+		// The engine assigns to a nested field —
+		// `CREATE person SET name.first = 'John'` — and `DEFINE FIELD
+		// name.first ON person` already used `Idiom`, so without a path here a
+		// schema could declare a field no `SET` could assign.
+		//
+		// A path, though, and only a path. A single-segment target stays the
+		// bare `Ident` it has always been: `SET age = 29` is
+		// `FieldAssignment(Ident, Operator, …)`, unchanged, and only
+		// `SET name.first = …` wraps in an `Idiom`. One token of lookahead
+		// after the first `Ident` separates them — a `.` opens a path, an
+		// assignment operator does not — so this needs no declared conflict.
 		FieldAssignment: ($) =>
 			seq(
-				$.Idiom,
+				choice($.Ident, alias($._pathAssignTarget, $.Idiom)),
 				alias($._assignmentOp, $.Operator),
 				choice($.IfElseStatement, $._value),
+			),
+		_pathAssignTarget: ($) =>
+			seq(
+				$.Ident,
+				repeat1(seq('.', choice($.Ident, alias('*', $.Any)))),
 			),
 		_assignmentOp: ($) => choice('=', '+=', '-='),
 
