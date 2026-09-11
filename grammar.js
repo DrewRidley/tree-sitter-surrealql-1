@@ -199,8 +199,24 @@ export default grammar({
 				$.ForStatement,
 				$.ThrowStatement,
 				$.AccessStatement,
+				$.ExplainStatement,
 				$._subqueryStatement,
 			),
+
+		// `EXPLAIN <expression>`, the leading form, which is a different
+		// construct from the trailing `EXPLAIN [FULL]` clause on a query.
+		// The engine reads it as a prefix over a whole expression — `EXPLAIN
+		// SELECT * FROM person` returns a plan, and `EXPLAIN 1 + 1`,
+		// `EXPLAIN LET $x = 1` and `EXPLAIN INFO FOR DB` all parse and fail at
+		// runtime with `EXPLAIN is only supported with the new execution
+		// model`. The two compose: `EXPLAIN SELECT * FROM person EXPLAIN`.
+		//
+		// There is no `FULL` on this form. `EXPLAIN FULL SELECT …` is
+		// ``Unexpected token `SELECT`, expected the query to end`` — `FULL`
+		// there is just an identifier expression, which is why it looks like
+		// it parses on its own.
+		ExplainStatement: ($) =>
+			prec.right(seq(alias($._kw_explain, $.Keyword), $._expression)),
 
 		// ----------------------------------------------------------------
 		// Transaction statements

@@ -109,3 +109,15 @@ UPDATE person SET a = 1 WITH INDEX idx
 ---
 
 (ERROR)
+==========================================
+clauses :: The leading EXPLAIN has no FULL
+:error
+==========================================
+
+-- FULL belongs to the trailing clause only. The engine rejects this:
+--   Unexpected token `SELECT`, expected the query to end
+EXPLAIN FULL SELECT * FROM person
+
+---
+
+(ERROR)

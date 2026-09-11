@@ -195,9 +195,35 @@
         },
         {
           "type": "SYMBOL",
+          "name": "ExplainStatement"
+        },
+        {
+          "type": "SYMBOL",
           "name": "_subqueryStatement"
         }
       ]
+    },
+    "ExplainStatement": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_kw_explain"
+            },
+            "named": true,
+            "value": "Keyword"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_expression"
+          }
+        ]
+      }
     },
     "AccessStatement": {
       "type": "SEQ",

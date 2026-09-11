@@ -4808,6 +4808,62 @@ SELECT * FROM person EXPLAIN FULL
       (Keyword)
       (Literal))))
 
+=======================================
+select :: Leading EXPLAIN over a select
+=======================================
+
+EXPLAIN SELECT * FROM person
+
+---
+
+(SurrealQL
+  (ExplainStatement
+    (Keyword)
+    (SelectStatement
+      (Keyword)
+      (Fields
+        (Any))
+      (Keyword)
+      (Ident))))
+
+===============================================
+select :: Leading and trailing EXPLAIN together
+===============================================
+
+EXPLAIN SELECT * FROM person EXPLAIN
+
+---
+
+(SurrealQL
+  (ExplainStatement
+    (Keyword)
+    (SelectStatement
+      (Keyword)
+      (Fields
+        (Any))
+      (Keyword)
+      (Ident)
+      (ExplainClause
+        (Keyword)))))
+
+==========================================
+select :: Leading EXPLAIN over a non-query
+==========================================
+
+EXPLAIN 1 + 1
+
+---
+
+(SurrealQL
+  (ExplainStatement
+    (Keyword)
+    (BinaryExpression
+      (Number
+        (Int))
+      (Operator)
+      (Number
+        (Int)))))
+
 ==============================
 select :: Select with PARALLEL
 ==============================
