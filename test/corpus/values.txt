@@ -1953,6 +1953,27 @@ RETURN |test:1..4|
           (RecordIdIdent)))
       (Pipe))))
 
+========================
+record-ids :: Count mock
+========================
+
+-- `CREATE |t:10|` makes ten records with random ids
+CREATE |t:10|
+
+---
+
+(SurrealQL
+  (Comment)
+  (CreateStatement
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Pipe))))
+
 ====================
 regex :: Basic regex
 ====================

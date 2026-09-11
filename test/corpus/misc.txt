@@ -945,3 +945,59 @@ operators :: Prefix plus on array
     (Array
       (Number
         (Int)))))
+
+==================================================
+operators :: Prefix minus binds tighter than power
+==================================================
+
+-- `(-a) ** 2`, as the engine reads it: with $a = 2, `-$a ** 2` is 4
+-a ** 2
+
+---
+
+(SurrealQL
+  (Comment)
+  (BinaryExpression
+    (PrefixExpression
+      (Operator)
+      (Ident))
+    (Operator)
+    (Number
+      (Int))))
+
+==============================================
+operators :: Subtraction of a negative literal
+==============================================
+
+-- One `Number` token on the right, not a prefix: `1 - -1` is 2
+1 - -1
+
+---
+
+(SurrealQL
+  (Comment)
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (Number
+      (Int))))
+
+=============================================
+operators :: Subtraction of a prefix negation
+=============================================
+
+-- With $a = 2 the engine answers 3
+1 - -$a
+
+---
+
+(SurrealQL
+  (Comment)
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (PrefixExpression
+      (Operator)
+      (VariableName))))
