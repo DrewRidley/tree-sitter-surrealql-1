@@ -516,6 +516,48 @@ DEFINE USER tobie ON ROOT PASSWORD "secret" ROLES owner
     (Keyword)
     (Ident)))
 
+======================================
+define :: Define user on NS short form
+======================================
+
+DEFINE USER tobie ON NS PASSWORD "secret" ROLES OWNER
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (Keyword)
+    (String)
+    (Keyword)
+    (Ident)))
+
+======================================
+define :: Define user on DB short form
+======================================
+
+DEFINE USER tobie ON DB PASSWORD "secret" ROLES OWNER
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (Keyword)
+    (String)
+    (Keyword)
+    (Ident)))
+
 ======================
 define :: Define event
 ======================

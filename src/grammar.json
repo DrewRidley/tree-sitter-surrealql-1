@@ -5949,24 +5949,60 @@
               "value": "Keyword"
             },
             {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_namespace"
-              },
-              "named": true,
-              "value": "Keyword"
+              "type": "SYMBOL",
+              "name": "_nsKeyword"
             },
             {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_database"
-              },
-              "named": true,
-              "value": "Keyword"
+              "type": "SYMBOL",
+              "name": "_dbKeyword"
             }
           ]
+        }
+      ]
+    },
+    "_nsKeyword": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_namespace"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_ns"
+          },
+          "named": true,
+          "value": "Keyword"
+        }
+      ]
+    },
+    "_dbKeyword": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_database"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_db"
+          },
+          "named": true,
+          "value": "Keyword"
         }
       ]
     },
