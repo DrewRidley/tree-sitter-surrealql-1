@@ -1267,15 +1267,16 @@ export default grammar({
 				$.JwtClause,
 			),
 
-		SignupClause: ($) =>
-			seq(alias($._kw_signup, $.Keyword), choice($.SubQuery, $.Block)),
-		SigninClause: ($) =>
-			seq(alias($._kw_signin, $.Keyword), choice($.SubQuery, $.Block)),
+		// The engine takes a statement or a value here, not only a parenthesised
+		// subquery or a block: `SIGNUP CREATE user`, `SIGNUP RETURN 1`,
+		// `SIGNUP $x` and `AUTHENTICATE RETURN $auth` all run. `SubQuery` and
+		// `Block` are both reachable through `_value`, so `SIGNUP (…)` and
+		// `SIGNUP { … }` parse to the trees they always did.
+		SignupClause: ($) => seq(alias($._kw_signup, $.Keyword), $._clauseBody),
+		SigninClause: ($) => seq(alias($._kw_signin, $.Keyword), $._clauseBody),
 		AuthenticateClause: ($) =>
-			seq(
-				alias($._kw_authenticate, $.Keyword),
-				choice($.SubQuery, $.Block),
-			),
+			seq(alias($._kw_authenticate, $.Keyword), $._clauseBody),
+		_clauseBody: ($) => $._value,
 		SessionClause: ($) => seq(alias($._kw_session, $.Keyword), $.Duration),
 
 		// `DURATION FOR <target> <duration|NONE>, ...`. The engine requires the

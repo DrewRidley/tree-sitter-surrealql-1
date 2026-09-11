@@ -6434,17 +6434,8 @@
           "value": "Keyword"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "SubQuery"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Block"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_clauseBody"
         }
       ]
     },
@@ -6461,17 +6452,8 @@
           "value": "Keyword"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "SubQuery"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Block"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_clauseBody"
         }
       ]
     },
@@ -6488,19 +6470,14 @@
           "value": "Keyword"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "SubQuery"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Block"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_clauseBody"
         }
       ]
+    },
+    "_clauseBody": {
+      "type": "SYMBOL",
+      "name": "_value"
     },
     "SessionClause": {
       "type": "SEQ",
