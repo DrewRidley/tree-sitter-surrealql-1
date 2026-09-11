@@ -346,6 +346,56 @@ operators :: Division
     (Number
       (Int))))
 
+======================
+operators :: Remainder
+======================
+
+8 % 3
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (Number
+      (Int))))
+
+==================================================
+operators :: Remainder binds tighter than addition
+==================================================
+
+1 + 8 % 3
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (BinaryExpression
+      (Number
+        (Int))
+      (Operator)
+      (Number
+        (Int)))))
+
+=====================================
+operators :: Remainder on non-numbers
+=====================================
+
+"8" % "3"
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (String)
+    (Operator)
+    (String)))
+
 ==================
 operators :: Power
 ==================

@@ -1787,7 +1787,7 @@ export default grammar({
 				...['∋', '∌', '⊇', '⊃', '⊅', '∈', '∉', '⊆', '⊂', '⊄'],
 			),
 		_binop_additive: ($) => choice('+', '-', '+=', '-='),
-		_binop_multiplicative: ($) => choice('*', '×', '/', '÷'),
+		_binop_multiplicative: ($) => choice('*', '×', '/', '÷', '%'),
 		_binop_power: ($) => '**',
 
 		// Range
