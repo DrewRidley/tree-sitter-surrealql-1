@@ -300,6 +300,29 @@ casting :: Parameterized type cast
       (TypeName))
     (Ident)))
 
+================================
+casting :: Sized array type cast
+================================
+
+<array<float, 3>> [1f, 2f, 3f]
+
+---
+
+(SurrealQL
+  (TypeCast
+    (ParameterizedType
+      (TypeName)
+      (TypeName)
+      (Number
+        (Int)))
+    (Array
+      (Number
+        (Float))
+      (Number
+        (Float))
+      (Number
+        (Float)))))
+
 =========================================
 casting :: Complex union object type cast
 =========================================
@@ -439,6 +462,28 @@ closures :: Closure with typed param
         (Number
           (Int)))
       (BraceClose))))
+
+===================================================
+closures :: Closure with bracketed union param type
+===================================================
+
+|$x: <int | float>| $x
+
+---
+
+(SurrealQL
+  (Closure
+    (Pipe)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (UnionType
+          (TypeName)
+          (Pipe)
+          (TypeName))))
+    (Pipe)
+    (VariableName)))
 
 ========================================
 closures :: Closure with multiple params
@@ -1479,6 +1524,45 @@ numbers :: Decimal
   (Number
     (Decimal)))
 
+================================
+numbers :: Decimal with fraction
+================================
+
+102023.1dec
+
+---
+
+(SurrealQL
+  (Number
+    (Decimal)))
+
+================================
+numbers :: Decimal with exponent
+================================
+
+9.7e-7dec
+
+---
+
+(SurrealQL
+  (Number
+    (Decimal)))
+
+===============================================
+numbers :: Negative decimal in an argument list
+===============================================
+
+math::ceil(-102023.1dec)
+
+---
+
+(SurrealQL
+  (FunctionCall
+    (FunctionName)
+    (ArgumentList
+      (Number
+        (Decimal)))))
+
 ===========================
 numbers :: Negative numbers
 ===========================
@@ -1846,6 +1930,101 @@ test:u"my-uuid-here"
     (Colon)
     (RecordIdString
       (String))))
+
+====================================
+record-ids :: Mock in value position
+====================================
+
+RETURN |test:1..4|
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdRange
+          (RecordIdIdent)
+          (RangeOp)
+          (RecordIdIdent)))
+      (Pipe))))
+
+===========================================
+record-ids :: Count mock as a CREATE target
+===========================================
+
+-- A CREATE target, which parsed before this branch as well: `RangeRecordId`
+-- was already reachable from CREATE's target list. Kept as a regression pin.
+-- `CREATE |t:10|` makes ten records with random ids, where the range form
+-- `CREATE |u:1..4|` makes u:1, u:2, u:3.
+CREATE |t:10|
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
+  (Comment)
+  (CreateStatement
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Pipe))))
+
+==========================================
+record-ids :: Count mock in value position
+==========================================
+
+-- The count form in a value position, which is what reachability from
+-- `_computedValue` bought. At master this is `(ERROR (Pipe))` around a bare
+-- `RecordId`. The engine answers a list of ten random-id records.
+RETURN |t:10|
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
+  (ReturnStatement
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Pipe))))
+
+=====================================
+record-ids :: Count mock bound by LET
+=====================================
+
+LET $x = |t:10|
+
+---
+
+(SurrealQL
+  (LetStatement
+    (Keyword)
+    (ParamDefinition
+      (VariableName))
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Pipe))))
 
 ====================
 regex :: Basic regex

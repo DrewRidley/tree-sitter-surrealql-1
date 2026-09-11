@@ -216,22 +216,26 @@ create bla set true = 1, false = 2, null = 3, none = 4
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int)))
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int)))
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int)))
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))))
@@ -314,6 +318,22 @@ operators :: Subtraction
     (Number
       (Int))))
 
+======================================
+operators :: Subtraction without space
+======================================
+
+1 -2
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (Number
+      (Int))))
+
 ===========================
 operators :: Multiplication
 ===========================
@@ -345,6 +365,60 @@ operators :: Division
     (Operator)
     (Number
       (Int))))
+
+======================
+operators :: Remainder
+======================
+
+8 % 3
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (Number
+      (Int))))
+
+==================================================
+operators :: Remainder binds tighter than addition
+==================================================
+
+1 + 8 % 3
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (BinaryExpression
+      (Number
+        (Int))
+      (Operator)
+      (Number
+        (Int)))))
+
+==========================================================================
+operators :: Remainder on strings parses; the engine rejects it at runtime
+==========================================================================
+
+/* Well-formed, and not a valid program: the engine answers
+   "Cannot perform remainder with 'string' and 'string'".
+   Operand types are the type checker's job, not the grammar's. */
+"8" % "3"
+
+---
+
+(SurrealQL
+  (BlockComment)
+  (BinaryExpression
+    (String)
+    (Operator)
+    (String)))
 
 ==================
 operators :: Power
@@ -812,3 +886,126 @@ operators :: Chained prefix not
     (PrefixExpression
       (Operator)
       (Ident))))
+
+======================================
+operators :: Prefix minus on parameter
+======================================
+
+-$x
+
+---
+
+(SurrealQL
+  (PrefixExpression
+    (Operator)
+    (VariableName)))
+
+===========================================================================
+operators :: Prefix minus on array parses; the engine rejects it at runtime
+===========================================================================
+
+/* Well-formed, and not a valid program: the engine answers
+   "Cannot negate the value 'array'".
+   Operand types are the type checker's job, not the grammar's. */
+-[1, 2, 3]
+
+---
+
+(SurrealQL
+  (BlockComment)
+  (PrefixExpression
+    (Operator)
+    (Array
+      (Number
+        (Int))
+      (Number
+        (Int))
+      (Number
+        (Int)))))
+
+=================================
+operators :: Prefix minus on path
+=================================
+
+-person.age
+
+---
+
+(SurrealQL
+  (PrefixExpression
+    (Operator)
+    (Path
+      (Ident)
+      (Subscript
+        (Ident)))))
+
+=================================
+operators :: Prefix plus on array
+=================================
+
++[1]
+
+---
+
+(SurrealQL
+  (PrefixExpression
+    (Operator)
+    (Array
+      (Number
+        (Int)))))
+
+==================================================
+operators :: Prefix minus binds tighter than power
+==================================================
+
+-- `(-a) ** 2`, as the engine reads it: with $a = 2, `-$a ** 2` is 4
+-a ** 2
+
+---
+
+(SurrealQL
+  (Comment)
+  (BinaryExpression
+    (PrefixExpression
+      (Operator)
+      (Ident))
+    (Operator)
+    (Number
+      (Int))))
+
+==============================================
+operators :: Subtraction of a negative literal
+==============================================
+
+-- One `Number` token on the right, not a prefix: `1 - -1` is 2
+1 - -1
+
+---
+
+(SurrealQL
+  (Comment)
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (Number
+      (Int))))
+
+=============================================
+operators :: Subtraction of a prefix negation
+=============================================
+
+-- With $a = 2 the engine answers 3
+1 - -$a
+
+---
+
+(SurrealQL
+  (Comment)
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (PrefixExpression
+      (Operator)
+      (VariableName))))

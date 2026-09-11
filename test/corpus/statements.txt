@@ -157,11 +157,40 @@ CREATE person SET name = "Tobie", age = 30
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String))
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
+        (Operator)
+        (Number
+          (Int))))))
+
+===========================================
+create :: Create with SET on a nested field
+===========================================
+
+CREATE person SET name.first = 'John', age = 29
+
+---
+
+(SurrealQL
+  (CreateStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Idiom
+          (Ident)
+          (Ident))
+        (Operator)
+        (String))
+      (FieldAssignment
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))))
@@ -249,7 +278,8 @@ CREATE person SET name = "Tobie" RETURN name
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String)))
     (ReturnClause
@@ -273,7 +303,8 @@ CREATE person SET name = "Tobie" RETURN AFTER
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String)))
     (ReturnClause
@@ -295,7 +326,8 @@ CREATE person SET name = "Tobie" RETURN BEFORE
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String)))
     (ReturnClause
@@ -317,7 +349,8 @@ CREATE person SET name = "Tobie" RETURN DIFF
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String)))
     (ReturnClause
@@ -339,7 +372,8 @@ CREATE person SET name = "Tobie" TIMEOUT 5s
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String)))
     (TimeoutClause
@@ -362,7 +396,8 @@ CREATE person SET name = "Tobie" PARALLEL
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String)))
     (ParallelClause
@@ -698,6 +733,31 @@ DEFINE FIELD data ON TABLE person FLEXIBLE TYPE object
       (Keyword)
       (Keyword)
       (TypeName))))
+
+==========================================
+define :: Define field with sized set type
+==========================================
+
+DEFINE FIELD a ON t TYPE set<int, 3>
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
+      (Keyword)
+      (ParameterizedType
+        (TypeName)
+        (TypeName)
+        (Number
+          (Int))))))
 
 =====================================================
 define :: Define field with flexible after type clause
@@ -1359,6 +1419,36 @@ DEFINE FUNCTION fn::greet($name: string) {
           (String)))
       (BraceClose))))
 
+===================================================
+define :: Define function with union parameter type
+===================================================
+
+DEFINE FUNCTION fn::g($x: int | float) {
+    RETURN $x;
+}
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (FunctionName)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (UnionType
+          (TypeName)
+          (Pipe)
+          (TypeName))))
+    (Block
+      (BraceOpen)
+      (ReturnStatement
+        (Keyword)
+        (VariableName))
+      (BraceClose))))
+
 =======================================
 define :: Function params trailing comma
 =======================================
@@ -1669,7 +1759,8 @@ DEFINE ACCESS myaccess ON DATABASE TYPE RECORD SIGNUP (CREATE user SET email = $
               (SetClause
                 (Keyword)
                 (FieldAssignment
-                  (Ident)
+                  (Idiom
+                    (Ident))
                   (Operator)
                   (VariableName))))))
         (SigninClause
@@ -1744,7 +1835,8 @@ DEFINE SCOPE account SESSION 24h SIGNUP (CREATE user SET email = $email) SIGNIN 
             (SetClause
               (Keyword)
               (FieldAssignment
-                (Ident)
+                (Idiom
+                  (Ident))
                 (Operator)
                 (VariableName))))))
       (SigninClause
@@ -1929,7 +2021,8 @@ FOR $item IN [1, 2, 3] {
         (SetClause
           (Keyword)
           (FieldAssignment
-            (Ident)
+            (Idiom
+              (Ident))
             (Operator)
             (VariableName))))
       (BraceClose))))
@@ -1958,7 +2051,8 @@ FOR $item IN $list {
         (SetClause
           (Keyword)
           (FieldAssignment
-            (Ident)
+            (Idiom
+              (Ident))
             (Operator)
             (VariableName))))
       (BraceClose))))
@@ -2017,7 +2111,8 @@ FOR $node IN SELECT * FROM node {
         (SetClause
           (Keyword)
           (FieldAssignment
-            (Ident)
+            (Idiom
+              (Ident))
             (Operator)
             (FunctionCall
               (FunctionName)
@@ -2495,7 +2590,8 @@ INSERT INTO person {name: "Tobie"} ON DUPLICATE KEY UPDATE age = 31
     (Keyword)
     (Keyword)
     (FieldAssignment
-      (Ident)
+      (Idiom
+        (Ident))
       (Operator)
       (Number
         (Int)))))
@@ -2634,6 +2730,50 @@ LET $name: string = "Tobie"
       (Type
         (TypeName)))
     (String)))
+
+================================
+let :: Let with sized array type
+================================
+
+LET $b: array<float, 10> = []
+
+---
+
+(SurrealQL
+  (LetStatement
+    (Keyword)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (ParameterizedType
+          (TypeName)
+          (TypeName)
+          (Number
+            (Int)))))
+    (Array)))
+
+==========================
+let :: Let with union type
+==========================
+
+LET $a: int | float = 2
+
+---
+
+(SurrealQL
+  (LetStatement
+    (Keyword)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (UnionType
+          (TypeName)
+          (Pipe)
+          (TypeName))))
+    (Number
+      (Int))))
 
 =======================
 live :: Live select all
@@ -2893,7 +3033,8 @@ RELATE person:tobie->knows->person:jaime SET since = "2024-01-01"
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String)))))
 
@@ -3288,6 +3429,53 @@ SELECT * FROM test
       (Any))
     (Keyword)
     (Ident)))
+
+============================
+select :: Select from a mock
+============================
+
+SELECT * FROM |test:1..4|
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdRange
+          (RecordIdIdent)
+          (RangeOp)
+          (RecordIdIdent)))
+      (Pipe))))
+
+==================================
+select :: Select from a count mock
+==================================
+
+SELECT * FROM |t:10|
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Pipe))))
 
 ================================
 select :: Select specific fields
@@ -4194,10 +4382,35 @@ UPDATE person SET age = 31
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))))
+
+===========================================
+update :: Update with SET on a nested field
+===========================================
+
+UPDATE person:tobie SET settings.theme = 'dark'
+
+---
+
+(SurrealQL
+  (UpdateStatement
+    (Keyword)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Idiom
+          (Ident)
+          (Ident))
+        (Operator)
+        (String)))))
 
 ======================================
 update :: Update with inline if in SET
@@ -4214,7 +4427,8 @@ UPDATE pileData SET status=IF progress = 100 THEN 'Pending Approval' ELSE 'Start
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (IfElseStatement
           (Keyword)
@@ -4390,7 +4604,8 @@ UPDATE person SET age = 31 WHERE name = "Tobie"
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))
@@ -4416,7 +4631,8 @@ UPDATE person SET age = 31 RETURN AFTER
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))
@@ -4439,7 +4655,8 @@ UPDATE person SET age = 31 TIMEOUT 5s
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))
@@ -4463,7 +4680,8 @@ UPDATE person SET age = 31 PARALLEL
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))
@@ -4515,7 +4733,8 @@ UPSERT person SET name = "Tobie"
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (String)))))
 
@@ -4583,7 +4802,8 @@ UPSERT person SET age = 31 WHERE name = "Tobie"
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))
@@ -4609,7 +4829,8 @@ UPSERT person SET age = 31 RETURN AFTER
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Ident)
+        (Idiom
+          (Ident))
         (Operator)
         (Number
           (Int))))

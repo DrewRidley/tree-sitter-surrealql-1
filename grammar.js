@@ -1,8 +1,16 @@
 /**
  * SurrealQL tree-sitter grammar.
  *
- * Mirrors the lezer-surrealql grammar 1:1 in tree-sitter form so that the
- * parsed tree can be compared against the lezer parser for parity.
+ * This grammar began as a 1:1 port of lezer-surrealql, and its rule names and
+ * node shapes still come from there — see the naming conventions below, which
+ * are why the rules are PascalCase rather than snake_case.
+ *
+ * What it tracks, though, is the SurrealDB engine: the shapes `surrealdb-core`
+ * accepts, and the trees its `BindingPower` implies. Where lezer and the engine
+ * disagree, the engine wins. The divergences that already exist are deliberate,
+ * each one checked against a live server before it was written, and each one
+ * pinned by a corpus case — so do not treat a difference from lezer as a bug to
+ * be closed. Check the engine first.
  *
  * Naming conventions (intentionally NOT snake_case):
  *   - Visible rules use the same PascalCase names as lezer node types.
@@ -106,6 +114,10 @@ export default grammar({
 		[$.Legacy, $._baseValue],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
+		// `-5` is a signed literal and `-$x` a prefix negation; both start the
+		// same way, and the signed literal wins (dynamic precedence on
+		// `Number`) whenever the operand is a bare number.
+		[$.Number],
 	],
 
 	rules: {
@@ -281,7 +293,7 @@ export default grammar({
 		LetStatement: ($) =>
 			seq(
 				alias($._kw_let, $.Keyword),
-				$.ParamDefinition,
+				alias($._unionParamDefinition, $.ParamDefinition),
 				'=',
 				choice($._value, $._subqueryStatement),
 			),
@@ -607,7 +619,15 @@ export default grammar({
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
 				$.FunctionName, // customFunctionName aliased to FunctionName
-				seq('(', optional(csepTrail($.ParamDefinition)), ')'),
+				seq(
+					'(',
+					optional(
+						csepTrail(
+							alias($._unionParamDefinition, $.ParamDefinition),
+						),
+					),
+					')',
+				),
 				optional(seq($.LookupRight, $._type)),
 				$.Block,
 				repeat(choice($.PermissionsBasicClause, $.CommentClause)),
@@ -1528,8 +1548,22 @@ export default grammar({
 				$._baseValue,
 			),
 
+		// `!`, and the arithmetic signs. A sign in front of a literal number
+		// stays part of the `Number` token (see `Number` below); everywhere
+		// else — `-$x`, `-[1, 2, 3]`, `-fn::f()` — it is a prefix operator,
+		// which is how surrealdb-core reads it.
 		PrefixExpression: ($) =>
-			prec('prefix', seq(alias('!', $.Operator), $._prefixOperand)),
+			prec(
+				'prefix',
+				seq(
+					choice(
+						alias('!', $.Operator),
+						alias('-', $.Operator),
+						alias('+', $.Operator),
+					),
+					$._prefixOperand,
+				),
+			),
 		_prefixOperand: ($) => choice($.PrefixExpression, $.Path, $._baseValue),
 
 		_baseValue: ($) =>
@@ -1561,6 +1595,9 @@ export default grammar({
 				$.Object,
 				$.Duration,
 				$.Point,
+				// `|table:10|` and `|table:1..10|` generate records anywhere a
+				// value is wanted, not only as a CREATE target.
+				$.RangeRecordId,
 			),
 
 		// Paths
@@ -1787,7 +1824,7 @@ export default grammar({
 				...['∋', '∌', '⊇', '⊃', '⊅', '∈', '∉', '⊆', '⊂', '⊄'],
 			),
 		_binop_additive: ($) => choice('+', '-', '+=', '-='),
-		_binop_multiplicative: ($) => choice('*', '×', '/', '÷'),
+		_binop_multiplicative: ($) => choice('*', '×', '/', '÷', '%'),
 		_binop_power: ($) => '**',
 
 		// Range
@@ -1828,11 +1865,23 @@ export default grammar({
 				),
 			),
 
+		// Inside a closure's `|…|` parameter list a bare `|` is the closing
+		// pipe, so the type slot there is `_safeType`: a union has to be
+		// bracketed, `|$x: <int | float>| $x`. The engine agrees — it answers
+		// `Unexpected token `|`, expected Eof` for `|$x: int | float| $x`.
 		ParamDefinition: ($) =>
 			seq(
 				$.VariableName,
 				optional(seq($.Colon, alias($._safeType, $.Type))),
 			),
+
+		// The same node, in the two places the parameter list is not
+		// pipe-delimited — `LET` and a `DEFINE FUNCTION` argument list — where
+		// a bare `|` can only be a union and the engine accepts one:
+		// `LET $a: int | float = 2` and
+		// `DEFINE FUNCTION fn::g($x: int | float) { … }` both run.
+		_unionParamDefinition: ($) =>
+			seq($.VariableName, optional(seq($.Colon, alias($._type, $.Type)))),
 
 		// Block / SubQuery
 		Block: ($) => seq($.BraceOpen, optional($._expressions), $.BraceClose),
@@ -1984,9 +2033,13 @@ export default grammar({
 		// Field assignment
 		// ----------------------------------------------------------------
 
+		// The target is an `Idiom`, not a bare `Ident`: the engine assigns to a
+		// nested field, `CREATE person SET name.first = 'John'`, and
+		// `DEFINE FIELD name.first ON person` already used `Idiom` here — so
+		// without this a schema could declare a field no `SET` could assign.
 		FieldAssignment: ($) =>
 			seq(
-				$.Ident,
+				$.Idiom,
 				alias($._assignmentOp, $.Operator),
 				choice($.IfElseStatement, $._value),
 			),
@@ -2018,7 +2071,10 @@ export default grammar({
 				$.ParameterizedType,
 				$.LiteralType,
 			),
-		ParameterizedType: ($) => seq($._singleType, '<', $._type, '>'),
+		// `array<int, 3>` and `set<int, 5>` carry a length bound after the
+		// element type; nothing else takes a second argument.
+		ParameterizedType: ($) =>
+			seq($._singleType, '<', $._type, optional(seq(',', $.Number)), '>'),
 		_type: ($) => choice($._singleType, $.UnionType),
 		UnionType: ($) =>
 			prec.right(
@@ -2054,8 +2110,15 @@ export default grammar({
 
 		BlockComment: ($) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
+		// A signed literal stays one `Number`, unchanged from before: the
+		// dynamic precedence keeps `-1` a `Number(Int)` rather than a
+		// `PrefixExpression` wrapping one, so no existing tree is reshaped.
 		Number: ($) =>
-			seq(optional(choice('-', '+')), choice($.Decimal, $.Float, $.Int)),
+			choice(
+				prec.dynamic(1, seq(choice('-', '+'), $._unsignedNumber)),
+				$._unsignedNumber,
+			),
+		_unsignedNumber: ($) => choice($.Decimal, $.Float, $.Int),
 
 		Int: ($) => token(DIGITS),
 
@@ -2083,13 +2146,19 @@ export default grammar({
 				),
 			),
 
+		// Above `Float`'s precedence, because lexical precedence outranks
+		// longest match: without it `102023.1dec` lexes as the float
+		// `102023.1` followed by a stray `dec`.
 		Decimal: ($) =>
 			token(
-				seq(
-					DIGITS,
-					optional(seq('.', DIGITS)),
-					optional(/[eE][+-]?[0-9]+(?:_[0-9]+)*/),
-					'dec',
+				prec(
+					2,
+					seq(
+						DIGITS,
+						optional(seq('.', DIGITS)),
+						optional(/[eE][+-]?[0-9]+(?:_[0-9]+)*/),
+						'dec',
+					),
 				),
 			),
 
