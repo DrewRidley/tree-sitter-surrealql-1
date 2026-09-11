@@ -6068,6 +6068,18 @@
                 {
                   "type": "SYMBOL",
                   "name": "JwtClause"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "_issuerOptions"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
                 }
               ]
             },
@@ -6106,65 +6118,15 @@
                       "type": "SEQ",
                       "members": [
                         {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "SYMBOL",
-                            "name": "_kw_with"
-                          },
-                          "named": true,
-                          "value": "Keyword"
-                        },
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "SYMBOL",
-                            "name": "_kw_jwt"
-                          },
-                          "named": true,
-                          "value": "Keyword"
-                        },
-                        {
                           "type": "SYMBOL",
-                          "name": "JwtClause"
+                          "name": "_withJwt"
                         },
                         {
                           "type": "CHOICE",
                           "members": [
                             {
-                              "type": "SEQ",
-                              "members": [
-                                {
-                                  "type": "ALIAS",
-                                  "content": {
-                                    "type": "SYMBOL",
-                                    "name": "_kw_with"
-                                  },
-                                  "named": true,
-                                  "value": "Keyword"
-                                },
-                                {
-                                  "type": "ALIAS",
-                                  "content": {
-                                    "type": "SYMBOL",
-                                    "name": "_kw_issuer"
-                                  },
-                                  "named": true,
-                                  "value": "Keyword"
-                                },
-                                {
-                                  "type": "ALIAS",
-                                  "content": {
-                                    "type": "SYMBOL",
-                                    "name": "_kw_key"
-                                  },
-                                  "named": true,
-                                  "value": "Keyword"
-                                },
-                                {
-                                  "type": "SYMBOL",
-                                  "name": "Ident"
-                                }
-                              ]
+                              "type": "SYMBOL",
+                              "name": "_issuerOptions"
                             },
                             {
                               "type": "BLANK"
@@ -6214,7 +6176,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "Ident"
+              "name": "_value"
             }
           ]
         },
@@ -6232,9 +6194,103 @@
             },
             {
               "type": "SYMBOL",
-              "name": "String"
+              "name": "_value"
             }
           ]
+        }
+      ]
+    },
+    "_issuerOptions": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_with"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_issuer"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_kw_algorithm"
+                    },
+                    "named": true,
+                    "value": "Keyword"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "Ident"
+                  }
+                ]
+              },
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_kw_key"
+                    },
+                    "named": true,
+                    "value": "Keyword"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_value"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "_withJwt": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_with"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_jwt"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "JwtClause"
         }
       ]
     },

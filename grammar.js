@@ -1172,38 +1172,65 @@ export default grammar({
 			seq(
 				alias($._kw_type, $.Keyword),
 				choice(
-					seq(alias($._kw_jwt, $.Keyword), $.JwtClause),
+					seq(
+						alias($._kw_jwt, $.Keyword),
+						$.JwtClause,
+						optional($._issuerOptions),
+					),
 					seq(
 						alias($._kw_record, $.Keyword),
 						repeat(choice($.SignupClause, $.SigninClause)),
-						optional(
-							seq(
-								alias($._kw_with, $.Keyword),
-								alias($._kw_jwt, $.Keyword),
-								$.JwtClause,
-								optional(
-									seq(
-										alias($._kw_with, $.Keyword),
-										alias($._kw_issuer, $.Keyword),
-										alias($._kw_key, $.Keyword),
-										$.Ident,
-									),
-								),
-							),
-						),
+						optional(seq($._withJwt, optional($._issuerOptions))),
 					),
 				),
 			),
 
+		// `ALGORITHM <name> KEY <value>` or `URL <value>`, in that order — the
+		// engine answers ``Unexpected token `KEY`, expected `ALGORITHM`, or
+		// `URL` `` for the other one.
+		//
+		// The algorithm is a bare name, never a string (`ALGORITHM "HS512"` is
+		// `expected a valid algorithm`); which names are valid is a semantic
+		// question left to the layer above. The key and the URL are ordinary
+		// values: the engine parses `KEY "sec"`, `KEY $k` and
+		// `KEY ("a" + "b")` alike and complains about the type at runtime
+		// (`Expected \`string\` but found \`1\``), so `KEY "sec"` — the spelling
+		// the docs use, and previously a syntax error — parses, and a bare
+		// `KEY sec` still parses to the same `Ident` it did before.
 		JwtClause: ($) =>
 			choice(
 				seq(
 					alias($._kw_algorithm, $.Keyword),
 					$.Ident,
 					alias($._kw_key, $.Keyword),
-					$.Ident,
+					$._value,
 				),
-				seq(alias($._kw_url, $.Keyword), $.String),
+				seq(alias($._kw_url, $.Keyword), $._value),
+			),
+
+		// `WITH ISSUER [ALGORITHM <name>] [KEY <value>]` — the engine takes
+		// the two options in either order, either alone, both, or neither, and
+		// accepts the clause on all three access types. It stays a flat run of
+		// keywords under `AccessTypeClause`, where the `TYPE RECORD` branch
+		// already put it, so the one input that parsed before —
+		// `WITH ISSUER KEY <ident>` — parses to the same tree.
+		_issuerOptions: ($) =>
+			seq(
+				alias($._kw_with, $.Keyword),
+				alias($._kw_issuer, $.Keyword),
+				repeat(
+					choice(
+						seq(alias($._kw_algorithm, $.Keyword), $.Ident),
+						seq(alias($._kw_key, $.Keyword), $._value),
+					),
+				),
+			),
+
+		_withJwt: ($) =>
+			seq(
+				alias($._kw_with, $.Keyword),
+				alias($._kw_jwt, $.Keyword),
+				$.JwtClause,
 			),
 
 		SignupClause: ($) =>

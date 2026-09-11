@@ -2061,6 +2061,120 @@ DEFINE ACCESS api ON DB TYPE RECORD DURATION FOR TOKEN 15m, FOR SESSION 12h, FOR
           (Duration
             (DurationPart)))))))
 
+==================================================
+define :: Define access JWT with algorithm and key
+==================================================
+
+DEFINE ACCESS api ON DB TYPE JWT ALGORITHM HS512 KEY "secret"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String))))))
+
+===========================================
+define :: Define access JWT with a JWKS url
+===========================================
+
+DEFINE ACCESS api ON DB TYPE JWT URL "https://example.com/.well-known/jwks.json"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (String))))))
+
+==============================================
+define :: Define access JWT with an issuer key
+==============================================
+
+DEFINE ACCESS api ON DB TYPE JWT ALGORITHM RS256 KEY "public" WITH ISSUER KEY "private"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String))
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (String)))))
+
+================================================
+define :: Define access RECORD with a JWT clause
+================================================
+
+DEFINE ACCESS api ON DB TYPE RECORD SIGNUP (CREATE user) WITH JWT ALGORITHM HS512 KEY "secret"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (SignupClause
+          (Keyword)
+          (SubQuery
+            (CreateStatement
+              (Keyword)
+              (Ident))))
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String))))))
+
 ===============================
 define :: Define config graphql
 ===============================
