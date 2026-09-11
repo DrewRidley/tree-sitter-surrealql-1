@@ -9505,34 +9505,65 @@
         {
           "type": "REPEAT",
           "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "."
-              },
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "Ident"
-                  },
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "STRING",
-                      "value": "*"
-                    },
-                    "named": true,
-                    "value": "Any"
-                  }
-                ]
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_idiomTail"
           }
         }
       ]
+    },
+    "_idiomTail": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "."
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "Ident"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "STRING",
+                    "value": "*"
+                  },
+                  "named": true,
+                  "value": "Any"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_pathFilter"
+          },
+          "named": true,
+          "value": "Filter"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "STRING",
+            "value": "..."
+          },
+          "named": true,
+          "value": "Flatten"
+        }
+      ]
+    },
+    "Flatten": {
+      "type": "STRING",
+      "value": "..."
     },
     "BinaryExpression": {
       "type": "CHOICE",
@@ -11232,31 +11263,8 @@
         {
           "type": "REPEAT1",
           "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "."
-              },
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "Ident"
-                  },
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "STRING",
-                      "value": "*"
-                    },
-                    "named": true,
-                    "value": "Any"
-                  }
-                ]
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_idiomTail"
           }
         }
       ]

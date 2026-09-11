@@ -3893,6 +3893,14 @@
           "named": true
         },
         {
+          "type": "Filter",
+          "named": true
+        },
+        {
+          "type": "Flatten",
+          "named": true
+        },
+        {
           "type": "Ident",
           "named": true
         }
@@ -10571,6 +10579,10 @@
   },
   {
     "type": "DurationPart",
+    "named": true
+  },
+  {
+    "type": "Flatten",
     "named": true
   },
   {

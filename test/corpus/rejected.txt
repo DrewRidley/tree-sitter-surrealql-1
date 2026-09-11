@@ -110,3 +110,28 @@ LET $a: array<int, 3f> = []
             (Int))
           (ERROR))))
     (Array)))
+
+==========================================
+idioms :: A SET target rejects a parameter
+==========================================
+
+-- The engine rejects this too:
+--   Unexpected token `a parameter`, expected an identifier
+-- Rejected before the Idiom widening as well; pinned so widening the tail
+-- never reaches the root.
+CREATE t SET $x = 1
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
+  (Comment)
+  (ERROR
+    (Keyword)
+    (Ident)
+    (Keyword)
+    (VariableName))
+  (Number
+    (Int)))
