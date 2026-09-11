@@ -2268,3 +2268,16 @@ b"base64data"
   (String)
   (String)
   (String))
+
+=================================
+strings :: Strand-prefixed string
+=================================
+
+RETURN s'hello'
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (String)))

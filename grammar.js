@@ -370,15 +370,39 @@ export default grammar({
 				alias($._kw_info, $.Keyword),
 				alias($._kw_for, $.Keyword),
 				choice(
-					alias($._kw_root, $.Keyword),
-					alias($._kw_ns, $.Keyword),
-					alias($._kw_namespace, $.Keyword),
-					alias($._kw_db, $.Keyword),
-					alias($._kw_database, $.Keyword),
+					// `VERSION` is accepted on the four targets that name a
+					// catalogue level or a table, and on no others: on USER or
+					// INDEX the engine answers ``Unexpected token `VERSION`,
+					// expected Eof``.
+					seq(
+						choice(
+							alias($._kw_root, $.Keyword),
+							alias($._kw_ns, $.Keyword),
+							alias($._kw_namespace, $.Keyword),
+							alias($._kw_db, $.Keyword),
+							alias($._kw_database, $.Keyword),
+							seq(alias($._kw_tb, $.Keyword), $.Ident),
+							seq(alias($._kw_table, $.Keyword), $.Ident),
+						),
+						optional($.VersionClause),
+					),
 					seq(alias($._kw_sc, $.Keyword), $.Ident),
 					seq(alias($._kw_scope, $.Keyword), $.Ident),
-					seq(alias($._kw_tb, $.Keyword), $.Ident),
-					seq(alias($._kw_table, $.Keyword), $.Ident),
+					// `INFO FOR USER <name> [ON <level>]` — the level is
+					// optional and defaults to the session's database.
+					seq(
+						alias($._kw_user, $.Keyword),
+						$.Ident,
+						optional($.OnRootNsDbClause),
+					),
+					// `INFO FOR INDEX <name> ON [TABLE] <table>` — here the
+					// `ON` is required: without it the engine answers
+					// ``Unexpected token `;`, expected ON``.
+					seq(
+						alias($._kw_index, $.Keyword),
+						$.Ident,
+						$.OnTableClause,
+					),
 				),
 				optional(alias($._kw_structure, $.Keyword)),
 			),
@@ -610,14 +634,8 @@ export default grammar({
 				alias($._kw_define, $.Keyword),
 				choice(
 					$.AccessDefinition,
-					seq(
-						alias($._kw_namespace, $.Keyword),
-						$._defineNamespaceOptions,
-					),
-					seq(
-						alias($._kw_database, $.Keyword),
-						$._defineDatabaseOptions,
-					),
+					seq($._nsKeyword, $._defineNamespaceOptions),
+					seq($._dbKeyword, $._defineDatabaseOptions),
 					seq(alias($._kw_user, $.Keyword), $._defineUserOptions),
 					seq(alias($._kw_token, $.Keyword), $._defineTokenOptions),
 					seq(alias($._kw_event, $.Keyword), $._defineEventOptions),
@@ -2444,7 +2462,13 @@ export default grammar({
 				prec(
 					1,
 					seq(
-						/[rudbf]/,
+						// r record, s strand, u uuid, d datetime, b bytes, f file.
+						// `s'x'` is a plain strand — the engine emits the same token
+						// as `'x'` — so it stays inside `String` rather than
+						// getting a node of its own. Lowercase only, and no space
+						// before the quote: `S'x'` and `s 'x'` are an identifier
+						// followed by a string, which is what the engine says too.
+						/[rsudbf]/,
 						choice(
 							seq("'", repeat(choice(/[^'\\]/, /\\[\s\S]/)), "'"),
 							seq('"', repeat(choice(/[^"\\]/, /\\[\s\S]/)), '"'),

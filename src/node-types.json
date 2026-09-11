@@ -4850,6 +4850,18 @@
         {
           "type": "Keyword",
           "named": true
+        },
+        {
+          "type": "OnRootNsDbClause",
+          "named": true
+        },
+        {
+          "type": "OnTableClause",
+          "named": true
+        },
+        {
+          "type": "VersionClause",
+          "named": true
         }
       ]
     }

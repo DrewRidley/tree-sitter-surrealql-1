@@ -791,6 +791,34 @@ DEFINE NAMESPACE test
     (Keyword)
     (Ident)))
 
+==============================
+define :: Define NS short form
+==============================
+
+DEFINE NS test
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
+==============================
+define :: Define DB short form
+==============================
+
+DEFINE DB test
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
 ========================================
 define :: Define namespace if not exists
 ========================================
@@ -3235,6 +3263,60 @@ INFO FOR DATABASE
     (Keyword)
     (Keyword)
     (Keyword)))
+
+=====================
+info :: Info for USER
+=====================
+
+INFO FOR USER tobie ON ROOT
+
+---
+
+(SurrealQL
+  (InfoForStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))))
+
+======================
+info :: Info for INDEX
+======================
+
+INFO FOR INDEX idx ON TABLE person
+
+---
+
+(SurrealQL
+  (InfoForStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Keyword)
+      (Ident))))
+
+================================
+info :: Info for DB at a version
+================================
+
+INFO FOR DB VERSION d'2024-01-01T00:00:00Z'
+
+---
+
+(SurrealQL
+  (InfoForStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (VersionClause
+      (Keyword)
+      (String))))
 
 ======================
 info :: Info for scope

@@ -991,49 +991,107 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_root"
-              },
-              "named": true,
-              "value": "Keyword"
-            },
-            {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_ns"
-              },
-              "named": true,
-              "value": "Keyword"
-            },
-            {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_namespace"
-              },
-              "named": true,
-              "value": "Keyword"
-            },
-            {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_db"
-              },
-              "named": true,
-              "value": "Keyword"
-            },
-            {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_database"
-              },
-              "named": true,
-              "value": "Keyword"
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_kw_root"
+                      },
+                      "named": true,
+                      "value": "Keyword"
+                    },
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_kw_ns"
+                      },
+                      "named": true,
+                      "value": "Keyword"
+                    },
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_kw_namespace"
+                      },
+                      "named": true,
+                      "value": "Keyword"
+                    },
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_kw_db"
+                      },
+                      "named": true,
+                      "value": "Keyword"
+                    },
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_kw_database"
+                      },
+                      "named": true,
+                      "value": "Keyword"
+                    },
+                    {
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "_kw_tb"
+                          },
+                          "named": true,
+                          "value": "Keyword"
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "Ident"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "_kw_table"
+                          },
+                          "named": true,
+                          "value": "Keyword"
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "Ident"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "VersionClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "type": "SEQ",
@@ -1078,7 +1136,7 @@
                   "type": "ALIAS",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "_kw_tb"
+                    "name": "_kw_user"
                   },
                   "named": true,
                   "value": "Keyword"
@@ -1086,6 +1144,18 @@
                 {
                   "type": "SYMBOL",
                   "name": "Ident"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "OnRootNsDbClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
                 }
               ]
             },
@@ -1096,7 +1166,7 @@
                   "type": "ALIAS",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "_kw_table"
+                    "name": "_kw_index"
                   },
                   "named": true,
                   "value": "Keyword"
@@ -1104,6 +1174,10 @@
                 {
                   "type": "SYMBOL",
                   "name": "Ident"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "OnTableClause"
                 }
               ]
             }
@@ -2397,13 +2471,8 @@
               "type": "SEQ",
               "members": [
                 {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_namespace"
-                  },
-                  "named": true,
-                  "value": "Keyword"
+                  "type": "SYMBOL",
+                  "name": "_nsKeyword"
                 },
                 {
                   "type": "SYMBOL",
@@ -2415,13 +2484,8 @@
               "type": "SEQ",
               "members": [
                 {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_database"
-                  },
-                  "named": true,
-                  "value": "Keyword"
+                  "type": "SYMBOL",
+                  "name": "_dbKeyword"
                 },
                 {
                   "type": "SYMBOL",
@@ -12904,7 +12968,7 @@
           "members": [
             {
               "type": "PATTERN",
-              "value": "[rudbf]"
+              "value": "[rsudbf]"
             },
             {
               "type": "CHOICE",

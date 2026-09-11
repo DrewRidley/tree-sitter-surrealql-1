@@ -121,3 +121,39 @@ EXPLAIN FULL SELECT * FROM person
 ---
 
 (ERROR)
+============================================
+strings :: A string prefix is lowercase only
+:error
+============================================
+
+-- `S'x'` is an identifier followed by a string. The engine says:
+--   Unexpected token `a strand`, expected Eof
+RETURN S'hello'
+
+---
+
+(ERROR)
+==================================
+info :: INFO FOR INDEX requires ON
+:error
+==================================
+
+-- The engine rejects this too:
+--   Unexpected token `;`, expected ON
+INFO FOR INDEX idx
+
+---
+
+(ERROR)
+======================================
+info :: INFO FOR USER takes no VERSION
+:error
+======================================
+
+-- VERSION is for the catalogue levels and a table, not a user. The engine:
+--   Unexpected token `VERSION`, expected Eof
+INFO FOR USER tobie VERSION d'2024-01-01T00:00:00Z'
+
+---
+
+(ERROR)
