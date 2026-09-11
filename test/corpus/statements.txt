@@ -2128,6 +2128,39 @@ DEFINE ACCESS api ON DB TYPE BEARER FOR USER WITH REFRESH
 
 (ERROR)
 
+======================================================
+define :: Define access with an AUTHENTICATE parameter
+======================================================
+
+DEFINE ACCESS api ON DB TYPE RECORD SIGNIN (SELECT * FROM user) AUTHENTICATE $auth
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (SigninClause
+          (Keyword)
+          (SubQuery
+            (SelectStatement
+              (Keyword)
+              (Fields
+                (Any))
+              (Keyword)
+              (Ident)))))
+      (AuthenticateClause
+        (Keyword)
+        (VariableName)))))
+
 ===============================
 define :: Define config graphql
 ===============================
