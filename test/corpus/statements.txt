@@ -648,6 +648,19 @@ DEFINE USER tobie ON DB PASSWORD "secret" ROLES OWNER DURATION FOR SESSION NONE
         (Keyword)
         (None)))))
 
+================================================
+define :: Define user rejects DURATION FOR GRANT
+:error
+================================================
+
+-- Grants are an access concept. The engine answers
+--   Unexpected token `GRANT`, expected `TOKEN` or `SESSION`
+DEFINE USER tobie ON DB PASSWORD "secret" DURATION FOR GRANT 1w
+
+---
+
+(ERROR)
+
 ======================
 define :: Define event
 ======================
@@ -1971,6 +1984,149 @@ DEFINE ACCESS api ON DB TYPE RECORD SIGNUP (CREATE user) WITH JWT ALGORITHM HS51
           (Ident)
           (Keyword)
           (String))))))
+
+=======================================
+define :: Define access BEARER for user
+=======================================
+
+DEFINE ACCESS api ON DB TYPE BEARER FOR USER DURATION FOR GRANT 30d
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (Keyword))
+      (DurationClause
+        (Keyword)
+        (DurationValue
+          (Keyword)
+          (Keyword)
+          (Duration
+            (DurationPart)))))))
+
+=========================================
+define :: Define access BEARER for record
+=========================================
+
+DEFINE ACCESS api ON DB TYPE BEARER FOR RECORD
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (Keyword)))))
+
+===========================================
+define :: Define access RECORD with refresh
+===========================================
+
+DEFINE ACCESS api ON DB TYPE RECORD SIGNUP (CREATE user) WITH REFRESH
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (SignupClause
+          (Keyword)
+          (SubQuery
+            (CreateStatement
+              (Keyword)
+              (Ident))))
+        (Keyword)
+        (Keyword)))))
+
+===========================================================
+define :: Define access RECORD with refresh after an issuer
+===========================================================
+
+DEFINE ACCESS api ON DB TYPE RECORD WITH JWT ALGORITHM RS256 KEY "public" WITH ISSUER KEY "private" WITH REFRESH
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String))
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (String)
+        (Keyword)
+        (Keyword)))))
+
+================================================================
+define :: Define access RECORD rejects refresh without an issuer
+:error
+================================================================
+
+-- The engine rejects this too: having read `WITH JWT <source>` it expects
+-- any following WITH to open ISSUER, and answers
+--   Unexpected token `REFRESH`, expected ISSUER
+DEFINE ACCESS api ON DB TYPE RECORD WITH JWT ALGORITHM HS512 KEY "secret" WITH REFRESH
+
+---
+
+(ERROR)
+
+==============================================
+define :: Define access BEARER rejects refresh
+:error
+==============================================
+
+-- WITH REFRESH belongs to TYPE RECORD alone. The engine answers
+--   Unexpected token `REFRESH`, expected JWT
+DEFINE ACCESS api ON DB TYPE BEARER FOR USER WITH REFRESH
+
+---
+
+(ERROR)
 
 ===============================
 define :: Define config graphql
