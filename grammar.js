@@ -1121,14 +1121,26 @@ export default grammar({
 				$._value,
 			),
 
+		// The engine lexes `NS`/`NAMESPACE` and `DB`/`DATABASE` as the same
+		// keyword, and takes either spelling here.
 		OnRootNsDbClause: ($) =>
 			seq(
 				alias($._kw_on, $.Keyword),
 				choice(
 					alias($._kw_root, $.Keyword),
-					alias($._kw_namespace, $.Keyword),
-					alias($._kw_database, $.Keyword),
+					$._nsKeyword,
+					$._dbKeyword,
 				),
+			),
+		_nsKeyword: ($) =>
+			choice(
+				alias($._kw_namespace, $.Keyword),
+				alias($._kw_ns, $.Keyword),
+			),
+		_dbKeyword: ($) =>
+			choice(
+				alias($._kw_database, $.Keyword),
+				alias($._kw_db, $.Keyword),
 			),
 
 		AccessTypeClause: ($) =>
