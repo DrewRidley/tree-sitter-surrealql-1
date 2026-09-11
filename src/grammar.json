@@ -11181,8 +11181,22 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "Idiom"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "Ident"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_pathAssignTarget"
+              },
+              "named": true,
+              "value": "Idiom"
+            }
+          ]
         },
         {
           "type": "ALIAS",
@@ -11205,6 +11219,45 @@
               "name": "_value"
             }
           ]
+        }
+      ]
+    },
+    "_pathAssignTarget": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "Ident"
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "."
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "Ident"
+                  },
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "STRING",
+                      "value": "*"
+                    },
+                    "named": true,
+                    "value": "Any"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
