@@ -463,6 +463,28 @@ closures :: Closure with typed param
           (Int)))
       (BraceClose))))
 
+===================================================
+closures :: Closure with bracketed union param type
+===================================================
+
+|$x: <int | float>| $x
+
+---
+
+(SurrealQL
+  (Closure
+    (Pipe)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (UnionType
+          (TypeName)
+          (Pipe)
+          (TypeName))))
+    (Pipe)
+    (VariableName)))
+
 ========================================
 closures :: Closure with multiple params
 ========================================

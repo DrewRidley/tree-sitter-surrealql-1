@@ -285,7 +285,7 @@ export default grammar({
 		LetStatement: ($) =>
 			seq(
 				alias($._kw_let, $.Keyword),
-				$.ParamDefinition,
+				alias($._unionParamDefinition, $.ParamDefinition),
 				'=',
 				choice($._value, $._subqueryStatement),
 			),
@@ -611,7 +611,15 @@ export default grammar({
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
 				$.FunctionName, // customFunctionName aliased to FunctionName
-				seq('(', optional(csepTrail($.ParamDefinition)), ')'),
+				seq(
+					'(',
+					optional(
+						csepTrail(
+							alias($._unionParamDefinition, $.ParamDefinition),
+						),
+					),
+					')',
+				),
 				optional(seq($.LookupRight, $._type)),
 				$.Block,
 				repeat(choice($.PermissionsBasicClause, $.CommentClause)),
@@ -1846,11 +1854,23 @@ export default grammar({
 				),
 			),
 
+		// Inside a closure's `|…|` parameter list a bare `|` is the closing
+		// pipe, so the type slot there is `_safeType`: a union has to be
+		// bracketed, `|$x: <int | float>| $x`. The engine agrees — it answers
+		// `Unexpected token `|`, expected Eof` for `|$x: int | float| $x`.
 		ParamDefinition: ($) =>
 			seq(
 				$.VariableName,
 				optional(seq($.Colon, alias($._safeType, $.Type))),
 			),
+
+		// The same node, in the two places the parameter list is not
+		// pipe-delimited — `LET` and a `DEFINE FUNCTION` argument list — where
+		// a bare `|` can only be a union and the engine accepts one:
+		// `LET $a: int | float = 2` and
+		// `DEFINE FUNCTION fn::g($x: int | float) { … }` both run.
+		_unionParamDefinition: ($) =>
+			seq($.VariableName, optional(seq($.Colon, alias($._type, $.Type)))),
 
 		// Block / SubQuery
 		Block: ($) => seq($.BraceOpen, optional($._expressions), $.BraceClose),

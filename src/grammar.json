@@ -821,8 +821,13 @@
           "value": "Keyword"
         },
         {
-          "type": "SYMBOL",
-          "name": "ParamDefinition"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_unionParamDefinition"
+          },
+          "named": true,
+          "value": "ParamDefinition"
         },
         {
           "type": "STRING",
@@ -2709,8 +2714,13 @@
                   "type": "SEQ",
                   "members": [
                     {
-                      "type": "SYMBOL",
-                      "name": "ParamDefinition"
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_unionParamDefinition"
+                      },
+                      "named": true,
+                      "value": "ParamDefinition"
                     },
                     {
                       "type": "REPEAT",
@@ -2722,8 +2732,13 @@
                             "value": ","
                           },
                           {
-                            "type": "SYMBOL",
-                            "name": "ParamDefinition"
+                            "type": "ALIAS",
+                            "content": {
+                              "type": "SYMBOL",
+                              "name": "_unionParamDefinition"
+                            },
+                            "named": true,
+                            "value": "ParamDefinition"
                           }
                         ]
                       }
@@ -10322,6 +10337,41 @@
                   "content": {
                     "type": "SYMBOL",
                     "name": "_safeType"
+                  },
+                  "named": true,
+                  "value": "Type"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "_unionParamDefinition": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "VariableName"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "Colon"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_type"
                   },
                   "named": true,
                   "value": "Type"

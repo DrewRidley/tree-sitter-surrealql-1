@@ -1384,6 +1384,36 @@ DEFINE FUNCTION fn::greet($name: string) {
           (String)))
       (BraceClose))))
 
+===================================================
+define :: Define function with union parameter type
+===================================================
+
+DEFINE FUNCTION fn::g($x: int | float) {
+    RETURN $x;
+}
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (FunctionName)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (UnionType
+          (TypeName)
+          (Pipe)
+          (TypeName))))
+    (Block
+      (BraceOpen)
+      (ReturnStatement
+        (Keyword)
+        (VariableName))
+      (BraceClose))))
+
 =======================================
 define :: Function params trailing comma
 =======================================
@@ -2681,6 +2711,28 @@ LET $b: array<float, 10> = []
           (Number
             (Int)))))
     (Array)))
+
+==========================
+let :: Let with union type
+==========================
+
+LET $a: int | float = 2
+
+---
+
+(SurrealQL
+  (LetStatement
+    (Keyword)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (UnionType
+          (TypeName)
+          (Pipe)
+          (TypeName))))
+    (Number
+      (Int))))
 
 =======================
 live :: Live select all
