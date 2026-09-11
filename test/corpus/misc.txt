@@ -402,15 +402,19 @@ operators :: Remainder binds tighter than addition
       (Number
         (Int)))))
 
-=====================================
-operators :: Remainder on non-numbers
-=====================================
+==========================================================================
+operators :: Remainder on strings parses; the engine rejects it at runtime
+==========================================================================
 
+/* Well-formed, and not a valid program: the engine answers
+   "Cannot perform remainder with 'string' and 'string'".
+   Operand types are the type checker's job, not the grammar's. */
 "8" % "3"
 
 ---
 
 (SurrealQL
+  (BlockComment)
   (BinaryExpression
     (String)
     (Operator)
@@ -896,15 +900,19 @@ operators :: Prefix minus on parameter
     (Operator)
     (VariableName)))
 
-==================================
-operators :: Prefix minus on array
-==================================
+===========================================================================
+operators :: Prefix minus on array parses; the engine rejects it at runtime
+===========================================================================
 
+/* Well-formed, and not a valid program: the engine answers
+   "Cannot negate the value 'array'".
+   Operand types are the type checker's job, not the grammar's. */
 -[1, 2, 3]
 
 ---
 
 (SurrealQL
+  (BlockComment)
   (PrefixExpression
     (Operator)
     (Array
