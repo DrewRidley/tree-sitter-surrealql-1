@@ -2022,9 +2022,13 @@ export default grammar({
 		// Field assignment
 		// ----------------------------------------------------------------
 
+		// The target is an `Idiom`, not a bare `Ident`: the engine assigns to a
+		// nested field, `CREATE person SET name.first = 'John'`, and
+		// `DEFINE FIELD name.first ON person` already used `Idiom` here — so
+		// without this a schema could declare a field no `SET` could assign.
 		FieldAssignment: ($) =>
 			seq(
-				$.Ident,
+				$.Idiom,
 				alias($._assignmentOp, $.Operator),
 				choice($.IfElseStatement, $._value),
 			),

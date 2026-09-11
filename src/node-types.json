@@ -2918,6 +2918,10 @@
           "named": true
         },
         {
+          "type": "Idiom",
+          "named": true
+        },
+        {
           "type": "IfElseStatement",
           "named": true
         },
