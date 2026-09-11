@@ -658,6 +658,69 @@ DEFINE USER tobie ON DB PASSWORD "secret" ROLES OWNER
     (Keyword)
     (Ident)))
 
+==============================================
+define :: Define user with no optional clauses
+==============================================
+
+DEFINE USER tobie ON DB
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))))
+
+===============================================
+define :: Define user with clauses out of order
+===============================================
+
+DEFINE USER tobie ON DB COMMENT "an admin" ROLES OWNER PASSWORD "secret"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (CommentClause
+      (Keyword)
+      (String))
+    (Keyword)
+    (Ident)
+    (Keyword)
+    (String)))
+
+=====================================================
+define :: Define user with passhash and several roles
+=====================================================
+
+DEFINE USER tobie ON DB PASSHASH "$argon2id$v=19$m=19456" ROLES EDITOR, VIEWER
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (Keyword)
+    (String)
+    (Keyword)
+    (Ident)
+    (Ident)))
+
 ======================
 define :: Define event
 ======================

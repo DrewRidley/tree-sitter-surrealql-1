@@ -772,21 +772,46 @@ export default grammar({
 				seq(alias($._kw_value, $.Keyword), $.String),
 			),
 
+		// Every clause after the level is optional, repeatable and order-free:
+		// the engine accepts `DEFINE USER u ON DB` on its own, takes
+		// `COMMENT 'c' PASSWORD 'p'` and `ROLES OWNER PASSWORD 'p'` in those
+		// orders, and lets a repeated clause win last. The old fixed `seq`
+		// required both a password and a roles list, in that order, and had no
+		// COMMENT at all.
+		//
+		// The password and roles clauses stay unwrapped, as they were, so a
+		// `DEFINE USER` that parsed before parses to exactly the same tree.
 		_defineUserOptions: ($) =>
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
 				$._value,
 				$.OnRootNsDbClause,
-				seq(
+				repeat(
 					choice(
-						alias($._kw_password, $.Keyword),
-						alias($._kw_passhash, $.Keyword),
+						$._userPassword,
+						$._userRoles,
+						$.DurationClause,
+						$.CommentClause,
 					),
-					$.String,
 				),
-				seq(alias($._kw_roles, $.Keyword), csep($.Ident)),
-				optional($.DurationClause),
 			),
+		// PASSWORD and PASSHASH take a string literal and nothing else — the
+		// engine answers `Unexpected token ..., expected a strand` for both
+		// `PASSWORD $p` and `PASSWORD ('a' + 'b')`.
+		_userPassword: ($) =>
+			seq(
+				choice(
+					alias($._kw_password, $.Keyword),
+					alias($._kw_passhash, $.Keyword),
+				),
+				$.String,
+			),
+		// The engine checks the role names against a closed set (`OWNER`,
+		// `EDITOR`, `VIEWER`, case-insensitive) while parsing, and rejects
+		// anything else with `expected an existent role`. That set is a
+		// semantic question, not a syntactic one, and is left to the layer
+		// above — as the algorithm names in `JwtClause` already are.
+		_userRoles: ($) => seq(alias($._kw_roles, $.Keyword), csep($.Ident)),
 
 		_defineApiOptions: ($) =>
 			seq(
