@@ -3501,85 +3501,97 @@
           "name": "OnRootNsDbClause"
         },
         {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_password"
-                  },
-                  "named": true,
-                  "value": "Keyword"
-                },
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_passhash"
-                  },
-                  "named": true,
-                  "value": "Keyword"
-                }
-              ]
-            },
-            {
-              "type": "SYMBOL",
-              "name": "String"
-            }
-          ]
-        },
+          "type": "REPEAT",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_userPassword"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_userRoles"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "DurationClause"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "CommentClause"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "_userPassword": {
+      "type": "SEQ",
+      "members": [
         {
-          "type": "SEQ",
+          "type": "CHOICE",
           "members": [
             {
               "type": "ALIAS",
               "content": {
                 "type": "SYMBOL",
-                "name": "_kw_roles"
+                "name": "_kw_password"
               },
               "named": true,
               "value": "Keyword"
             },
             {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "Ident"
-                },
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": ","
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "Ident"
-                      }
-                    ]
-                  }
-                }
-              ]
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_passhash"
+              },
+              "named": true,
+              "value": "Keyword"
             }
           ]
         },
         {
-          "type": "CHOICE",
+          "type": "SYMBOL",
+          "name": "String"
+        }
+      ]
+    },
+    "_userRoles": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_roles"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "SEQ",
           "members": [
             {
               "type": "SYMBOL",
-              "name": "DurationClause"
+              "name": "Ident"
             },
             {
-              "type": "BLANK"
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": ","
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "Ident"
+                  }
+                ]
+              }
             }
           ]
         }
