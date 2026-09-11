@@ -61,6 +61,32 @@ function piped(rule) {
 /** Digit sequence with optional underscore separators (e.g. 1_000_000) */
 const DIGITS = /[0-9]+(?:_[0-9]+)*/;
 
+/** Exponent part of a float or decimal, e.g. `e-7`. */
+const EXPONENT = /[eE][+-]?[0-9]+(?:_[0-9]+)*/;
+
+/**
+ * The bodies of the `Float` and `Decimal` tokens, written once because each is
+ * needed twice: as an ordinary token, and as a `token.immediate` twin used
+ * after a sign. See `Number`.
+ */
+const FLOAT_BODY = choice(
+	seq(DIGITS, 'f'),
+	seq(
+		DIGITS,
+		choice(seq('.', DIGITS, optional(EXPONENT)), EXPONENT),
+		optional('f'),
+	),
+	'Infinity',
+	'NaN',
+);
+
+const DECIMAL_BODY = seq(
+	DIGITS,
+	optional(seq('.', DIGITS)),
+	optional(EXPONENT),
+	'dec',
+);
+
 // ---------------------------------------------------------------------------
 // Grammar
 // ---------------------------------------------------------------------------
@@ -114,10 +140,6 @@ export default grammar({
 		[$.Legacy, $._baseValue],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
-		// `-5` is a signed literal and `-$x` a prefix negation; both start the
-		// same way, and the signed literal wins (dynamic precedence on
-		// `Number`) whenever the operand is a bare number.
-		[$.Number],
 	],
 
 	rules: {
@@ -2162,57 +2184,51 @@ export default grammar({
 
 		BlockComment: ($) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
-		// A signed literal stays one `Number`, unchanged from before: the
-		// dynamic precedence keeps `-1` a `Number(Int)` rather than a
-		// `PrefixExpression` wrapping one, so no existing tree is reshaped.
+		// A signed literal is one `Number`, as it has always been: `-1` is
+		// `Number(Int)`, not a `PrefixExpression` wrapping one.
+		//
+		// The sign and the digits are joined *lexically* — the signed form
+		// takes `token.immediate` twins of the three numeric tokens, so it
+		// matches only when nothing separates the two. That is what keeps this
+		// out of the parser: at a value position, `-1` offers the parser a
+		// signed `Number`, while `- 1` and `-$x` offer only a
+		// `PrefixExpression`, and one token of lookahead tells them apart. No
+		// conflict is declared, and none is needed.
+		//
+		// It was a declared `[$.Number]` conflict before, resolved by dynamic
+		// precedence, and GLR then explored both readings at every sign. On a
+		// 4,000-statement corpus of `RETURN -1 - -2 + -3 * -4;` that cost
+		// about half the throughput (9,647 -> 5,095 bytes/ms). Dropping the
+		// conflict recovers most of it (8,363, +64% against the conflict),
+		// which still sits about 13% under the pre-conflict baseline;
+		// ordinary input is unchanged either way. `test/corpus/bench/` holds
+		// the inputs and the method — interleave the revisions and take the
+		// median, or measurement drift will invert the result.
 		Number: ($) =>
 			choice(
-				prec.dynamic(1, seq(choice('-', '+'), $._unsignedNumber)),
+				seq(choice('-', '+'), $._signedNumberBody),
 				$._unsignedNumber,
 			),
 		_unsignedNumber: ($) => choice($.Decimal, $.Float, $.Int),
+		_signedNumberBody: ($) =>
+			choice(
+				alias($._decimalImmediate, $.Decimal),
+				alias($._floatImmediate, $.Float),
+				alias($._intImmediate, $.Int),
+			),
 
 		Int: ($) => token(DIGITS),
+		_intImmediate: ($) => token.immediate(DIGITS),
 
-		Float: ($) =>
-			token(
-				prec(
-					1,
-					choice(
-						seq(DIGITS, 'f'),
-						seq(
-							DIGITS,
-							choice(
-								seq(
-									'.',
-									DIGITS,
-									optional(/[eE][+-]?[0-9]+(?:_[0-9]+)*/),
-								),
-								/[eE][+-]?[0-9]+(?:_[0-9]+)*/,
-							),
-							optional('f'),
-						),
-						'Infinity',
-						'NaN',
-					),
-				),
-			),
+		Float: ($) => token(prec(1, FLOAT_BODY)),
 
 		// Above `Float`'s precedence, because lexical precedence outranks
 		// longest match: without it `102023.1dec` lexes as the float
 		// `102023.1` followed by a stray `dec`.
-		Decimal: ($) =>
-			token(
-				prec(
-					2,
-					seq(
-						DIGITS,
-						optional(seq('.', DIGITS)),
-						optional(/[eE][+-]?[0-9]+(?:_[0-9]+)*/),
-						'dec',
-					),
-				),
-			),
+		Decimal: ($) => token(prec(2, DECIMAL_BODY)),
+
+		_floatImmediate: ($) => token.immediate(prec(1, FLOAT_BODY)),
+		_decimalImmediate: ($) => token.immediate(prec(2, DECIMAL_BODY)),
 
 		String: ($) => choice($._stringLiteral, $._prefixedString),
 		// Lezer allows `\<newline>` and any other escape; we use [\s\S] to
