@@ -2733,6 +2733,35 @@ DELETE person WHERE age < 18
         (Number
           (Int))))))
 
+============================================
+delete :: Delete with WITH INDEX and EXPLAIN
+============================================
+
+DELETE person WITH INDEX idx WHERE a = 1 RETURN BEFORE EXPLAIN
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))
+    (ReturnClause
+      (Keyword)
+      (Literal))
+    (ExplainClause
+      (Keyword))))
+
 ===================================
 delete :: Delete with RETURN BEFORE
 ===================================
@@ -4722,6 +4751,26 @@ SELECT * FROM person WITH NOINDEX
       (Keyword)
       (Keyword))))
 
+===================================
+select :: Select with WITH NO INDEX
+===================================
+
+SELECT * FROM person WITH NO INDEX
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Keyword))))
+
 =============================
 select :: Select with EXPLAIN
 =============================
@@ -5210,6 +5259,42 @@ UPDATE person SET age = 31
         (Number
           (Int))))))
 
+============================================
+update :: Update with WITH INDEX and EXPLAIN
+============================================
+
+UPDATE person WITH INDEX idx SET a = 1 WHERE b = 1 RETURN AFTER EXPLAIN
+
+---
+
+(SurrealQL
+  (UpdateStatement
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))
+    (ReturnClause
+      (Keyword)
+      (Literal))
+    (ExplainClause
+      (Keyword))))
+
 ===========================================
 update :: Update with SET on a nested field
 ===========================================
@@ -5553,6 +5638,43 @@ UPSERT person SET name = "Tobie"
         (Ident)
         (Operator)
         (String)))))
+
+============================================
+upsert :: Upsert with WITH INDEX and EXPLAIN
+============================================
+
+UPSERT ONLY person:x WITH INDEX idx SET a = 1 RETURN AFTER TIMEOUT 1s EXPLAIN
+
+---
+
+(SurrealQL
+  (UpsertStatement
+    (Keyword)
+    (Keyword)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))
+    (ReturnClause
+      (Keyword)
+      (Literal))
+    (TimeoutClause
+      (Keyword)
+      (Duration
+        (DurationPart)))
+    (ExplainClause
+      (Keyword))))
 
 =============================
 upsert :: Upsert with CONTENT

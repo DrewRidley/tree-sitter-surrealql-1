@@ -944,6 +944,7 @@ export default grammar({
 					$._statement,
 					seq(
 						csep($._value),
+						optional($.WithClause),
 						repeat(
 							choice(
 								$.WhereClause,
@@ -952,6 +953,7 @@ export default grammar({
 								$.ParallelClause,
 							),
 						),
+						optional($.ExplainClause),
 					),
 				),
 			),
@@ -997,11 +999,13 @@ export default grammar({
 					$._statement,
 					seq(
 						csep($._value),
+						optional($.WithClause),
 						optional($._dataClause),
 						optional($.WhereClause),
 						optional($.ReturnClause),
 						optional($.TimeoutClause),
 						optional($.ParallelClause),
+						optional($.ExplainClause),
 					),
 				),
 			),
@@ -1015,11 +1019,13 @@ export default grammar({
 					$._statement,
 					seq(
 						csep($._value),
+						optional($.WithClause),
 						optional($._dataClause),
 						optional($.WhereClause),
 						optional($.ReturnClause),
 						optional($.TimeoutClause),
 						optional($.ParallelClause),
+						optional($.ExplainClause),
 					),
 				),
 			),
@@ -1095,11 +1101,19 @@ export default grammar({
 		WhereClause: ($) =>
 			seq(alias($._kw_where, $.Keyword), optional($._value)),
 
+		// `WITH INDEX a, b`, `WITH NOINDEX`, or `WITH NO INDEX` — the engine
+		// takes the last two as synonyms, and names all three in its own error:
+		// ``expected `NO`, `NOINDEX` or `INDEX```. The index names are bare
+		// identifiers; `WITH INDEX $p` is ``expected an identifier``.
 		WithClause: ($) =>
 			seq(
 				alias($._kw_with, $.Keyword),
 				choice(
 					alias($._kw_noindex, $.Keyword),
+					seq(
+						alias($._kw_no, $.Keyword),
+						alias($._kw_index, $.Keyword),
+					),
 					seq(alias($._kw_index, $.Keyword), csep($.Ident)),
 				),
 			),
@@ -2750,6 +2764,7 @@ export default grammar({
 		_kw_mtree: ($) => kw('mtree'),
 		_kw_mtree_cache: ($) => kw('mtree_cache'),
 		_kw_namespace: ($) => kw('namespace'),
+		_kw_no: ($) => kw('no'),
 		_kw_noindex: ($) => kw('noindex'),
 		_kw_normal: ($) => kw('normal'),
 		_kw_not: ($) => kw('not'),
@@ -3031,6 +3046,7 @@ export default grammar({
 				$._kw_mtree,
 				$._kw_mtree_cache,
 				$._kw_namespace,
+				$._kw_no,
 				$._kw_noindex,
 				$._kw_normal,
 				$._kw_not,

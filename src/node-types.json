@@ -2690,6 +2690,10 @@
           "named": true
         },
         {
+          "type": "ExplainClause",
+          "named": true
+        },
+        {
           "type": "ForStatement",
           "named": true
         },
@@ -2859,6 +2863,10 @@
         },
         {
           "type": "WhereClause",
+          "named": true
+        },
+        {
+          "type": "WithClause",
           "named": true
         }
       ]
@@ -10136,6 +10144,10 @@
           "named": true
         },
         {
+          "type": "ExplainClause",
+          "named": true
+        },
+        {
           "type": "ForStatement",
           "named": true
         },
@@ -10325,6 +10337,10 @@
         },
         {
           "type": "WhereClause",
+          "named": true
+        },
+        {
+          "type": "WithClause",
           "named": true
         }
       ]
@@ -10407,6 +10423,10 @@
           "named": true
         },
         {
+          "type": "ExplainClause",
+          "named": true
+        },
+        {
           "type": "ForStatement",
           "named": true
         },
@@ -10596,6 +10616,10 @@
         },
         {
           "type": "WhereClause",
+          "named": true
+        },
+        {
+          "type": "WithClause",
           "named": true
         }
       ]

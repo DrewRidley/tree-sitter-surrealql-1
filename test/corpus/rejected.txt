@@ -83,3 +83,29 @@ DEFINE FUNCTION fn::g($x: <int>) { RETURN $x; }
 ---
 
 (ERROR)
+========================================================
+clauses :: WITH INDEX takes identifiers, not a parameter
+:error
+========================================================
+
+-- The engine rejects this too:
+--   Unexpected token `a parameter`, expected an identifier
+SELECT * FROM person WITH INDEX $p
+
+---
+
+(ERROR)
+=============================================================
+clauses :: WITH INDEX comes before the data clause, not after
+:error
+=============================================================
+
+-- The engine rejects this too:
+--   Unexpected token `WITH`, expected Eof
+-- (On SELECT the modifier list is an order-free repeat inherited from
+--  upstream, so the same misordering is still accepted there.)
+UPDATE person SET a = 1 WITH INDEX idx
+
+---
+
+(ERROR)
