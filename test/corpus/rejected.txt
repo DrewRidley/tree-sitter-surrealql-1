@@ -1,0 +1,48 @@
+================================================
+types :: A sized bound rejects a negative length
+:error
+================================================
+
+-- The engine rejects this too:
+--   Unexpected token `-`
+LET $a: array<int, -3> = []
+
+---
+
+(ERROR)
+==================================================
+types :: A sized bound rejects a fractional length
+:error
+==================================================
+
+-- The engine rejects this too:
+--   Unexpected character `.` starting float, only integers are allowed here
+LET $a: array<int, 1.5> = []
+
+---
+
+(ERROR)
+==========================================
+types :: A sized bound rejects a parameter
+:error
+==========================================
+
+-- The engine rejects this too:
+--   Unexpected token `a parameter`, expected an unsigned integer
+LET $a: array<int, $n> = []
+
+---
+
+(ERROR)
+=============================================
+types :: A sized bound rejects a float suffix
+:error
+=============================================
+
+-- The engine rejects this too:
+--   Invalid token, found unexpected character `f after integer token
+LET $a: array<int, 3f> = []
+
+---
+
+(ERROR)
