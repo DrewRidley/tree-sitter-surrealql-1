@@ -1180,6 +1180,31 @@ export default grammar({
 					seq(
 						alias($._kw_record, $.Keyword),
 						repeat(choice($.SignupClause, $.SigninClause)),
+						optional($._refreshOption),
+						optional(
+							seq(
+								$._withJwt,
+								optional(
+									seq(
+										$._issuerOptions,
+										optional($._refreshOption),
+									),
+								),
+							),
+						),
+					),
+					// `TYPE BEARER FOR USER|RECORD`. The `FOR` target is
+					// required — a bare `TYPE BEARER` is ``Unexpected token
+					// `;`, expected FOR`` — and a bearer access takes a JWT
+					// clause but never `WITH REFRESH`
+					// (``Unexpected token `REFRESH`, expected JWT``).
+					seq(
+						alias($._kw_bearer, $.Keyword),
+						alias($._kw_for, $.Keyword),
+						choice(
+							alias($._kw_user, $.Keyword),
+							alias($._kw_record, $.Keyword),
+						),
 						optional(seq($._withJwt, optional($._issuerOptions))),
 					),
 				),
@@ -1225,6 +1250,15 @@ export default grammar({
 					),
 				),
 			),
+
+		// `WITH REFRESH` belongs to `TYPE RECORD` alone, and the engine reads it
+		// either before `WITH JWT`, or after it — but after it only once a
+		// `WITH ISSUER` has intervened. Having seen `WITH JWT <source>`, its
+		// parser expects any following `WITH` to open ISSUER and says so:
+		// ``Unexpected token `REFRESH`, expected ISSUER``. The nesting above
+		// reproduces that exactly, rather than accepting both orders.
+		_refreshOption: ($) =>
+			seq(alias($._kw_with, $.Keyword), alias($._kw_refresh, $.Keyword)),
 
 		_withJwt: ($) =>
 			seq(
