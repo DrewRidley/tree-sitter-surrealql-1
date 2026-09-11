@@ -8548,13 +8548,36 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "ALIAS",
-            "content": {
-              "type": "STRING",
-              "value": "!"
-            },
-            "named": true,
-            "value": "Operator"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "STRING",
+                  "value": "!"
+                },
+                "named": true,
+                "value": "Operator"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "STRING",
+                  "value": "-"
+                },
+                "named": true,
+                "value": "Operator"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "STRING",
+                  "value": "+"
+                },
+                "named": true,
+                "value": "Operator"
+              }
+            ]
           },
           {
             "type": "SYMBOL",
@@ -11559,45 +11582,54 @@
       }
     },
     "Number": {
-      "type": "SEQ",
+      "type": "CHOICE",
       "members": [
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "-"
-                },
-                {
-                  "type": "STRING",
-                  "value": "+"
-                }
-              ]
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
+          "type": "PREC_DYNAMIC",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "-"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "+"
+                  }
+                ]
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_unsignedNumber"
+              }
+            ]
+          }
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "Decimal"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Float"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Int"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_unsignedNumber"
+        }
+      ]
+    },
+    "_unsignedNumber": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "Decimal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Float"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Int"
         }
       ]
     },
@@ -14670,6 +14702,9 @@
     [
       "_value",
       "Path"
+    ],
+    [
+      "Number"
     ]
   ],
   "precedences": [

@@ -106,6 +106,10 @@ export default grammar({
 		[$.Legacy, $._baseValue],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
+		// `-5` is a signed literal and `-$x` a prefix negation; both start the
+		// same way, and the signed literal wins (dynamic precedence on
+		// `Number`) whenever the operand is a bare number.
+		[$.Number],
 	],
 
 	rules: {
@@ -1528,8 +1532,22 @@ export default grammar({
 				$._baseValue,
 			),
 
+		// `!`, and the arithmetic signs. A sign in front of a literal number
+		// stays part of the `Number` token (see `Number` below); everywhere
+		// else — `-$x`, `-[1, 2, 3]`, `-fn::f()` — it is a prefix operator,
+		// which is how surrealdb-core reads it.
 		PrefixExpression: ($) =>
-			prec('prefix', seq(alias('!', $.Operator), $._prefixOperand)),
+			prec(
+				'prefix',
+				seq(
+					choice(
+						alias('!', $.Operator),
+						alias('-', $.Operator),
+						alias('+', $.Operator),
+					),
+					$._prefixOperand,
+				),
+			),
 		_prefixOperand: ($) => choice($.PrefixExpression, $.Path, $._baseValue),
 
 		_baseValue: ($) =>
@@ -2054,8 +2072,15 @@ export default grammar({
 
 		BlockComment: ($) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
+		// A signed literal stays one `Number`, unchanged from before: the
+		// dynamic precedence keeps `-1` a `Number(Int)` rather than a
+		// `PrefixExpression` wrapping one, so no existing tree is reshaped.
 		Number: ($) =>
-			seq(optional(choice('-', '+')), choice($.Decimal, $.Float, $.Int)),
+			choice(
+				prec.dynamic(1, seq(choice('-', '+'), $._unsignedNumber)),
+				$._unsignedNumber,
+			),
+		_unsignedNumber: ($) => choice($.Decimal, $.Float, $.Int),
 
 		Int: ($) => token(DIGITS),
 

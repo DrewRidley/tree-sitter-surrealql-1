@@ -314,6 +314,22 @@ operators :: Subtraction
     (Number
       (Int))))
 
+======================================
+operators :: Subtraction without space
+======================================
+
+1 -2
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (Number
+      (Int))
+    (Operator)
+    (Number
+      (Int))))
+
 ===========================
 operators :: Multiplication
 ===========================
@@ -862,3 +878,65 @@ operators :: Chained prefix not
     (PrefixExpression
       (Operator)
       (Ident))))
+======================================
+operators :: Prefix minus on parameter
+======================================
+
+-$x
+
+---
+
+(SurrealQL
+  (PrefixExpression
+    (Operator)
+    (VariableName)))
+
+==================================
+operators :: Prefix minus on array
+==================================
+
+-[1, 2, 3]
+
+---
+
+(SurrealQL
+  (PrefixExpression
+    (Operator)
+    (Array
+      (Number
+        (Int))
+      (Number
+        (Int))
+      (Number
+        (Int)))))
+
+=================================
+operators :: Prefix minus on path
+=================================
+
+-person.age
+
+---
+
+(SurrealQL
+  (PrefixExpression
+    (Operator)
+    (Path
+      (Ident)
+      (Subscript
+        (Ident)))))
+
+=================================
+operators :: Prefix plus on array
+=================================
+
++[1]
+
+---
+
+(SurrealQL
+  (PrefixExpression
+    (Operator)
+    (Array
+      (Number
+        (Int)))))
