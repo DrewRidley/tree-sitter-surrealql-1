@@ -11423,8 +11423,13 @@
                   "value": ","
                 },
                 {
-                  "type": "SYMBOL",
-                  "name": "Number"
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_sizeBound"
+                  },
+                  "named": true,
+                  "value": "Number"
                 }
               ]
             },
@@ -11436,6 +11441,27 @@
         {
           "type": "STRING",
           "value": ">"
+        }
+      ]
+    },
+    "_sizeBound": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "+"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Int"
         }
       ]
     },

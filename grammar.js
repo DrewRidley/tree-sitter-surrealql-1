@@ -2086,7 +2086,23 @@ export default grammar({
 		// `array<int, 3>` and `set<int, 5>` carry a length bound after the
 		// element type; nothing else takes a second argument.
 		ParameterizedType: ($) =>
-			seq($._singleType, '<', $._type, optional(seq(',', $.Number)), '>'),
+			seq(
+				$._singleType,
+				'<',
+				$._type,
+				optional(seq(',', alias($._sizeBound, $.Number))),
+				'>',
+			),
+		// A length bound is an unsigned integer and nothing else. The engine
+		// says so in as many words — `expected an unsigned integer` for a
+		// parameter or a string — and rejects the near misses distinctly:
+		// `array<int, -3>` is ``Unexpected token `-` `` and `array<int, 1.5>`
+		// is ``Unexpected character `.` starting float, only integers are
+		// allowed here``. A leading `+` it does take, and `1_0` means ten.
+		//
+		// Aliased to `Number` so a sized type keeps the `Number(Int)` child it
+		// had; only the set of literals the slot accepts is narrower.
+		_sizeBound: ($) => seq(optional('+'), $.Int),
 		_type: ($) => choice($._singleType, $.UnionType),
 		UnionType: ($) =>
 			prec.right(
