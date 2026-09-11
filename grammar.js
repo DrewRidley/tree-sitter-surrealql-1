@@ -1389,7 +1389,8 @@ export default grammar({
 			alias($._kw_keep_pruned_connections, $.Keyword),
 		IndexHashedVectorClause: ($) => alias($._kw_hashed_vector, $.Keyword),
 		IndexDegreeClause: ($) => seq(alias($._kw_degree, $.Keyword), $.Number),
-		IndexLBuildClause: ($) => seq(alias($._kw_l_build, $.Keyword), $.Number),
+		IndexLBuildClause: ($) =>
+			seq(alias($._kw_l_build, $.Keyword), $.Number),
 		IndexAlphaClause: ($) => seq(alias($._kw_alpha, $.Keyword), $.Number),
 
 		// Define table
