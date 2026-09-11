@@ -721,6 +721,33 @@ DEFINE USER tobie ON DB PASSHASH "$argon2id$v=19$m=19456" ROLES EDITOR, VIEWER
     (Ident)
     (Ident)))
 
+=====================================================
+define :: Define user with a session duration of NONE
+=====================================================
+
+DEFINE USER tobie ON DB PASSWORD "secret" ROLES OWNER DURATION FOR SESSION NONE
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (Keyword)
+    (String)
+    (Keyword)
+    (Ident)
+    (DurationClause
+      (Keyword)
+      (DurationValue
+        (Keyword)
+        (Keyword)
+        (None)))))
+
 ======================
 define :: Define event
 ======================
@@ -1995,6 +2022,44 @@ DEFINE ACCESS myaccess ON DATABASE TYPE RECORD SIGNUP (CREATE user SET email = $
                   (Ident)
                   (Operator)
                   (VariableName))))))))))
+
+=======================================================
+define :: Define access with all three duration targets
+=======================================================
+
+DEFINE ACCESS api ON DB TYPE RECORD DURATION FOR TOKEN 15m, FOR SESSION 12h, FOR GRANT 30d
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword))
+      (DurationClause
+        (Keyword)
+        (DurationValue
+          (Keyword)
+          (Keyword)
+          (Duration
+            (DurationPart)))
+        (DurationValue
+          (Keyword)
+          (Keyword)
+          (Duration
+            (DurationPart)))
+        (DurationValue
+          (Keyword)
+          (Keyword)
+          (Duration
+            (DurationPart)))))))
 
 ===============================
 define :: Define config graphql

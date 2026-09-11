@@ -2415,8 +2415,13 @@
                 "name": "AuthenticateClause"
               },
               {
-                "type": "SYMBOL",
-                "name": "DurationClause"
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_accessDurationClause"
+                },
+                "named": true,
+                "value": "DurationClause"
               },
               {
                 "type": "SYMBOL",
@@ -6345,37 +6350,6 @@
           "value": "Keyword"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_for"
-                  },
-                  "named": true,
-                  "value": "Keyword"
-                },
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_session"
-                  },
-                  "named": true,
-                  "value": "Keyword"
-                }
-              ]
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
           "type": "SEQ",
           "members": [
             {
@@ -6403,20 +6377,20 @@
       ]
     },
     "DurationValue": {
-      "type": "CHOICE",
+      "type": "SEQ",
       "members": [
         {
-          "type": "SEQ",
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_for"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "CHOICE",
           "members": [
-            {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_for"
-              },
-              "named": true,
-              "value": "Keyword"
-            },
             {
               "type": "ALIAS",
               "content": {
@@ -6427,10 +6401,51 @@
               "value": "Keyword"
             },
             {
-              "type": "SYMBOL",
-              "name": "Duration"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_session"
+              },
+              "named": true,
+              "value": "Keyword"
             }
           ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_durationOrNone"
+        }
+      ]
+    },
+    "_durationOrNone": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "Duration"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_none"
+          },
+          "named": true,
+          "value": "None"
+        }
+      ]
+    },
+    "_accessDurationClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_duration"
+          },
+          "named": true,
+          "value": "Keyword"
         },
         {
           "type": "SEQ",
@@ -6439,7 +6454,56 @@
               "type": "ALIAS",
               "content": {
                 "type": "SYMBOL",
-                "name": "_kw_for"
+                "name": "_accessDurationValue"
+              },
+              "named": true,
+              "value": "DurationValue"
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": ","
+                  },
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_accessDurationValue"
+                    },
+                    "named": true,
+                    "value": "DurationValue"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "_accessDurationValue": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_for"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_token"
               },
               "named": true,
               "value": "Keyword"
@@ -6454,10 +6518,19 @@
               "value": "Keyword"
             },
             {
-              "type": "SYMBOL",
-              "name": "Duration"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_grant"
+              },
+              "named": true,
+              "value": "Keyword"
             }
           ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_durationOrNone"
         }
       ]
     },

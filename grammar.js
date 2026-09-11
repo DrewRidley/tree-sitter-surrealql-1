@@ -581,7 +581,7 @@ export default grammar({
 					choice(
 						$.AccessTypeClause,
 						$.AuthenticateClause,
-						$.DurationClause,
+						alias($._accessDurationClause, $.DurationClause),
 						$.CommentClause,
 					),
 				),
@@ -1217,29 +1217,45 @@ export default grammar({
 			),
 		SessionClause: ($) => seq(alias($._kw_session, $.Keyword), $.Duration),
 
+		// `DURATION FOR <target> <duration|NONE>, ...`. The engine requires the
+		// `FOR <target>` on every entry — a bare `DURATION 1h` is `Unexpected
+		// token \`a number\`, expected FOR` — and accepts `NONE` in place of a
+		// duration to mean "does not expire".
+		//
+		// The dropped `optional(FOR SESSION)` prefix was never reachable on
+		// anything the engine accepts: it only ever let through
+		// `DURATION FOR SESSION FOR TOKEN 1h`, which the engine rejects. Every
+		// duration clause that parsed before parses to the same tree.
 		DurationClause: ($) =>
+			seq(alias($._kw_duration, $.Keyword), csep($.DurationValue)),
+		DurationValue: ($) =>
+			seq(
+				alias($._kw_for, $.Keyword),
+				choice(
+					alias($._kw_token, $.Keyword),
+					alias($._kw_session, $.Keyword),
+				),
+				$._durationOrNone,
+			),
+		_durationOrNone: ($) => choice($.Duration, alias($._kw_none, $.None)),
+
+		// `FOR GRANT` is an access concept and the engine takes it only there:
+		// on a `DEFINE USER` it answers ``Unexpected token `GRANT`, expected
+		// `TOKEN` or `SESSION` ``. Same node kinds, one more target.
+		_accessDurationClause: ($) =>
 			seq(
 				alias($._kw_duration, $.Keyword),
-				optional(
-					seq(
-						alias($._kw_for, $.Keyword),
-						alias($._kw_session, $.Keyword),
-					),
-				),
-				csep($.DurationValue),
+				csep(alias($._accessDurationValue, $.DurationValue)),
 			),
-		DurationValue: ($) =>
-			choice(
-				seq(
-					alias($._kw_for, $.Keyword),
+		_accessDurationValue: ($) =>
+			seq(
+				alias($._kw_for, $.Keyword),
+				choice(
 					alias($._kw_token, $.Keyword),
-					$.Duration,
-				),
-				seq(
-					alias($._kw_for, $.Keyword),
 					alias($._kw_session, $.Keyword),
-					$.Duration,
+					alias($._kw_grant, $.Keyword),
 				),
+				$._durationOrNone,
 			),
 
 		TokenTypeClause: ($) => seq(alias($._kw_type, $.Keyword), $.TokenType),

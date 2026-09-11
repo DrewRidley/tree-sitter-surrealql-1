@@ -2872,6 +2872,10 @@
         {
           "type": "Keyword",
           "named": true
+        },
+        {
+          "type": "None",
+          "named": true
         }
       ]
     }
