@@ -58,3 +58,28 @@ CREATE t SET $x = 1
 ---
 
 (ERROR)
+====================================================
+types :: A LET annotation rejects the bracketed form
+:error
+====================================================
+
+-- The bracketed type is a closure-parameter spelling only. The engine
+-- rejects it here too:
+--   Unexpected token `<`, expected a kind name
+LET $a: <int> = 2
+
+---
+
+(ERROR)
+========================================================
+types :: A function parameter rejects the bracketed form
+:error
+========================================================
+
+-- Same rule inside a DEFINE FUNCTION argument list:
+--   Unexpected token `<`, expected a kind name
+DEFINE FUNCTION fn::g($x: <int>) { RETURN $x; }
+
+---
+
+(ERROR)
