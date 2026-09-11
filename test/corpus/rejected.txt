@@ -46,3 +46,15 @@ LET $a: array<int, 3f> = []
 ---
 
 (ERROR)
+==========================================
+idioms :: A SET target rejects a parameter
+:error
+==========================================
+
+-- The engine rejects this too:
+--   Unexpected token `a parameter`, expected an identifier
+CREATE t SET $x = 1
+
+---
+
+(ERROR)

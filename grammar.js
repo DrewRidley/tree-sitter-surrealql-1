@@ -1727,9 +1727,33 @@ export default grammar({
 				),
 			),
 
-		// Idiom
-		Idiom: ($) =>
-			seq($.Ident, repeat(seq('.', choice($.Ident, alias('*', $.Any))))),
+		// Idiom — a field path, as `DEFINE FIELD` and a `SET` target write one.
+		//
+		// The engine takes more than a dotted run here. Every one of these
+		// assigns, and every one of them declares:
+		//
+		//   SET a.b = 1        SET a.* = 1          SET tags[0] = 1
+		//   SET tags[*] = 1    SET tags[$] = 1      SET tags[$i] = 1
+		//   SET tags[WHERE x = 1] = 1               SET tags... = 1
+		//   SET a.b[0].c = 1   SET tags[*].name = 1
+		//
+		// A bracketed part is a whole expression to the engine —
+		// `SET tags[1..3] = 1` writes the key `"1..3"` — so `_pathFilter` is
+		// reused verbatim rather than a narrower list being invented. What is
+		// *not* allowed is a parameter as the root: `SET $x = 1` is
+		// ``Unexpected token `a parameter`, expected an identifier``, so the
+		// path still starts at an `Ident`.
+		//
+		// A dotted path parses to exactly the tree it did before; the other
+		// tails are new children.
+		Idiom: ($) => seq($.Ident, repeat($._idiomTail)),
+		_idiomTail: ($) =>
+			choice(
+				seq('.', choice($.Ident, alias('*', $.Any))),
+				alias($._pathFilter, $.Filter),
+				alias('...', $.Flatten),
+			),
+		Flatten: ($) => '...',
 
 		// Binary expression
 		//
@@ -2050,11 +2074,11 @@ export default grammar({
 				alias($._assignmentOp, $.Operator),
 				choice($.IfElseStatement, $._value),
 			),
-		_pathAssignTarget: ($) =>
-			seq(
-				$.Ident,
-				repeat1(seq('.', choice($.Ident, alias('*', $.Any)))),
-			),
+		// Any idiom tail makes a target a path, not just a dotted one: the
+		// engine takes `SET d[0] = 3`, `SET tags[*].seen = true` and
+		// `SET tags... = 1` as readily as `SET a.b = 1`. A single-segment
+		// target is still the bare `Ident` it has always been.
+		_pathAssignTarget: ($) => seq($.Ident, repeat1($._idiomTail)),
 		_assignmentOp: ($) => choice('=', '+=', '-='),
 
 		// ----------------------------------------------------------------

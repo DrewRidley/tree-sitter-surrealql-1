@@ -192,6 +192,80 @@ CREATE person SET name.first = 'John', age = 29
         (Number
           (Int))))))
 
+=============================================
+create :: Create with SET on an indexed field
+=============================================
+
+CREATE t SET tags[0] = 'first'
+
+---
+
+(SurrealQL
+  (CreateStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Idiom
+          (Ident)
+          (Filter
+            (Number
+              (Int))))
+        (Operator)
+        (String)))))
+
+===============================================
+create :: Create with SET on a wildcard element
+===============================================
+
+CREATE t SET tags[*].seen = true
+
+---
+
+(SurrealQL
+  (CreateStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Idiom
+          (Ident)
+          (Filter
+            (Any))
+          (Ident))
+        (Operator)
+        (Bool)))))
+
+===============================================
+create :: Create with SET on a filtered element
+===============================================
+
+CREATE t SET tags[WHERE active = true].seen = true
+
+---
+
+(SurrealQL
+  (CreateStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Idiom
+          (Ident)
+          (Filter
+            (WhereClause
+              (Keyword)
+              (BinaryExpression
+                (Ident)
+                (Operator)
+                (Bool))))
+          (Ident))
+        (Operator)
+        (Bool)))))
+
 =============================
 create :: Create with CONTENT
 =============================
@@ -722,6 +796,54 @@ DEFINE FIELD data ON TABLE person FLEXIBLE TYPE object
       (Ident))
     (TypeClause
       (Keyword)
+      (Keyword)
+      (TypeName))))
+
+============================================
+define :: Define field on a wildcard element
+============================================
+
+DEFINE FIELD tags[*] ON t TYPE string
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident)
+      (Filter
+        (Any)))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
+      (Keyword)
+      (TypeName))))
+
+================================================
+define :: Define field on a nested wildcard path
+================================================
+
+DEFINE FIELD meta.tags[*].name ON t TYPE string
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident)
+      (Ident)
+      (Filter
+        (Any))
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
       (Keyword)
       (TypeName))))
 
