@@ -1953,19 +1953,71 @@ RETURN |test:1..4|
           (RecordIdIdent)))
       (Pipe))))
 
-========================
-record-ids :: Count mock
-========================
+===========================================
+record-ids :: Count mock as a CREATE target
+===========================================
 
--- `CREATE |t:10|` makes ten records with random ids
+-- A CREATE target, which parsed before this branch as well: `RangeRecordId`
+-- was already reachable from CREATE's target list. Kept as a regression pin.
+-- `CREATE |t:10|` makes ten records with random ids, where the range form
+-- `CREATE |u:1..4|` makes u:1, u:2, u:3.
 CREATE |t:10|
 
 ---
 
 (SurrealQL
   (Comment)
+  (Comment)
+  (Comment)
+  (Comment)
   (CreateStatement
     (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Pipe))))
+
+==========================================
+record-ids :: Count mock in value position
+==========================================
+
+-- The count form in a value position, which is what reachability from
+-- `_computedValue` bought. At master this is `(ERROR (Pipe))` around a bare
+-- `RecordId`. The engine answers a list of ten random-id records.
+RETURN |t:10|
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
+  (ReturnStatement
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Pipe))))
+
+=====================================
+record-ids :: Count mock bound by LET
+=====================================
+
+LET $x = |t:10|
+
+---
+
+(SurrealQL
+  (LetStatement
+    (Keyword)
+    (ParamDefinition
+      (VariableName))
     (RangeRecordId
       (Pipe)
       (RecordId

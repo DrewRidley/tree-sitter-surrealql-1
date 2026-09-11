@@ -3455,6 +3455,28 @@ SELECT * FROM |test:1..4|
           (RecordIdIdent)))
       (Pipe))))
 
+==================================
+select :: Select from a count mock
+==================================
+
+SELECT * FROM |t:10|
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Pipe))))
+
 ================================
 select :: Select specific fields
 ================================
