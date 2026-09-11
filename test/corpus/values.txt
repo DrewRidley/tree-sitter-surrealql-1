@@ -1524,6 +1524,45 @@ numbers :: Decimal
   (Number
     (Decimal)))
 
+================================
+numbers :: Decimal with fraction
+================================
+
+102023.1dec
+
+---
+
+(SurrealQL
+  (Number
+    (Decimal)))
+
+================================
+numbers :: Decimal with exponent
+================================
+
+9.7e-7dec
+
+---
+
+(SurrealQL
+  (Number
+    (Decimal)))
+
+===============================================
+numbers :: Negative decimal in an argument list
+===============================================
+
+math::ceil(-102023.1dec)
+
+---
+
+(SurrealQL
+  (FunctionCall
+    (FunctionName)
+    (ArgumentList
+      (Number
+        (Decimal)))))
+
 ===========================
 numbers :: Negative numbers
 ===========================

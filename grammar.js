@@ -2131,13 +2131,19 @@ export default grammar({
 				),
 			),
 
+		// Above `Float`'s precedence, because lexical precedence outranks
+		// longest match: without it `102023.1dec` lexes as the float
+		// `102023.1` followed by a stray `dec`.
 		Decimal: ($) =>
 			token(
-				seq(
-					DIGITS,
-					optional(seq('.', DIGITS)),
-					optional(/[eE][+-]?[0-9]+(?:_[0-9]+)*/),
-					'dec',
+				prec(
+					2,
+					seq(
+						DIGITS,
+						optional(seq('.', DIGITS)),
+						optional(/[eE][+-]?[0-9]+(?:_[0-9]+)*/),
+						'dec',
+					),
 				),
 			),
 
