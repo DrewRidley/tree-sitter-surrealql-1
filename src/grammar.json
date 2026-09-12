@@ -1672,10 +1672,150 @@
           "value": "Keyword"
         },
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_table"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "IfExistsClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_value"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_kw_schemafull"
+                        },
+                        "named": true,
+                        "value": "Keyword"
+                      },
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_kw_schemaless"
+                        },
+                        "named": true,
+                        "value": "Keyword"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "TableTypeClause"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "ChangefeedClause"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "PermissionsForClause"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "CommentClause"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "_alterDropClause"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_index"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "IfExistsClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "Ident"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "OnTableClause"
+                },
+                {
+                  "type": "REPEAT1",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "PrepareClause"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "CommentClause"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "_alterDropClause"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "_alterDropClause": {
+      "type": "SEQ",
+      "members": [
+        {
           "type": "ALIAS",
           "content": {
             "type": "SYMBOL",
-            "name": "_kw_table"
+            "name": "_kw_drop"
           },
           "named": true,
           "value": "Keyword"
@@ -1684,60 +1824,55 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "IfNotExistsClause"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_comment"
+              },
+              "named": true,
+              "value": "Keyword"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_changefeed"
+              },
+              "named": true,
+              "value": "Keyword"
+            }
+          ]
+        }
+      ]
+    },
+    "PrepareClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_prepare"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_remove"
+              },
+              "named": true,
+              "value": "Keyword"
             },
             {
               "type": "BLANK"
             }
           ]
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_value"
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "ALIAS",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "_kw_drop"
-                },
-                "named": true,
-                "value": "Keyword"
-              },
-              {
-                "type": "ALIAS",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "_kw_schemafull"
-                },
-                "named": true,
-                "value": "Keyword"
-              },
-              {
-                "type": "ALIAS",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "_kw_schemaless"
-                },
-                "named": true,
-                "value": "Keyword"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "PermissionsForClause"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "CommentClause"
-              }
-            ]
-          }
         }
       ]
     },
@@ -8459,6 +8594,37 @@
         {
           "type": "SYMBOL",
           "name": "Duration"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_include"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_original"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
@@ -9111,11 +9277,37 @@
               "value": "Literal"
             },
             {
-              "type": "REPEAT1",
-              "content": {
-                "type": "SYMBOL",
-                "name": "PermissionGroup"
-              }
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "PermissionGroup"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "STRING",
+                            "value": ","
+                          },
+                          {
+                            "type": "BLANK"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "PermissionGroup"
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }
@@ -14581,8 +14773,17 @@
       "value": "[sS][cC]"
     },
     "_kw_schemafull": {
-      "type": "PATTERN",
-      "value": "[sS][cC][hH][eE][mM][aA][fF][uU][lL][lL]"
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "PATTERN",
+          "value": "[sS][cC][hH][eE][mM][aA][fF][uU][lL]"
+        },
+        {
+          "type": "PATTERN",
+          "value": "[sS][cC][hH][eE][mM][aA][fF][uU][lL][lL]"
+        }
+      ]
     },
     "_kw_schemaless": {
       "type": "PATTERN",
@@ -15039,6 +15240,10 @@
     "_kw_original": {
       "type": "PATTERN",
       "value": "[oO][rR][iI][gG][iI][nN][aA][lL]"
+    },
+    "_kw_prepare": {
+      "type": "PATTERN",
+      "value": "[pP][rR][eE][pP][aA][rR][eE]"
     },
     "_kw_future": {
       "type": "PATTERN",
@@ -15578,6 +15783,10 @@
         {
           "type": "SYMBOL",
           "name": "_kw_postings_order"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_kw_prepare"
         },
         {
           "type": "SYMBOL",

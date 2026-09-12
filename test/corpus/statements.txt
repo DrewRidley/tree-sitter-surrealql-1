@@ -16,7 +16,7 @@ ALTER TABLE person
 alter :: Alter table drop
 =========================
 
-ALTER TABLE person DROP
+ALTER TABLE person DROP COMMENT
 
 ---
 
@@ -25,6 +25,7 @@ ALTER TABLE person DROP
     (Keyword)
     (Keyword)
     (Ident)
+    (Keyword)
     (Keyword)))
 
 ===============================
@@ -5730,3 +5731,185 @@ REMOVE ACCESS api ON DB
     (OnRootNsDbClause
       (Keyword)
       (Keyword))))
+
+
+========================================================
+define :: Define table with the one-L SCHEMAFUL spelling
+========================================================
+
+DEFINE TABLE test SCHEMAFUL TYPE NORMAL
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (Keyword)
+    (TableTypeClause
+      (Keyword)
+      (Keyword))))
+
+===============================================================
+define :: Define table with a changefeed including the original
+===============================================================
+
+DEFINE TABLE record SCHEMALESS CHANGEFEED 1h INCLUDE ORIGINAL
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (Keyword)
+    (ChangefeedClause
+      (Keyword)
+      (Duration
+        (DurationPart))
+      (Keyword)
+      (Keyword))))
+
+===============================================
+define :: Permission groups separated by commas
+===============================================
+
+DEFINE FIELD test ON user PERMISSIONS FOR select NONE, FOR create, update FULL
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (PermissionsForClause
+      (Keyword)
+      (PermissionGroup
+        (Keyword)
+        (Keyword)
+        (None))
+      (PermissionGroup
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (Literal)))))
+
+==============================
+alter :: Alter table if exists
+==============================
+
+ALTER TABLE IF EXISTS person COMMENT 'bla'
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (IfExistsClause
+      (Keyword)
+      (Keyword))
+    (Ident)
+    (CommentClause
+      (Keyword)
+      (String))))
+
+======================================
+alter :: Alter table with every clause
+======================================
+
+ALTER TABLE person SCHEMALESS PERMISSIONS FOR create FULL CHANGEFEED 1d COMMENT 'test' TYPE NORMAL
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (Keyword)
+    (PermissionsForClause
+      (Keyword)
+      (PermissionGroup
+        (Keyword)
+        (Keyword)
+        (Literal)))
+    (ChangefeedClause
+      (Keyword)
+      (Duration
+        (DurationPart)))
+    (CommentClause
+      (Keyword)
+      (String))
+    (TableTypeClause
+      (Keyword)
+      (Keyword))))
+
+============================
+alter :: Alter index comment
+============================
+
+ALTER INDEX idx ON person COMMENT "test"
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (CommentClause
+      (Keyword)
+      (String))))
+
+===================================
+alter :: Alter index prepare remove
+===================================
+
+ALTER INDEX idx ON person PREPARE REMOVE COMMENT 'may rebuild instead'
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (PrepareClause
+      (Keyword)
+      (Keyword))
+    (CommentClause
+      (Keyword)
+      (String))))
+
+=========================================
+alter :: Alter index dropping its comment
+=========================================
+
+ALTER INDEX idx ON person DROP COMMENT
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (Keyword)
+    (Keyword)))

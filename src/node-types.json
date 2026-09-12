@@ -329,6 +329,10 @@
           "named": true
         },
         {
+          "type": "ChangefeedClause",
+          "named": true
+        },
+        {
           "type": "Closure",
           "named": true
         },
@@ -361,7 +365,7 @@
           "named": true
         },
         {
-          "type": "IfNotExistsClause",
+          "type": "IfExistsClause",
           "named": true
         },
         {
@@ -381,6 +385,10 @@
           "named": true
         },
         {
+          "type": "OnTableClause",
+          "named": true
+        },
+        {
           "type": "Path",
           "named": true
         },
@@ -394,6 +402,10 @@
         },
         {
           "type": "PrefixExpression",
+          "named": true
+        },
+        {
+          "type": "PrepareClause",
           "named": true
         },
         {
@@ -422,6 +434,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "TableTypeClause",
           "named": true
         },
         {
@@ -4953,6 +4969,11 @@
     }
   },
   {
+    "type": "Keyword",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "KillStatement",
     "named": true,
     "fields": {},
@@ -6969,6 +6990,21 @@
         },
         {
           "type": "VariableName",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "PrepareClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Keyword",
           "named": true
         }
       ]
@@ -11148,10 +11184,6 @@
   },
   {
     "type": "KeyName",
-    "named": true
-  },
-  {
-    "type": "Keyword",
     "named": true
   },
   {

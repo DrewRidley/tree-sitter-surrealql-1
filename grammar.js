@@ -505,21 +505,69 @@ export default grammar({
 			),
 
 		// ALTER
+		// ALTER's guard is `IF EXISTS`, not `IF NOT EXISTS`, and it takes no
+		// view clause: 3.2.3 parse-errors on `ALTER TABLE IF NOT EXISTS t`
+		// and on `ALTER TABLE t AS SELECT …`, both of which `DEFINE TABLE`
+		// accepts.
+		//
+		// `DROP` is a different word here than in `DEFINE TABLE`, where it is
+		// a flag. On ALTER it *unsets* a clause and must name which one:
+		// `ALTER TABLE t DROP` answers "Unexpected token `;`, expected
+		// `COMMENT` or `CHANGEFEED`".
 		AlterStatement: ($) =>
 			seq(
 				alias($._kw_alter, $.Keyword),
-				alias($._kw_table, $.Keyword),
-				optional($.IfNotExistsClause),
-				$._value,
-				repeat(
-					choice(
-						alias($._kw_drop, $.Keyword),
-						alias($._kw_schemafull, $.Keyword),
-						alias($._kw_schemaless, $.Keyword),
-						$.PermissionsForClause,
-						$.CommentClause,
+				choice(
+					seq(
+						alias($._kw_table, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						repeat(
+							choice(
+								alias($._kw_schemafull, $.Keyword),
+								alias($._kw_schemaless, $.Keyword),
+								$.TableTypeClause,
+								$.ChangefeedClause,
+								$.PermissionsForClause,
+								$.CommentClause,
+								$._alterDropClause,
+							),
+						),
+					),
+					// ALTER INDEX names the table the index is on and needs at
+					// least one change: bare `ALTER INDEX i ON t` is a parse
+					// error in 3.2.3.
+					seq(
+						alias($._kw_index, $.Keyword),
+						optional($.IfExistsClause),
+						$.Ident,
+						$.OnTableClause,
+						repeat1(
+							choice(
+								$.PrepareClause,
+								$.CommentClause,
+								$._alterDropClause,
+							),
+						),
 					),
 				),
+			),
+
+		_alterDropClause: ($) =>
+			seq(
+				alias($._kw_drop, $.Keyword),
+				choice(
+					alias($._kw_comment, $.Keyword),
+					alias($._kw_changefeed, $.Keyword),
+				),
+			),
+
+		// `PREPARE` alone reaches the executor; only `REMOVE` follows it —
+		// 3.2.3 parse-errors on `PREPARE REBUILD`.
+		PrepareClause: ($) =>
+			seq(
+				alias($._kw_prepare, $.Keyword),
+				optional(alias($._kw_remove, $.Keyword)),
 			),
 
 		// REMOVE
@@ -1628,7 +1676,16 @@ export default grammar({
 			),
 
 		ChangefeedClause: ($) =>
-			seq(alias($._kw_changefeed, $.Keyword), $.Duration),
+			seq(
+				alias($._kw_changefeed, $.Keyword),
+				$.Duration,
+				optional(
+					seq(
+						alias($._kw_include, $.Keyword),
+						alias($._kw_original, $.Keyword),
+					),
+				),
+			),
 
 		WhenClause: ($) => seq(alias($._kw_when, $.Keyword), $._value),
 		ThenClause: ($) =>
@@ -1717,7 +1774,12 @@ export default grammar({
 				choice(
 					alias($._kw_none, $.None),
 					alias($._kw_full, $.Literal),
-					repeat1($.PermissionGroup),
+					// The engine takes the groups with or without commas
+					// between them: `FOR select NONE, FOR create FULL`.
+					seq(
+						$.PermissionGroup,
+						repeat(seq(optional(','), $.PermissionGroup)),
+					),
 				),
 			),
 
@@ -2840,7 +2902,8 @@ export default grammar({
 		_kw_roles: ($) => kw('roles'),
 		_kw_root: ($) => kw('root'),
 		_kw_sc: ($) => kw('sc'),
-		_kw_schemafull: ($) => kw('schemafull'),
+		// 3.2.3 takes both spellings: `DEFINE TABLE t SCHEMAFUL` parses.
+		_kw_schemafull: ($) => choice(kw('schemaful'), kw('schemafull')),
 		_kw_schemaless: ($) => kw('schemaless'),
 		_kw_scope: ($) => kw('scope'),
 		_kw_search: ($) => kw('search'),
@@ -2970,6 +3033,7 @@ export default grammar({
 		_kw_batch: ($) => kw('batch'),
 		_kw_matches: ($) => kw('matches'),
 		_kw_original: ($) => kw('original'),
+		_kw_prepare: ($) => kw('prepare'),
 		_kw_future: ($) => kw('future'),
 		_kw_import: ($) => kw('import'),
 		_kw_fulltext: ($) => kw('fulltext'),
@@ -3108,6 +3172,7 @@ export default grammar({
 				$._kw_post,
 				$._kw_postings_cache,
 				$._kw_postings_order,
+				$._kw_prepare,
 				$._kw_put,
 				$._kw_readonly,
 				$._kw_rebuild,
