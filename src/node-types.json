@@ -2188,6 +2188,10 @@
           "named": true
         },
         {
+          "type": "PasswordClause",
+          "named": true
+        },
+        {
           "type": "Path",
           "named": true
         },
@@ -2229,6 +2233,10 @@
         },
         {
           "type": "Regex",
+          "named": true
+        },
+        {
+          "type": "RolesClause",
           "named": true
         },
         {
@@ -2891,6 +2899,10 @@
         },
         {
           "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "None",
           "named": true
         }
       ]
@@ -6158,6 +6170,25 @@
     }
   },
   {
+    "type": "PasswordClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "PatchClause",
     "named": true,
     "fields": {},
@@ -7574,6 +7605,25 @@
         },
         {
           "type": "VariableName",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "RolesClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Keyword",
           "named": true
         }
       ]

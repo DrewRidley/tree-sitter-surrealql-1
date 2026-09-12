@@ -780,16 +780,24 @@ export default grammar({
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
 				$._value,
 				$.OnRootNsDbClause,
-				seq(
+				repeat(
 					choice(
-						alias($._kw_password, $.Keyword),
-						alias($._kw_passhash, $.Keyword),
+						$.PasswordClause,
+						$.RolesClause,
+						$.DurationClause,
+						$.CommentClause,
 					),
-					$.String,
 				),
-				seq(alias($._kw_roles, $.Keyword), csep($.Ident)),
-				optional($.DurationClause),
 			),
+		PasswordClause: ($) =>
+			seq(
+				choice(
+					alias($._kw_password, $.Keyword),
+					alias($._kw_passhash, $.Keyword),
+				),
+				$.String,
+			),
+		RolesClause: ($) => seq(alias($._kw_roles, $.Keyword), csep($.Ident)),
 
 		_defineApiOptions: ($) =>
 			seq(
@@ -1257,29 +1265,19 @@ export default grammar({
 			),
 		SessionClause: ($) => seq(alias($._kw_session, $.Keyword), $.Duration),
 
+		// The engine wants the FOR target on every entry, and takes NONE in
+		// place of a duration to mean "never expires".
 		DurationClause: ($) =>
-			seq(
-				alias($._kw_duration, $.Keyword),
-				optional(
-					seq(
-						alias($._kw_for, $.Keyword),
-						alias($._kw_session, $.Keyword),
-					),
-				),
-				csep($.DurationValue),
-			),
+			seq(alias($._kw_duration, $.Keyword), csep($.DurationValue)),
 		DurationValue: ($) =>
-			choice(
-				seq(
-					alias($._kw_for, $.Keyword),
+			seq(
+				alias($._kw_for, $.Keyword),
+				choice(
 					alias($._kw_token, $.Keyword),
-					$.Duration,
-				),
-				seq(
-					alias($._kw_for, $.Keyword),
 					alias($._kw_session, $.Keyword),
-					$.Duration,
+					alias($._kw_grant, $.Keyword),
 				),
+				choice($.Duration, alias($._kw_none, $.None)),
 			),
 
 		TokenTypeClause: ($) => seq(alias($._kw_type, $.Keyword), $.TokenType),
