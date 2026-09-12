@@ -174,7 +174,11 @@ export default grammar({
 		[$.WhereClause],
 		[$._baseValue, $.Closure],
 		[$._idName, $._singleType],
-		[$.Legacy, $._baseValue],
+		// A bare RETURN or THROW as an IF-THEN body can itself contain a
+		// block-form (Modern) IF, whose ELSE chain is a dangling-else
+		// ambiguity: the ELSE either continues this chain or closes the nested
+		// one. Both are real readings; let GLR settle it.
+		[$.Modern],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
 	],
@@ -444,26 +448,29 @@ export default grammar({
 		// IF/ELSE
 		IfElseStatement: ($) =>
 			seq(alias($._kw_if, $.Keyword), choice($.Legacy, $.Modern)),
+		// A branch body is a value, a THROW or a RETURN, each optionally
+		// followed by a `;`. `_value` already covers Block and SubQuery, so
+		// spelling those out again would make one tree reachable two ways.
+		_ifBranchBody: ($) =>
+			seq(
+				choice($._value, $.ThrowStatement, $.ReturnStatement),
+				optional(';'),
+			),
 		Legacy: ($) =>
 			seq(
 				$._value,
 				alias($._kw_then, $.Keyword),
-				choice($.Block, $.SubQuery, $._value),
+				$._ifBranchBody,
 				repeat(
 					seq(
 						alias($._kw_else, $.Keyword),
 						alias($._kw_if, $.Keyword),
 						$._value,
 						alias($._kw_then, $.Keyword),
-						choice($.Block, $.SubQuery, $._value),
+						$._ifBranchBody,
 					),
 				),
-				optional(
-					seq(
-						alias($._kw_else, $.Keyword),
-						choice($.Block, $.SubQuery, $._value),
-					),
-				),
+				optional(seq(alias($._kw_else, $.Keyword), $._ifBranchBody)),
 				alias($._kw_end, $.Keyword),
 			),
 		Modern: ($) =>
