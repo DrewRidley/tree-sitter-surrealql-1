@@ -1282,9 +1282,15 @@ export default grammar({
 				optional(alias($._kw_by, $.Keyword)),
 				choice(csep($.Order), $.FunctionCall),
 			),
+		// `count` is a field name here as much as anywhere else — 3.2.3 accepts
+		// `ORDER BY count DESC` — but the clause's own `ORDER BY RAND()`
+		// alternative makes `count` a live token in this state, so `Idiom`
+		// alone cannot reach it. `rand` is NOT admitted: the engine really
+		// does reserve that one here, answering `ORDER BY rand` with
+		// "Unexpected token `;`, expected (".
 		Order: ($) =>
 			seq(
-				$.Idiom,
+				choice($.Idiom, alias($._countIdiom, $.Idiom)),
 				optional(alias($._kw_collate, $.Keyword)),
 				optional(alias($._kw_numeric, $.Keyword)),
 				optional(
@@ -1872,6 +1878,33 @@ export default grammar({
 				$.Block,
 				$.Closure,
 				$.Ident,
+				// Non-reserved clause keywords are valid identifiers wherever
+				// a value is expected — `WHERE order = $x`, `SELECT count`.
+				alias($._nonReservedIdent, $.Ident),
+			),
+
+		_nonReservedIdent: ($) =>
+			choice(
+				$._kw_order,
+				$._kw_start,
+				$._kw_limit,
+				$._kw_group,
+				$._kw_key,
+				// `count` is a function name only when it is called.
+				// `SELECT field1, count() FROM t GROUP field1` names its
+				// aggregate column `count`, and reading it back —
+				// `SELECT VALUE [field1, count] FROM (…)` — is what
+				// SurrealDB's own tests do. The precedence settles `count <`:
+				// it is the field compared (`count < 5`), never the start of
+				// a versioned call — versions apply to `fn::` functions, and
+				// `count` is a built-in.
+				prec(1, $._kw_count),
+				// `type` too: `tags[WHERE type = 'library']` is a field named
+				// `type`, and the engine reads it as one. It is a live token
+				// inside a WHERE because a `DEFINE FIELD`'s TYPE clause may
+				// follow a permission's WHERE, so without this the keyword
+				// wins the lex everywhere a WHERE value is parsed.
+				$._kw_type,
 			),
 
 		_computedValue: ($) =>
@@ -1978,20 +2011,29 @@ export default grammar({
 			choice(seq($._value, optional($.GraphFieldClause)), $.Any),
 		GraphFieldClause: ($) => seq(alias($._kw_field, $.Keyword), $.Ident),
 
+		// The selection list is OPTIONAL: `id.{}` is valid SurrealQL and
+		// evaluates to the empty object (3.2.3: `SELECT VALUE id.{} FROM ONLY
+		// user:ada` -> `{}`). Requiring at least one entry made every such
+		// expression a parse error.
 		Destructure: ($) =>
 			seq(
 				$.BraceOpen,
-				csep(
-					choice(
-						seq(
-							$.Ident,
-							$.Colon,
-							choice(
-								seq($.Lookup, repeat($._pathElement)),
-								$._value,
+				optional(
+					csep(
+						choice(
+							seq(
+								$.Ident,
+								$.Colon,
+								choice(
+									seq($.Lookup, repeat($._pathElement)),
+									$._value,
+								),
+							),
+							seq(
+								choice($.Ident, $.Lookup),
+								repeat($._pathElement),
 							),
 						),
-						seq(choice($.Ident, $.Lookup), repeat($._pathElement)),
 					),
 				),
 				$.BraceClose,
@@ -2053,6 +2095,12 @@ export default grammar({
 				alias($._pathFilter, $.Filter),
 				alias('...', $.Flatten),
 			),
+		// An idiom rooted at `count`, for the positions where the bare keyword
+		// cannot lex as an `Ident` because a call is also on offer. Aliased to
+		// `Idiom`, so the shape — and every consumer — is the same as any
+		// other idiom's.
+		_countIdiom: ($) =>
+			seq(alias($._kw_count, $.Ident), repeat($._idiomTail)),
 
 		// Binary expression
 		//
@@ -2320,6 +2368,10 @@ export default grammar({
 				),
 				seq($.RecordId, $.ArgumentList),
 				seq($.VariableName, $.ArgumentList),
+				// `(|$x| $x + 1)(41)` — a parenthesised value called in place
+				// (3.2.3 evaluates it to 42; `(1 + 2)(3)` parses and fails at
+				// run time with "'int' is not a function").
+				seq($.SubQuery, $.ArgumentList),
 			),
 		ArgumentList: ($) =>
 			seq(
@@ -2409,7 +2461,9 @@ export default grammar({
 		// `SET tags... = 1` as readily as `SET a.b = 1`. A single-segment
 		// target is still the bare `Ident` it has always been.
 		_pathAssignTarget: ($) => seq($.Ident, repeat1($._idiomTail)),
-		_assignmentOp: ($) => choice('=', '+=', '-='),
+		// `+?=` extends an array only where the value is missing. There is no
+		// `-?=`: 3.2.3 rejects it.
+		_assignmentOp: ($) => choice('=', '+=', '-=', '+?='),
 
 		// ----------------------------------------------------------------
 		// Fields & predicates
