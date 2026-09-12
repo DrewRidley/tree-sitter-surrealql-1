@@ -10238,17 +10238,21 @@
           "name": "_kw_is"
         },
         {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "_kw_is"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "_kw_not"
-            }
-          ]
+          "type": "PREC",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_kw_is"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_kw_not"
+              }
+            ]
+          }
         },
         {
           "type": "STRING",
@@ -11339,52 +11343,74 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "FunctionName"
-                },
-                {
-                  "type": "ALIAS",
-                  "content": {
+          "type": "PREC_DYNAMIC",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
                     "type": "SYMBOL",
-                    "name": "_kw_rand"
+                    "name": "FunctionName"
                   },
-                  "named": true,
-                  "value": "FunctionName"
-                },
-                {
-                  "type": "ALIAS",
-                  "content": {
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_kw_rand"
+                    },
+                    "named": true,
+                    "value": "FunctionName"
+                  },
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_kw_count"
+                    },
+                    "named": true,
+                    "value": "FunctionName"
+                  },
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_kw_not"
+                    },
+                    "named": true,
+                    "value": "FunctionName"
+                  },
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_kw_sleep"
+                    },
+                    "named": true,
+                    "value": "FunctionName"
+                  }
+                ]
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
                     "type": "SYMBOL",
-                    "name": "_kw_count"
+                    "name": "Version"
                   },
-                  "named": true,
-                  "value": "FunctionName"
-                }
-              ]
-            },
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "Version"
-                },
-                {
-                  "type": "BLANK"
-                }
-              ]
-            },
-            {
-              "type": "SYMBOL",
-              "name": "ArgumentList"
-            }
-          ]
+                  {
+                    "type": "BLANK"
+                  }
+                ]
+              },
+              {
+                "type": "SYMBOL",
+                "name": "ArgumentList"
+              }
+            ]
+          }
         },
         {
           "type": "SEQ",
@@ -12606,7 +12632,7 @@
           "members": [
             {
               "type": "PATTERN",
-              "value": "[rudbf]"
+              "value": "[rudbfs]"
             },
             {
               "type": "CHOICE",

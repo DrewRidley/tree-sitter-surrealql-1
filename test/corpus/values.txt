@@ -2259,11 +2259,13 @@ strings :: Prefixed strings
 r"raw string";
 u"uuid";
 d"2024-01-01T00:00:00Z";
-b"base64data"
+b"base64data";
+s"plain string"
 
 ---
 
 (SurrealQL
+  (String)
   (String)
   (String)
   (String)
@@ -2312,3 +2314,31 @@ math::floor(math::PI)
     (FunctionName)
     (ArgumentList
       (Constant))))
+
+============================
+functions :: not() is a call
+============================
+
+not(false)
+
+---
+
+(SurrealQL
+  (FunctionCall
+    (FunctionName)
+    (ArgumentList
+      (Bool))))
+
+=========================================
+functions :: IS NOT is still one operator
+=========================================
+
+a IS NOT b
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (Ident)
+    (Operator)
+    (Ident)))

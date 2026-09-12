@@ -1936,7 +1936,9 @@ export default grammar({
 				'!~',
 				'*~',
 				$._kw_is,
-				seq($._kw_is, $._kw_not),
+				// `a IS NOT b` is one operator, never `a IS (NOT b)` — which
+				// matters now that `not` can also open a call.
+				prec(1, seq($._kw_is, $._kw_not)),
 				'@@',
 				seq('@', $.Number, '@'),
 			),
@@ -2129,14 +2131,24 @@ export default grammar({
 
 		FunctionCall: ($) =>
 			choice(
-				seq(
-					choice(
-						$.FunctionName,
-						alias($._kw_rand, $.FunctionName),
-						alias($._kw_count, $.FunctionName),
+				// Dynamic precedence, because `not` also opens `IS NOT`: one
+				// token of lookahead cannot tell `a IS NOT b` from a call until
+				// the `(` arrives, and the call reading wins when it does.
+				prec.dynamic(
+					1,
+					seq(
+						choice(
+							$.FunctionName,
+							alias($._kw_rand, $.FunctionName),
+							alias($._kw_count, $.FunctionName),
+							// `not(true)` is a call; `not true` is a parse error
+							// in 3.2.3, so the keyword is a function name only.
+							alias($._kw_not, $.FunctionName),
+							alias($._kw_sleep, $.FunctionName),
+						),
+						optional($.Version),
+						$.ArgumentList,
 					),
-					optional($.Version),
-					$.ArgumentList,
 				),
 				seq($.RecordId, $.ArgumentList),
 				seq($.VariableName, $.ArgumentList),
@@ -2377,7 +2389,7 @@ export default grammar({
 				prec(
 					1,
 					seq(
-						/[rudbf]/,
+						/[rudbfs]/,
 						choice(
 							seq("'", repeat(choice(/[^'\\]/, /\\[\s\S]/)), "'"),
 							seq('"', repeat(choice(/[^"\\]/, /\\[\s\S]/)), '"'),
