@@ -193,3 +193,15 @@ REMOVE ACCESS a
 ---
 
 (ERROR)
+=========================================
+values :: A constant path is a closed set
+:error
+=========================================
+
+-- The set is closed and the engine checks it while parsing:
+--   Invalid function/constant path, did you maybe mean `math::SQRT_2`
+RETURN math::SQRT2
+
+---
+
+(ERROR)

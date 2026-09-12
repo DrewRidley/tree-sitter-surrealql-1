@@ -59,6 +59,48 @@ function piped(rule) {
 }
 
 /** Digit sequence with optional underscore separators (e.g. 1_000_000) */
+/** Case-insensitive alternation source, for embedding in a larger RegExp. */
+function kwAlt(words) {
+	return words.map((word) => kw(word).source).join('|');
+}
+
+/**
+ * The paths SurrealQL resolves as bare constants — `math::PI` is a value, not
+ * a zero-argument call. The set is closed, and the engine enforces it while
+ * parsing: `math::SQRT2` is ``Invalid function/constant path, did you maybe
+ * mean `math::SQRT_2```, and `foo::PI` is `Invalid function/constant path`.
+ * Listing the names exactly is what keeps this from being looser than the
+ * engine. Note `time::MIN`/`time::MAX` are *functions*; the constants are
+ * spelled `MINIMUM`/`MAXIMUM`.
+ */
+const MATH_CONSTANTS = [
+	'E',
+	'FRAC_1_PI',
+	'FRAC_1_SQRT_2',
+	'FRAC_2_PI',
+	'FRAC_2_SQRT_PI',
+	'FRAC_PI_2',
+	'FRAC_PI_3',
+	'FRAC_PI_4',
+	'FRAC_PI_6',
+	'FRAC_PI_8',
+	'INF',
+	'INFINITY',
+	'LN_10',
+	'LN_2',
+	'LOG10_2',
+	'LOG10_E',
+	'LOG2_10',
+	'LOG2_E',
+	'NEG_INF',
+	'NEG_INFINITY',
+	'PI',
+	'SQRT_2',
+	'TAU',
+];
+const TIME_CONSTANTS = ['EPOCH', 'MINIMUM', 'MAXIMUM'];
+const DURATION_CONSTANTS = ['MAX'];
+
 const DIGITS = /[0-9]+(?:_[0-9]+)*/;
 
 /** Exponent part of a float or decimal, e.g. `e-7`. */
@@ -1895,6 +1937,7 @@ export default grammar({
 				$.Object,
 				$.Duration,
 				$.Point,
+				$.Constant,
 				// `|table:10|` and `|table:1..10|` generate records anywhere a
 				// value is wanted, not only as a CREATE target.
 				$.RangeRecordId,
@@ -2504,6 +2547,24 @@ export default grammar({
 
 		_floatImmediate: ($) => token.immediate(prec(1, FLOAT_BODY)),
 		_decimalImmediate: ($) => token.immediate(prec(2, DECIMAL_BODY)),
+
+		// One token, at a higher lexical precedence than `FunctionName`, so
+		// `math::PI` lexes as the constant. Longest match still settles
+		// `math::pilot(…)` in favour of the function name, and `math::PI()`
+		// stays legal: the engine reads it as a call *on* the constant value
+		// and fails at run time with `'float' is not a function`, so the
+		// grammar must not reject it.
+		Constant: ($) =>
+			token(
+				prec(
+					4,
+					new RegExp(
+						`(?:${kw('math').source}::(?:${kwAlt(MATH_CONSTANTS)})` +
+							`|${kw('time').source}::(?:${kwAlt(TIME_CONSTANTS)})` +
+							`|${kw('duration').source}::(?:${kwAlt(DURATION_CONSTANTS)}))`,
+					),
+				),
+			),
 
 		String: ($) => choice($._stringLiteral, $._prefixedString),
 		// Lezer allows `\<newline>` and any other escape; we use [\s\S] to

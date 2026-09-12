@@ -1442,6 +1442,72 @@ none
   (None)
   (None))
 
+=============================
+literals :: Built-in constant
+=============================
+
+RETURN math::PI
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (Constant)))
+
+===============================
+literals :: Constants in a list
+===============================
+
+RETURN [math::PI, math::E, time::EPOCH, duration::MAX]
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (Array
+      (Constant)
+      (Constant)
+      (Constant)
+      (Constant))))
+
+=============================================
+literals :: A constant as a function argument
+=============================================
+
+RETURN math::floor(math::PI)
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (FunctionCall
+      (FunctionName)
+      (ArgumentList
+        (Constant)))))
+
+====================================================
+literals :: A function whose name extends a constant
+====================================================
+
+RETURN math::interquartile([1, 2])
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (FunctionCall
+      (FunctionName)
+      (ArgumentList
+        (Array
+          (Number
+            (Int))
+          (Number
+            (Int)))))))
+
 ==================
 numbers :: Integer
 ==================
