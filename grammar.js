@@ -284,8 +284,15 @@ export default grammar({
 		ContinueStatement: ($) => alias($._kw_continue, $.Keyword),
 		SleepStatement: ($) => seq(alias($._kw_sleep, $.Keyword), $.Duration),
 		ThrowStatement: ($) => seq(alias($._kw_throw, $.Keyword), $._value),
+		// RETURN carries its own FETCH clause. The value is spelled against
+		// `_value` rather than `_expression` so that `RETURN SELECT … FETCH a`
+		// gives the FETCH to the SELECT, which already has one, instead of
+		// leaving the two rules to fight over it.
 		ReturnStatement: ($) =>
-			seq(alias($._kw_return, $.Keyword), $._expression),
+			seq(
+				alias($._kw_return, $.Keyword),
+				choice($._statement, seq($._value, optional($.FetchClause))),
+			),
 
 		OptionStatement: ($) =>
 			seq(
@@ -302,7 +309,14 @@ export default grammar({
 				),
 			),
 
-		KillStatement: ($) => seq(alias($._kw_kill, $.Keyword), $.String),
+		// The live query is named by a UUID literal or a parameter holding
+		// one. 3.2.3 rejects every other literal — even a uuid-shaped plain
+		// strand is "Unexpected token `a strand`, expected a UUID or a
+		// parameter" — but any `String` is taken here so that the statement
+		// still parses and a consumer can say which literal was wrong,
+		// instead of the whole source collapsing into a syntax error.
+		KillStatement: ($) =>
+			seq(alias($._kw_kill, $.Keyword), choice($.String, $.VariableName)),
 
 		// USE
 		UseStatement: ($) =>
@@ -333,8 +347,11 @@ export default grammar({
 				alias($._kw_show, $.Keyword),
 				alias($._kw_changes, $.Keyword),
 				alias($._kw_for, $.Keyword),
-				alias($._kw_table, $.Keyword),
-				$.Ident,
+				// One table, or every table in the database.
+				choice(
+					seq(alias($._kw_table, $.Keyword), $.Ident),
+					$._dbKeyword,
+				),
 				optional(
 					seq(
 						alias($._kw_since, $.Keyword),
@@ -445,14 +462,11 @@ export default grammar({
 				alias($._kw_for, $.Keyword),
 				$.VariableName,
 				alias($._kw_in, $.Keyword),
-				choice(
-					$.Array,
-					$.VariableName,
-					$.Range,
-					$.SubQuery,
-					$._subqueryStatement,
-					$.Block,
-				),
+				// Any expression, not just a literal collection: the engine
+				// evaluates it and complains at run time if the result is not
+				// iterable, so `FOR $x IN 42 {…}` and
+				// `FOR $x IN (SELECT …) * 2 {…}` both parse.
+				choice($._value, $._subqueryStatement),
 				$.Block,
 			),
 
@@ -510,7 +524,7 @@ export default grammar({
 					csep($._inclusivePredicate),
 				),
 				alias($._kw_from, $.Keyword),
-				csep(choice($.Ident, $.RecordId)),
+				csep(choice($.Ident, $.RecordId, $.VariableName)),
 				optional($.WhereClause),
 				optional($.FetchClause),
 			),
@@ -625,18 +639,14 @@ export default grammar({
 						choice(
 							alias($._kw_graphql, $.Keyword),
 							alias($._kw_api, $.Keyword),
+							alias($._kw_default, $.Keyword),
 						),
 					),
 					seq(
 						alias($._kw_user, $.Keyword),
 						optional($.IfExistsClause),
 						$._value,
-						alias($._kw_on, $.Keyword),
-						choice(
-							alias($._kw_root, $.Keyword),
-							alias($._kw_namespace, $.Keyword),
-							alias($._kw_database, $.Keyword),
-						),
+						$.OnRootNsDbClause,
 					),
 					seq(
 						alias($._kw_token, $.Keyword),
@@ -644,8 +654,8 @@ export default grammar({
 						$._value,
 						alias($._kw_on, $.Keyword),
 						choice(
-							alias($._kw_namespace, $.Keyword),
-							alias($._kw_database, $.Keyword),
+							$._nsKeyword,
+							$._dbKeyword,
 							alias($._kw_scope, $.Keyword),
 						),
 					),
@@ -676,6 +686,9 @@ export default grammar({
 						alias($._kw_function, $.Keyword),
 						optional($.IfExistsClause),
 						$.FunctionName,
+						// The argument list may be written out, and is always
+						// empty: `REMOVE FUNCTION fn::greet()`.
+						optional(seq('(', ')')),
 					),
 					seq(
 						alias($._kw_param, $.Keyword),
@@ -1087,13 +1100,30 @@ export default grammar({
 		InsertStatement: ($) =>
 			seq(
 				alias($._kw_insert, $.Keyword),
-				optional(alias($._kw_ignore, $.Keyword)),
+				// The engine eats RELATION before IGNORE and only in that
+				// order: 3.2.3 runs `INSERT RELATION IGNORE INTO likes {…}`
+				// and answers `INSERT IGNORE RELATION INTO likes {…}` with
+				// "Unexpected token `INTO`, expected Eof".
 				optional(alias($._kw_relation, $.Keyword)),
-				optional(seq(alias($._kw_into, $.Keyword), $.Ident)),
+				optional(alias($._kw_ignore, $.Keyword)),
+				optional(
+					seq(
+						alias($._kw_into, $.Keyword),
+						choice($.Ident, $.VariableName),
+					),
+				),
 				choice(
 					$.Object,
 					$.VariableName,
 					$.BulkInsert,
+					// The rows can come from a subquery: `INSERT INTO t
+					// (SELECT … FROM u)`. Spelled as the statement rather than
+					// `SubQuery` so it stays distinct from the parenthesised
+					// column list below, which a general value would leave
+					// ambiguous until the token after the closing paren. The
+					// alias sits on a named rule: aliasing a bare `seq` would
+					// rename each of its members instead of wrapping them.
+					alias($._insertSubquery, $.SubQuery),
 					seq(
 						'(',
 						csep($.Ident),
@@ -1113,6 +1143,7 @@ export default grammar({
 				),
 				optional($.ReturnClause),
 			),
+		_insertSubquery: ($) => seq('(', $._subqueryStatement, ')'),
 		BulkInsert: ($) => seq('[', csep($.Object), ']'),
 
 		// UPDATE
@@ -1156,6 +1187,8 @@ export default grammar({
 			),
 
 		// RELATE
+		// Any end of the edge may be produced by a subquery:
+		// `RELATE [1,2]->a:b->(CREATE foo)`.
 		_relateSubject: ($) =>
 			choice(
 				$.Array,
@@ -1163,6 +1196,7 @@ export default grammar({
 				$.FunctionCall,
 				$.VariableName,
 				$.RecordId,
+				$.SubQuery,
 			),
 		RelateStatement: ($) =>
 			seq(
@@ -1173,6 +1207,9 @@ export default grammar({
 				$._relateSubject,
 				choice($.LookupRight, $.LookupLeft),
 				$._relateSubject,
+				// UNIQUE belongs to the edge, so it sits with the subject and
+				// ahead of the data: 3.2.3 rejects `SET x = 1 UNIQUE`.
+				optional($.UniqueClause),
 				optional(choice($.ContentClause, $.SetClause)),
 				optional($.ReturnClause),
 				optional($.TimeoutClause),

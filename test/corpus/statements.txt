@@ -3307,8 +3307,9 @@ REMOVE USER tobie ON ROOT
     (Keyword)
     (Keyword)
     (Ident)
-    (Keyword)
-    (Keyword)))
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))))
 
 ======================
 remove :: Remove token
@@ -6400,4 +6401,306 @@ DEFINE EVENT test ON user ASYNC RETRY 2 MAXDEPTH 6 WHEN true THEN (CREATE activi
         (CreateStatement
           (Keyword)
           (Ident))))))
+
+
+==============================================
+kill :: Kill a live query named by a parameter
+==============================================
+
+KILL $param
+
+---
+
+(SurrealQL
+  (KillStatement
+    (Keyword)
+    (VariableName)))
+
+===========================================
+show :: Show changes for the whole database
+===========================================
+
+SHOW CHANGES FOR DATABASE SINCE d"2012-04-23T18:25:43.0000511Z"
+
+---
+
+(SurrealQL
+  (ShowStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (String)))
+
+=============================
+for :: For over an expression
+=============================
+
+FOR $foo IN (SELECT foo FROM bar) * 2 { BREAK }
+
+---
+
+(SurrealQL
+  (ForStatement
+    (Keyword)
+    (VariableName)
+    (Keyword)
+    (BinaryExpression
+      (SubQuery
+        (SelectStatement
+          (Keyword)
+          (Fields
+            (Predicate
+              (Ident)))
+          (Keyword)
+          (Ident)))
+      (Operator)
+      (Number
+        (Int)))
+    (Block
+      (BraceOpen)
+      (BreakStatement
+        (Keyword))
+      (BraceClose))))
+
+====================================
+live :: Live select from a parameter
+====================================
+
+LIVE SELECT DIFF FROM $foo
+
+---
+
+(SurrealQL
+  (LiveSelectStatement
+    (Keyword)
+    (Keyword)
+    (Literal)
+    (Keyword)
+    (VariableName)))
+
+====================================
+return :: Return with a fetch clause
+====================================
+
+RETURN $users FETCH admin, editor
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (VariableName)
+    (FetchClause
+      (Keyword)
+      (Idiom
+        (Ident))
+      (Idiom
+        (Ident)))))
+
+============================================
+remove :: Remove user on the NS abbreviation
+============================================
+
+REMOVE USER tobie ON NS
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))))
+
+===================================
+remove :: Remove the default config
+===================================
+
+REMOVE CONFIG IF EXISTS DEFAULT
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (IfExistsClause
+      (Keyword)
+      (Keyword))
+    (Keyword)))
+
+==========================================================
+remove :: Remove a function written with its argument list
+==========================================================
+
+REMOVE FUNCTION fn::greet()
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (FunctionName)))
+
+=======================================================
+insert :: Insert relation ignore, in the engine's order
+=======================================================
+
+INSERT RELATION IGNORE INTO like (id, in, out) VALUES (2, person:1, person:2)
+
+---
+
+(SurrealQL
+  (InsertStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (Ident)
+    (Ident)
+    (Ident)
+    (Keyword)
+    (Number
+      (Int))
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))))
+
+=====================================
+insert :: Insert rows from a subquery
+=====================================
+
+INSERT INTO other (SELECT * FROM test)
+
+---
+
+(SurrealQL
+  (InsertStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (SubQuery
+      (SelectStatement
+        (Keyword)
+        (Fields
+          (Any))
+        (Keyword)
+        (Ident)))))
+
+========================================
+insert :: Insert into a parameter target
+========================================
+
+INSERT IGNORE INTO $foo (a, b) VALUES (1, 2) ON DUPLICATE KEY UPDATE a.b +?= null
+
+---
+
+(SurrealQL
+  (InsertStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (Ident)
+    (Ident)
+    (Keyword)
+    (Number
+      (Int))
+    (Number
+      (Int))
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (FieldAssignment
+      (Idiom
+        (Ident)
+        (Ident))
+      (Operator)
+      (None))))
+
+===============================================
+relate :: Relate with a subquery end and UNIQUE
+===============================================
+
+RELATE ONLY [1,2]->a:b->(CREATE foo) UNIQUE SET a += 1 RETURN NONE
+
+---
+
+(SurrealQL
+  (RelateStatement
+    (Keyword)
+    (Keyword)
+    (Array
+      (Number
+        (Int))
+      (Number
+        (Int)))
+    (LookupRight)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (LookupRight)
+    (SubQuery
+      (CreateStatement
+        (Keyword)
+        (Ident)))
+    (UniqueClause
+      (Keyword))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))
+    (ReturnClause
+      (Keyword)
+      (Fields
+        (Predicate
+          (None))))))
+
+=================================================
+relate :: Relate through a function-produced edge
+=================================================
+
+RELATE $tobie->(type::table("knows"))->$jaime CONTENT { id: "bar" }
+
+---
+
+(SurrealQL
+  (RelateStatement
+    (Keyword)
+    (VariableName)
+    (LookupRight)
+    (SubQuery
+      (FunctionCall
+        (FunctionName)
+        (ArgumentList
+          (String))))
+    (LookupRight)
+    (VariableName)
+    (ContentClause
+      (Keyword)
+      (Object
+        (BraceOpen)
+        (ObjectContent
+          (ObjectProperty
+            (ObjectKey
+              (KeyName))
+            (Colon)
+            (String)))
+        (BraceClose)))))
 

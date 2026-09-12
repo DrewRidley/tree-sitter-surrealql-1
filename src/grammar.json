@@ -355,8 +355,34 @@
           "value": "Keyword"
         },
         {
-          "type": "SYMBOL",
-          "name": "_expression"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_statement"
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_value"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "FetchClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -431,8 +457,17 @@
           "value": "Keyword"
         },
         {
-          "type": "SYMBOL",
-          "name": "String"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "String"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "VariableName"
+            }
+          ]
         }
       ]
     },
@@ -571,17 +606,31 @@
           "value": "Keyword"
         },
         {
-          "type": "ALIAS",
-          "content": {
-            "type": "SYMBOL",
-            "name": "_kw_table"
-          },
-          "named": true,
-          "value": "Keyword"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "Ident"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_table"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "Ident"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_dbKeyword"
+            }
+          ]
         },
         {
           "type": "CHOICE",
@@ -1235,27 +1284,11 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "Array"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "VariableName"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Range"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "SubQuery"
+              "name": "_value"
             },
             {
               "type": "SYMBOL",
               "name": "_subqueryStatement"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Block"
             }
           ]
         },
@@ -1599,6 +1632,10 @@
                 {
                   "type": "SYMBOL",
                   "name": "RecordId"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "VariableName"
                 }
               ]
             },
@@ -1621,6 +1658,10 @@
                       {
                         "type": "SYMBOL",
                         "name": "RecordId"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "VariableName"
                       }
                     ]
                   }
@@ -2107,6 +2148,15 @@
                       },
                       "named": true,
                       "value": "Keyword"
+                    },
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_kw_default"
+                      },
+                      "named": true,
+                      "value": "Keyword"
                     }
                   ]
                 }
@@ -2141,45 +2191,8 @@
                   "name": "_value"
                 },
                 {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_on"
-                  },
-                  "named": true,
-                  "value": "Keyword"
-                },
-                {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "_kw_root"
-                      },
-                      "named": true,
-                      "value": "Keyword"
-                    },
-                    {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "_kw_namespace"
-                      },
-                      "named": true,
-                      "value": "Keyword"
-                    },
-                    {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "_kw_database"
-                      },
-                      "named": true,
-                      "value": "Keyword"
-                    }
-                  ]
+                  "type": "SYMBOL",
+                  "name": "OnRootNsDbClause"
                 }
               ]
             },
@@ -2224,22 +2237,12 @@
                   "type": "CHOICE",
                   "members": [
                     {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "_kw_namespace"
-                      },
-                      "named": true,
-                      "value": "Keyword"
+                      "type": "SYMBOL",
+                      "name": "_nsKeyword"
                     },
                     {
-                      "type": "ALIAS",
-                      "content": {
-                        "type": "SYMBOL",
-                        "name": "_kw_database"
-                      },
-                      "named": true,
-                      "value": "Keyword"
+                      "type": "SYMBOL",
+                      "name": "_dbKeyword"
                     },
                     {
                       "type": "ALIAS",
@@ -2413,6 +2416,27 @@
                 {
                   "type": "SYMBOL",
                   "name": "FunctionName"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "STRING",
+                          "value": "("
+                        },
+                        {
+                          "type": "STRING",
+                          "value": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
                 }
               ]
             },
@@ -4798,7 +4822,7 @@
               "type": "ALIAS",
               "content": {
                 "type": "SYMBOL",
-                "name": "_kw_ignore"
+                "name": "_kw_relation"
               },
               "named": true,
               "value": "Keyword"
@@ -4815,7 +4839,7 @@
               "type": "ALIAS",
               "content": {
                 "type": "SYMBOL",
-                "name": "_kw_relation"
+                "name": "_kw_ignore"
               },
               "named": true,
               "value": "Keyword"
@@ -4841,8 +4865,17 @@
                   "value": "Keyword"
                 },
                 {
-                  "type": "SYMBOL",
-                  "name": "Ident"
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "Ident"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "VariableName"
+                    }
+                  ]
                 }
               ]
             },
@@ -4865,6 +4898,15 @@
             {
               "type": "SYMBOL",
               "name": "BulkInsert"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_insertSubquery"
+              },
+              "named": true,
+              "value": "SubQuery"
             },
             {
               "type": "SEQ",
@@ -5093,6 +5135,23 @@
               "type": "BLANK"
             }
           ]
+        }
+      ]
+    },
+    "_insertSubquery": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_subqueryStatement"
+        },
+        {
+          "type": "STRING",
+          "value": ")"
         }
       ]
     },
@@ -5464,6 +5523,10 @@
         {
           "type": "SYMBOL",
           "name": "RecordId"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "SubQuery"
         }
       ]
     },
@@ -5533,6 +5596,18 @@
         {
           "type": "SYMBOL",
           "name": "_relateSubject"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "UniqueClause"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         },
         {
           "type": "CHOICE",
