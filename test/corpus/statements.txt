@@ -6076,3 +6076,200 @@ DEFINE FIELD OVERWRITE profiles ON TABLE account COMPUTED <~(profile FIELD accou
               (GraphFieldClause
                 (Keyword)
                 (Ident)))))))))
+
+=================================
+if-else :: IF as a computed field
+=================================
+
+DEFINE FIELD a ON t COMPUTED IF $self.b > 0 THEN $self.b ELSE 0 END
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (ComputedClause
+      (Keyword)
+      (IfElseStatement
+        (Keyword)
+        (Legacy
+          (BinaryExpression
+            (Path
+              (VariableName)
+              (Subscript
+                (Ident)))
+            (Operator)
+            (Number
+              (Int)))
+          (Keyword)
+          (Path
+            (VariableName)
+            (Subscript
+              (Ident)))
+          (Keyword)
+          (Number
+            (Int))
+          (Keyword))))))
+
+===========================================
+if-else :: IF as a VALUE clause, block form
+===========================================
+
+DEFINE FIELD f ON t TYPE number VALUE IF $value > 100 { $value * 2 } ELSE { 123456789 }
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
+      (Keyword)
+      (TypeName))
+    (ValueClause
+      (Keyword)
+      (IfElseStatement
+        (Keyword)
+        (Modern
+          (BinaryExpression
+            (VariableName)
+            (Operator)
+            (Number
+              (Int)))
+          (Block
+            (BraceOpen)
+            (BinaryExpression
+              (VariableName)
+              (Operator)
+              (Number
+                (Int)))
+            (BraceClose))
+          (Keyword)
+          (Block
+            (BraceOpen)
+            (Number
+              (Int))
+            (BraceClose)))))))
+
+===========================================
+if-else :: IF as a projection with an alias
+===========================================
+
+SELECT id, IF type::is_none(refs) THEN NONE ELSE 1 END AS resolved FROM t
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Predicate
+        (Ident))
+      (Predicate
+        (IfElseStatement
+          (Keyword)
+          (Legacy
+            (FunctionCall
+              (FunctionName)
+              (ArgumentList
+                (Ident)))
+            (Keyword)
+            (None)
+            (Keyword)
+            (Number
+              (Int))
+            (Keyword)))
+        (Keyword)
+        (Ident)))
+    (Keyword)
+    (Ident)))
+
+===============================
+if-else :: IF as a closure body
+===============================
+
+RETURN set::reduce([1], |$acc, $v| IF $v > $acc THEN $v ELSE $acc END)
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (FunctionCall
+      (FunctionName)
+      (ArgumentList
+        (Array
+          (Number
+            (Int)))
+        (Closure
+          (Pipe)
+          (ParamDefinition
+            (VariableName))
+          (ParamDefinition
+            (VariableName))
+          (Pipe)
+          (IfElseStatement
+            (Keyword)
+            (Legacy
+              (BinaryExpression
+                (VariableName)
+                (Operator)
+                (VariableName))
+              (Keyword)
+              (VariableName)
+              (Keyword)
+              (VariableName)
+              (Keyword))))))))
+
+==================================================
+if-else :: An ASSERT and a VALUE that are both IFs
+==================================================
+
+DEFINE FIELD name ON TABLE person ASSERT IF $input THEN true ELSE true END VALUE IF $input THEN 'N' ELSE $value END
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (AssertClause
+      (Keyword)
+      (IfElseStatement
+        (Keyword)
+        (Legacy
+          (VariableName)
+          (Keyword)
+          (Bool)
+          (Keyword)
+          (Bool)
+          (Keyword))))
+    (ValueClause
+      (Keyword)
+      (IfElseStatement
+        (Keyword)
+        (Legacy
+          (VariableName)
+          (Keyword)
+          (String)
+          (Keyword)
+          (VariableName)
+          (Keyword))))))
+

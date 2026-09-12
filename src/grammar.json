@@ -74,10 +74,6 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "IfElseStatement"
-        },
-        {
-          "type": "SYMBOL",
           "name": "LetStatement"
         },
         {
@@ -9512,6 +9508,10 @@
         {
           "type": "SYMBOL",
           "name": "_baseValue"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "IfElseStatement"
         }
       ]
     },
@@ -12270,17 +12270,8 @@
           "value": "Operator"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "IfElseStatement"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "_value"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_value"
         }
       ]
     },
@@ -16097,6 +16088,9 @@
     ],
     [
       "Modern"
+    ],
+    [
+      "Legacy"
     ],
     [
       "_prefixOperand",

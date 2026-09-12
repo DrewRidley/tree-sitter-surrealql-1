@@ -179,6 +179,10 @@ export default grammar({
 		// ambiguity: the ELSE either continues this chain or closes the nested
 		// one. Both are real readings; let GLR settle it.
 		[$.Modern],
+		// The same dangling ELSE in the THEN…END form, now that a branch body
+		// is a value and a value can be another IF: `ELSE IF` either continues
+		// this chain or opens a nested one.
+		[$.Legacy],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
 	],
@@ -205,9 +209,11 @@ export default grammar({
 		// Statements
 		// ================================================================
 
+		// IfElseStatement is deliberately absent: IF is a value (see `_value`),
+		// so listing it here as well would make every `IF …` in an expression
+		// position reachable two ways for the same tree.
 		_subqueryStatement: ($) =>
 			choice(
-				$.IfElseStatement,
 				$.LetStatement,
 				$.DeleteStatement,
 				$.CreateStatement,
@@ -1814,6 +1820,11 @@ export default grammar({
 		// Values
 		// ================================================================
 
+		// IF is an expression in SurrealQL, not only a statement: it is legal
+		// unparenthesised in a projection, a WHERE, an array element, an
+		// object value, a `SET` right-hand side, a `COMPUTED`/`VALUE`/`ASSERT`
+		// clause. It sits here rather than in `_baseValue` so it does not also
+		// become a path or lookup base, which the engine does not accept.
 		_value: ($) =>
 			choice(
 				$.Path,
@@ -1821,6 +1832,7 @@ export default grammar({
 				$.Range,
 				$.PrefixExpression,
 				$._baseValue,
+				$.IfElseStatement,
 			),
 
 		// `!`, and the arithmetic signs. A sign in front of a literal number
@@ -2380,7 +2392,7 @@ export default grammar({
 			seq(
 				choice($.Ident, alias($._pathAssignTarget, $.Idiom)),
 				alias($._assignmentOp, $.Operator),
-				choice($.IfElseStatement, $._value),
+				$._value,
 			),
 		// Any idiom tail makes a target a path, not just a dotted one: the
 		// engine takes `SET d[0] = 3`, `SET tags[*].seen = true` and
