@@ -5068,6 +5068,10 @@
           "named": true
         },
         {
+          "type": "ReturnStatement",
+          "named": true
+        },
+        {
           "type": "Set",
           "named": true
         },
@@ -5077,6 +5081,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {

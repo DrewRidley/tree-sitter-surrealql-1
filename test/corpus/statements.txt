@@ -5582,6 +5582,28 @@ DEFINE USER u ON ROOT COMMENT "c" PASSWORD "p"
       (Keyword)
       (String))))
 
+==============================
+if :: THROW as an IF-THEN body
+==============================
+
+IF $org = NONE THEN THROW 'no organization' END
+
+---
+
+(SurrealQL
+  (IfElseStatement
+    (Keyword)
+    (Legacy
+      (BinaryExpression
+        (VariableName)
+        (Operator)
+        (None))
+      (Keyword)
+      (ThrowStatement
+        (Keyword)
+        (String))
+      (Keyword))))
+
 ===============================
 access :: ACCESS GRANT FOR USER
 ===============================

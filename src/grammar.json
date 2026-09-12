@@ -1296,6 +1296,40 @@
         }
       ]
     },
+    "_ifBranchBody": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_value"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "ThrowStatement"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "ReturnStatement"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": ";"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
     "Legacy": {
       "type": "SEQ",
       "members": [
@@ -1313,21 +1347,8 @@
           "value": "Keyword"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "Block"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "SubQuery"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "_value"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_ifBranchBody"
         },
         {
           "type": "REPEAT",
@@ -1366,21 +1387,8 @@
                 "value": "Keyword"
               },
               {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "Block"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "SubQuery"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "_value"
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "_ifBranchBody"
               }
             ]
           }
@@ -1401,21 +1409,8 @@
                   "value": "Keyword"
                 },
                 {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SYMBOL",
-                      "name": "Block"
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "SubQuery"
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "_value"
-                    }
-                  ]
+                  "type": "SYMBOL",
+                  "name": "_ifBranchBody"
                 }
               ]
             },
@@ -15857,8 +15852,7 @@
       "_singleType"
     ],
     [
-      "Legacy",
-      "_baseValue"
+      "Modern"
     ],
     [
       "_prefixOperand",
