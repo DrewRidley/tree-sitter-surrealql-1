@@ -2046,19 +2046,19 @@ export default grammar({
 			),
 
 		_pathFilter: ($) =>
-			seq(
-				'[',
-				choice(
-					$.WhereClause,
-					// `[? value]` shorthand — wrap in WhereClause to match lezer's
-					// inline `WhereClause { "?" value }` rule.
-					alias($._questionWhere, $.WhereClause),
-					// `[*]` selects every element, `[$]` the last one.
-					alias('*', $.Any),
-					alias('$', $.Last),
-					$._expression,
-				),
-				']',
+			seq('[', choice(alias('*', $.Any), $._filterBody), ']'),
+		// The same bracket without the `[*]` wildcard, for idiom positions —
+		// see `_idiomTail`, which spells the wildcard itself.
+		_idiomFilter: ($) => seq('[', $._filterBody, ']'),
+		_filterBody: ($) =>
+			choice(
+				$.WhereClause,
+				// `[? value]` shorthand — wrap in WhereClause to match lezer's
+				// inline `WhereClause { "?" value }` rule.
+				alias($._questionWhere, $.WhereClause),
+				// `[$]` selects the last element.
+				alias('$', $.Last),
+				$._expression,
 			),
 		_questionWhere: ($) => seq('?', $._value),
 
@@ -2183,7 +2183,13 @@ export default grammar({
 		_idiomTail: ($) =>
 			choice(
 				seq('.', choice($.Ident, alias('*', $.Any))),
-				alias($._pathFilter, $.Filter),
+				// `items[*]` and `items.*` are the same field path — every
+				// element — so they get the same tree: a bare `Any`, not a
+				// `Filter` wrapping one. In a *value* position `a[*]` stays a
+				// `Filter`, because there the brackets really are the filter
+				// syntax and `[0]`, `[$]`, `[WHERE …]` sit beside it.
+				seq('[', alias('*', $.Any), ']'),
+				alias($._idiomFilter, $.Filter),
 				alias('...', $.Flatten),
 			),
 		// An idiom rooted at `count`, for the positions where the bare keyword

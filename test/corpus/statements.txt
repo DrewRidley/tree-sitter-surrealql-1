@@ -233,8 +233,7 @@ CREATE t SET tags[*].seen = true
       (FieldAssignment
         (Idiom
           (Ident)
-          (Filter
-            (Any))
+          (Any)
           (Ident))
         (Operator)
         (Bool)))))
@@ -817,8 +816,7 @@ DEFINE FIELD tags[*] ON t TYPE string
     (Keyword)
     (Idiom
       (Ident)
-      (Filter
-        (Any)))
+      (Any))
     (OnTableClause
       (Keyword)
       (Ident))
@@ -841,8 +839,7 @@ DEFINE FIELD meta.tags[*].name ON t TYPE string
     (Idiom
       (Ident)
       (Ident)
-      (Filter
-        (Any))
+      (Any)
       (Ident))
     (OnTableClause
       (Keyword)
