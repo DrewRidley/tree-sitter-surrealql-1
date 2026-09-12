@@ -3955,13 +3955,35 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_kw_explain"
-              },
-              "named": true,
-              "value": "Keyword"
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_kw_explain"
+                  },
+                  "named": true,
+                  "value": "Keyword"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_kw_analyze"
+                      },
+                      "named": true,
+                      "value": "Keyword"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "type": "BLANK"
@@ -13277,6 +13299,10 @@
       "type": "PATTERN",
       "value": "[aA][lL][wW][aA][yY][sS]"
     },
+    "_kw_analyze": {
+      "type": "PATTERN",
+      "value": "[aA][nN][aA][lL][yY][zZ][eE]"
+    },
     "_kw_analyzer": {
       "type": "PATTERN",
       "value": "[aA][nN][aA][lL][yY][zZ][eE][rR]"
@@ -14327,6 +14353,10 @@
         {
           "type": "SYMBOL",
           "name": "_kw_always"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_kw_analyze"
         },
         {
           "type": "SYMBOL",

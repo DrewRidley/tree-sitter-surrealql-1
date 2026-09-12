@@ -843,10 +843,16 @@ export default grammar({
 		// SELECT
 		SelectStatement: ($) =>
 			seq(
-				// `EXPLAIN SELECT …` — the prefix spelling. 3.2.3 takes the prefix
-				// bare; `EXPLAIN FULL SELECT` is a parse error there, so FULL stays
-				// a trailing-clause-only option.
-				optional(alias($._kw_explain, $.Keyword)),
+				// `EXPLAIN SELECT …` and `EXPLAIN ANALYZE SELECT …` — the prefix
+				// spelling. 3.2.3 takes the prefix bare or with ANALYZE, but
+				// `EXPLAIN FULL SELECT` and `EXPLAIN ANALYZE FULL SELECT` are both
+				// parse errors there, so FULL stays a trailing-clause-only option.
+				optional(
+					seq(
+						alias($._kw_explain, $.Keyword),
+						optional(alias($._kw_analyze, $.Keyword)),
+					),
+				),
 				alias($._kw_select, $.Keyword),
 				$.Fields,
 				optional($.OmitClause),
@@ -2494,6 +2500,7 @@ export default grammar({
 		_kw_all: ($) => kw('all'),
 		_kw_alter: ($) => kw('alter'),
 		_kw_always: ($) => kw('always'),
+		_kw_analyze: ($) => kw('analyze'),
 		_kw_analyzer: ($) => kw('analyzer'),
 		_kw_and: ($) => kw('and'),
 		_kw_any: ($) => kw('any'),
@@ -2775,6 +2782,7 @@ export default grammar({
 				$._kw_all,
 				$._kw_alter,
 				$._kw_always,
+				$._kw_analyze,
 				$._kw_analyzer,
 				$._kw_and,
 				$._kw_any,

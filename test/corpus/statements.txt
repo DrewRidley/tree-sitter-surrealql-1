@@ -4059,6 +4059,24 @@ EXPLAIN SELECT * FROM person
     (Keyword)
     (Ident)))
 
+============================================
+select :: EXPLAIN ANALYZE as a leading prefix
+============================================
+
+EXPLAIN ANALYZE SELECT * FROM person
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (Ident)))
+
 =================================================
 select :: EXPLAIN both as a prefix and as a clause
 =================================================
