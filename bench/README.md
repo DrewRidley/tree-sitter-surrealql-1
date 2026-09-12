@@ -2,8 +2,8 @@
 
 Two 4,000-statement files, and the command that reads them:
 
-    npx tree-sitter parse -q -s test/corpus/bench/sign_literal.surql
-    npx tree-sitter parse -q -s test/corpus/bench/ordinary.surql
+    npx tree-sitter parse -q -s bench/sign_literal.surql
+    npx tree-sitter parse -q -s bench/ordinary.surql
 
 `sign_literal.surql` is `RETURN -1 - -2 + -3 * -4;` repeated — four signed
 literals per statement, which is the shape that provokes any ambiguity

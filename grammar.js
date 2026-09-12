@@ -1776,7 +1776,6 @@ export default grammar({
 				alias($._pathFilter, $.Filter),
 				alias('...', $.Flatten),
 			),
-		Flatten: ($) => '...',
 
 		// Binary expression
 		//
@@ -2149,7 +2148,11 @@ export default grammar({
 		//
 		// Aliased to `Number` so a sized type keeps the `Number(Int)` child it
 		// had; only the set of literals the slot accepts is narrower.
-		_sizeBound: ($) => seq(optional('+'), $.Int),
+		// The `+` is joined to its digits lexically, exactly as a signed
+		// `Number` is: `array<int, + 3>` is not a literal any more than
+		// `- 5` is, and the engine rejects it the same way.
+		_sizeBound: ($) =>
+			choice(seq('+', alias($._intImmediate, $.Int)), $.Int),
 		_type: ($) => choice($._singleType, $.UnionType),
 		UnionType: ($) =>
 			prec.right(
@@ -2202,7 +2205,7 @@ export default grammar({
 		// about half the throughput (9,647 -> 5,095 bytes/ms). Dropping the
 		// conflict recovers most of it (8,363, +64% against the conflict),
 		// which still sits about 13% under the pre-conflict baseline;
-		// ordinary input is unchanged either way. `test/corpus/bench/` holds
+		// ordinary input is unchanged either way. `bench/` holds
 		// the inputs and the method — interleave the revisions and take the
 		// median, or measurement drift will invert the result.
 		Number: ($) =>

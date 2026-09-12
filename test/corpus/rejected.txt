@@ -199,3 +199,30 @@ DEFINE FUNCTION fn::g($x: <int>) { RETURN $x; }
         (Keyword)
         (VariableName))
       (BraceClose))))
+
+=====================================================
+types :: A sized bound's sign is joined to its digits
+=====================================================
+
+-- `+ 3` is not a literal, the same way `- 5` is not. The engine:
+--   Unexpected token `+`
+LET $a: array<int, + 3> = []
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (LetStatement
+    (Keyword)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (ParameterizedType
+          (TypeName)
+          (TypeName)
+          (ERROR)
+          (Number
+            (Int)))))
+    (Array)))

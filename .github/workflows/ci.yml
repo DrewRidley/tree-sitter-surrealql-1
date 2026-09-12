@@ -41,5 +41,7 @@ jobs:
       - name: Test
         run: npm test
 
+      # The biome `npm ci` just installed, not a floating fetch — the point of
+      # the whole job is that it runs what the lockfile pins.
       - name: Format
-        run: npx --yes @biomejs/biome@2 format grammar.js
+        run: npx biome format grammar.js

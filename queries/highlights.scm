@@ -46,9 +46,12 @@
 (At) @operator
 (Optional) @operator
 
-; Token / clause keywords aliased through Distance / Filter / Tokenizer / etc.
+; Token / clause keywords aliased through Distance / Tokenizer / etc.
 (Distance) @constant.builtin
-(Filter) @constant.builtin
+; `Filter` is two different things: an analyzer filter name, which is a
+; built-in constant, and the brackets of an idiom or path filter
+; (`tags[WHERE …]`), which are not. Scope this to the analyzer clause.
+(AnalyzerFilters (Filter) @constant.builtin)
 (AnalyzerTokenizer) @constant.builtin
 (TokenType) @constant.builtin
 (HttpMethod) @constant.builtin
