@@ -4042,6 +4042,121 @@ SELECT * FROM person EXPLAIN FULL
       (Keyword)
       (Literal))))
 
+====================================
+select :: EXPLAIN as a leading prefix
+====================================
+
+EXPLAIN SELECT * FROM person
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (Ident)))
+
+============================================
+select :: EXPLAIN ANALYZE as a leading prefix
+============================================
+
+EXPLAIN ANALYZE SELECT * FROM person
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (Ident)))
+
+=================================================
+select :: EXPLAIN both as a prefix and as a clause
+=================================================
+
+EXPLAIN SELECT * FROM person EXPLAIN FULL
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (Ident)
+    (ExplainClause
+      (Keyword)
+      (Literal))))
+
+=============================
+delete :: Delete with EXPLAIN
+=============================
+
+DELETE person EXPLAIN
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Ident)
+    (ExplainClause
+      (Keyword))))
+
+==================================
+update :: Update with EXPLAIN FULL
+==================================
+
+UPDATE person SET age = 29 EXPLAIN FULL
+
+---
+
+(SurrealQL
+  (UpdateStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))
+    (ExplainClause
+      (Keyword)
+      (Literal))))
+
+=============================
+upsert :: Upsert with EXPLAIN
+=============================
+
+UPSERT person SET age = 29 EXPLAIN
+
+---
+
+(SurrealQL
+  (UpsertStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))
+    (ExplainClause
+      (Keyword))))
+
 ==============================
 select :: Select with PARALLEL
 ==============================
