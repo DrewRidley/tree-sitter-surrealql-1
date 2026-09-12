@@ -2268,3 +2268,47 @@ b"base64data"
   (String)
   (String)
   (String))
+
+================================
+constants :: Bare math constants
+================================
+
+math::PI;
+math::E;
+math::NEG_INFINITY;
+math::TAU
+
+---
+
+(SurrealQL
+  (Constant)
+  (Constant)
+  (Constant)
+  (Constant))
+
+==========================================
+constants :: time::EPOCH and duration::MAX
+==========================================
+
+time::EPOCH;
+duration::MAX
+
+---
+
+(SurrealQL
+  (Constant)
+  (Constant))
+
+==============================================
+constants :: A constant as a function argument
+==============================================
+
+math::floor(math::PI)
+
+---
+
+(SurrealQL
+  (FunctionCall
+    (FunctionName)
+    (ArgumentList
+      (Constant))))

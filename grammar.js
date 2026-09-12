@@ -43,6 +43,43 @@ function kw(word) {
 	);
 }
 
+/** Alternation of case-insensitive keyword sources, for use inside a token */
+function kwAlt(words) {
+	return words.map((word) => kw(word).source).join('|');
+}
+
+/**
+ * The constants SurrealQL resolves as bare paths — `math::PI` is a value, not
+ * a zero-argument call. The set is closed: 3.2.3 rejects `math::nan`,
+ * `time::MAX` and `duration::MIN` at parse time, so listing them exactly is
+ * what keeps the grammar from being looser than the engine.
+ */
+const MATH_CONSTANTS = [
+	'E',
+	'FRAC_1_PI',
+	'FRAC_1_SQRT_2',
+	'FRAC_2_PI',
+	'FRAC_2_SQRT_PI',
+	'FRAC_PI_2',
+	'FRAC_PI_3',
+	'FRAC_PI_4',
+	'FRAC_PI_6',
+	'FRAC_PI_8',
+	'INF',
+	'INFINITY',
+	'LN_10',
+	'LN_2',
+	'LOG10_2',
+	'LOG10_E',
+	'LOG2_10',
+	'LOG2_E',
+	'NEG_INF',
+	'NEG_INFINITY',
+	'PI',
+	'SQRT_2',
+	'TAU',
+];
+
 /** Comma separated list (no trailing comma) */
 function csep(rule) {
 	return seq(rule, repeat(seq(',', rule)));
@@ -1681,6 +1718,7 @@ export default grammar({
 
 		_computedValue: ($) =>
 			choice(
+				$.Constant,
 				$.String,
 				$.Number,
 				alias($._kw_true, $.Bool),
@@ -2110,6 +2148,21 @@ export default grammar({
 				')',
 			),
 		Version: ($) => seq('<', $.VersionNumber, '>'),
+
+		// One token, at a higher lexical precedence than `FunctionName`, so
+		// `math::PI` lexes as the constant while `math::pilot(…)` still lexes
+		// as a function name (longest match settles that first).
+		Constant: ($) =>
+			token(
+				prec(
+					4,
+					new RegExp(
+						`(?:${kw('math').source}::(?:${kwAlt(MATH_CONSTANTS)})` +
+							`|${kw('time').source}::${kw('EPOCH').source}` +
+							`|${kw('duration').source}::${kw('MAX').source})`,
+					),
+				),
+			),
 
 		FunctionName: ($) =>
 			choice(

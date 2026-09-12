@@ -9053,6 +9053,10 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "Constant"
+        },
+        {
+          "type": "SYMBOL",
           "name": "String"
         },
         {
@@ -11481,6 +11485,17 @@
           "value": ">"
         }
       ]
+    },
+    "Constant": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 4,
+        "content": {
+          "type": "PATTERN",
+          "value": "(?:[mM][aA][tT][hH]::(?:[eE]|[fF][rR][aA][cC][__][11][__][pP][iI]|[fF][rR][aA][cC][__][11][__][sS][qQ][rR][tT][__][22]|[fF][rR][aA][cC][__][22][__][pP][iI]|[fF][rR][aA][cC][__][22][__][sS][qQ][rR][tT][__][pP][iI]|[fF][rR][aA][cC][__][pP][iI][__][22]|[fF][rR][aA][cC][__][pP][iI][__][33]|[fF][rR][aA][cC][__][pP][iI][__][44]|[fF][rR][aA][cC][__][pP][iI][__][66]|[fF][rR][aA][cC][__][pP][iI][__][88]|[iI][nN][fF]|[iI][nN][fF][iI][nN][iI][tT][yY]|[lL][nN][__][11][00]|[lL][nN][__][22]|[lL][oO][gG][11][00][__][22]|[lL][oO][gG][11][00][__][eE]|[lL][oO][gG][22][__][11][00]|[lL][oO][gG][22][__][eE]|[nN][eE][gG][__][iI][nN][fF]|[nN][eE][gG][__][iI][nN][fF][iI][nN][iI][tT][yY]|[pP][iI]|[sS][qQ][rR][tT][__][22]|[tT][aA][uU])|[tT][iI][mM][eE]::[eE][pP][oO][cC][hH]|[dD][uU][rR][aA][tT][iI][oO][nN]::[mM][aA][xX])"
+        }
+      }
     },
     "FunctionName": {
       "type": "CHOICE",
