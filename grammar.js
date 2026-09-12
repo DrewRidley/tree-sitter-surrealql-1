@@ -144,6 +144,11 @@ export default grammar({
 		[
 			'prefix',
 			'range',
+			// A cast binds looser than a range (`<array> 1..5` is
+			// `[1, 2, 3, 4]` on 3.2.3) and tighter than every binary operator
+			// (`<string> 1 + 2` is a string-plus-int error there, so the cast
+			// took only the `1`).
+			'cast',
 			'method',
 			// Binary operator tiers, tightest to loosest. Splitting the former
 			// single 'binary' level is what makes `a > 1 AND b > 2` parse as
@@ -1831,6 +1836,7 @@ export default grammar({
 				$.BinaryExpression,
 				$.Range,
 				$.PrefixExpression,
+				$.TypeCast,
 				$._baseValue,
 				$.IfElseStatement,
 			),
@@ -1851,7 +1857,8 @@ export default grammar({
 					$._prefixOperand,
 				),
 			),
-		_prefixOperand: ($) => choice($.PrefixExpression, $.Path, $._baseValue),
+		_prefixOperand: ($) =>
+			choice($.PrefixExpression, $.Path, $.TypeCast, $._baseValue),
 
 		_baseValue: ($) =>
 			choice(
@@ -1864,7 +1871,6 @@ export default grammar({
 				$.SubQuery,
 				$.Block,
 				$.Closure,
-				$.TypeCast,
 				$.Ident,
 			),
 
@@ -2159,7 +2165,11 @@ export default grammar({
 			),
 
 		// Type cast
-		TypeCast: ($) => seq('<', $._type, '>', $._baseValue),
+		// The operand is a whole value, and the 'cast' precedence settles what
+		// that value reaches: a range, a path, a prefix operator or another
+		// cast is inside the cast (`<array> 1..5`, `<string> $x.y`,
+		// `<string> -$x`); a binary operator is outside it. Mirrors 3.2.3.
+		TypeCast: ($) => prec('cast', seq('<', $._type, '>', $._value)),
 
 		// Closure
 		Closure: ($) =>

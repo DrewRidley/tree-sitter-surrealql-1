@@ -2342,3 +2342,79 @@ a IS NOT b
     (Ident)
     (Operator)
     (Ident)))
+
+=====================================
+types :: A cast takes the whole range
+=====================================
+
+RETURN <array> 1..5
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (TypeCast
+      (TypeName)
+      (Range
+        (Number
+          (Int))
+        (RangeOp)
+        (Number
+          (Int))))))
+
+==============================================
+types :: A binary operator is outside the cast
+==============================================
+
+RETURN <string> 1 + 2
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (BinaryExpression
+      (TypeCast
+        (TypeName)
+        (Number
+          (Int)))
+      (Operator)
+      (Number
+        (Int)))))
+
+====================================
+types :: A cast takes the whole path
+====================================
+
+RETURN <string> $x.y
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (TypeCast
+      (TypeName)
+      (Path
+        (VariableName)
+        (Subscript
+          (Ident))))))
+
+=======================================
+types :: A cast takes a prefix operator
+=======================================
+
+RETURN <string> -$x
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (TypeCast
+      (TypeName)
+      (PrefixExpression
+        (Operator)
+        (VariableName)))))
+

@@ -6711,10 +6711,6 @@
           "named": true
         },
         {
-          "type": "TypeCast",
-          "named": true
-        },
-        {
           "type": "VariableName",
           "named": true
         }
@@ -7522,10 +7518,6 @@
         },
         {
           "type": "SubQuery",
-          "named": true
-        },
-        {
-          "type": "TypeCast",
           "named": true
         },
         {
@@ -9879,6 +9871,10 @@
           "named": true
         },
         {
+          "type": "BinaryExpression",
+          "named": true
+        },
+        {
           "type": "Block",
           "named": true
         },
@@ -9915,6 +9911,10 @@
           "named": true
         },
         {
+          "type": "IfElseStatement",
+          "named": true
+        },
+        {
           "type": "LiteralType",
           "named": true
         },
@@ -9935,7 +9935,19 @@
           "named": true
         },
         {
+          "type": "Path",
+          "named": true
+        },
+        {
           "type": "Point",
+          "named": true
+        },
+        {
+          "type": "PrefixExpression",
+          "named": true
+        },
+        {
+          "type": "Range",
           "named": true
         },
         {

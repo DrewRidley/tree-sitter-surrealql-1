@@ -9507,6 +9507,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "TypeCast"
+        },
+        {
+          "type": "SYMBOL",
           "name": "_baseValue"
         },
         {
@@ -9573,6 +9577,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "TypeCast"
+        },
+        {
+          "type": "SYMBOL",
           "name": "_baseValue"
         }
       ]
@@ -9615,10 +9623,6 @@
         {
           "type": "SYMBOL",
           "name": "Closure"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "TypeCast"
         },
         {
           "type": "SYMBOL",
@@ -11198,25 +11202,29 @@
       }
     },
     "TypeCast": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "<"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_type"
-        },
-        {
-          "type": "STRING",
-          "value": ">"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_baseValue"
-        }
-      ]
+      "type": "PREC",
+      "value": "cast",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "<"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_type"
+          },
+          {
+            "type": "STRING",
+            "value": ">"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_value"
+          }
+        ]
+      }
     },
     "Closure": {
       "type": "PREC",
@@ -16110,6 +16118,10 @@
       {
         "type": "STRING",
         "value": "range"
+      },
+      {
+        "type": "STRING",
+        "value": "cast"
       },
       {
         "type": "STRING",
