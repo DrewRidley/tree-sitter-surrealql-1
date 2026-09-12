@@ -5437,3 +5437,83 @@ REMOVE DB test
     (Keyword)
     (Keyword)
     (Ident)))
+
+================================
+define :: DEFINE ACCESS TYPE JWT
+================================
+
+DEFINE ACCESS a ON DATABASE TYPE JWT ALGORITHM HS256 KEY "secret"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String))))))
+
+============================================
+define :: DEFINE ACCESS JWT with WITH ISSUER
+============================================
+
+DEFINE ACCESS a ON DATABASE TYPE JWT ALGORITHM HS256 KEY "s" WITH ISSUER KEY "i"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String)
+          (IssuerClause
+            (Keyword)
+            (Keyword)
+            (Keyword)
+            (String)))))))
+
+============================================
+define :: DEFINE ACCESS TYPE BEARER FOR USER
+============================================
+
+DEFINE ACCESS a ON DATABASE TYPE BEARER FOR USER
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (Keyword)))))

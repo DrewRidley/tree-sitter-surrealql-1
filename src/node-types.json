@@ -151,10 +151,6 @@
       "required": true,
       "types": [
         {
-          "type": "Ident",
-          "named": true
-        },
-        {
           "type": "JwtClause",
           "named": true
         },
@@ -168,6 +164,10 @@
         },
         {
           "type": "SignupClause",
+          "named": true
+        },
+        {
+          "type": "WithJwtClause",
           "named": true
         }
       ]
@@ -4647,6 +4647,33 @@
     }
   },
   {
+    "type": "IssuerClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "VariableName",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "JavaScriptBlock",
     "named": true,
     "fields": {}
@@ -4664,11 +4691,19 @@
           "named": true
         },
         {
+          "type": "IssuerClause",
+          "named": true
+        },
+        {
           "type": "Keyword",
           "named": true
         },
         {
           "type": "String",
+          "named": true
+        },
+        {
+          "type": "VariableName",
           "named": true
         }
       ]
@@ -10448,6 +10483,25 @@
       "types": [
         {
           "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "WithJwtClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "JwtClause",
           "named": true
         },
         {

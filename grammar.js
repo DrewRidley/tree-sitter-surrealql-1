@@ -1194,35 +1194,57 @@ export default grammar({
 					seq(
 						alias($._kw_record, $.Keyword),
 						repeat(choice($.SignupClause, $.SigninClause)),
-						optional(
-							seq(
-								alias($._kw_with, $.Keyword),
-								alias($._kw_jwt, $.Keyword),
-								$.JwtClause,
-								optional(
-									seq(
-										alias($._kw_with, $.Keyword),
-										alias($._kw_issuer, $.Keyword),
-										alias($._kw_key, $.Keyword),
-										$.Ident,
-									),
-								),
-							),
+						optional($.WithJwtClause),
+					),
+					// TYPE BEARER FOR USER|RECORD, whose grants are what
+					// `DURATION FOR GRANT` and `ACCESS … GRANT` act on.
+					seq(
+						alias($._kw_bearer, $.Keyword),
+						alias($._kw_for, $.Keyword),
+						choice(
+							alias($._kw_user, $.Keyword),
+							alias($._kw_record, $.Keyword),
 						),
+						optional($.WithJwtClause),
 					),
 				),
 			),
 
-		JwtClause: ($) =>
-			choice(
-				seq(
-					alias($._kw_algorithm, $.Keyword),
-					$.Ident,
-					alias($._kw_key, $.Keyword),
-					$.Ident,
-				),
-				seq(alias($._kw_url, $.Keyword), $.String),
+		WithJwtClause: ($) =>
+			seq(
+				alias($._kw_with, $.Keyword),
+				alias($._kw_jwt, $.Keyword),
+				$.JwtClause,
 			),
+
+		JwtClause: ($) =>
+			seq(
+				choice(
+					seq(
+						alias($._kw_algorithm, $.Keyword),
+						$.Ident,
+						alias($._kw_key, $.Keyword),
+						$._accessKeyValue,
+					),
+					seq(alias($._kw_url, $.Keyword), $._accessKeyValue),
+				),
+				optional($.IssuerClause),
+			),
+
+		// WITH ISSUER takes an algorithm, a key, both, or neither. The engine
+		// additionally requires the issuer algorithm to be *compatible* with
+		// the access algorithm — `ALGORITHM HS256 … WITH ISSUER ALGORITHM
+		// HS384` is a parse error there — but that is a relation between two
+		// tokens, not a shape, so it is left to the analyzer.
+		IssuerClause: ($) =>
+			seq(
+				alias($._kw_with, $.Keyword),
+				alias($._kw_issuer, $.Keyword),
+				optional(seq(alias($._kw_algorithm, $.Keyword), $.Ident)),
+				optional(seq(alias($._kw_key, $.Keyword), $._accessKeyValue)),
+			),
+
+		_accessKeyValue: ($) => choice($.String, $.VariableName),
 
 		SignupClause: ($) =>
 			seq(alias($._kw_signup, $.Keyword), choice($.SubQuery, $.Block)),
