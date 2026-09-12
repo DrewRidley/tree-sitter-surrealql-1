@@ -190,6 +190,11 @@ export default grammar({
 		[$.Legacy],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
+		// After `WITH JWT <jwt>` inside DEFINE ACCESS … TYPE RECORD, a `WITH`
+		// starts either the JWT clause's own `WITH ISSUER` or the type's
+		// trailing `WITH REFRESH`. Deciding needs the token after `WITH`, so
+		// the grammar is LR(2) here — not ambiguous. Let GLR look ahead.
+		[$.JwtClause],
 	],
 
 	rules: {
@@ -1426,7 +1431,13 @@ export default grammar({
 					seq(
 						alias($._kw_record, $.Keyword),
 						repeat(choice($.SignupClause, $.SigninClause)),
+						// `WITH REFRESH` sits on either side of `WITH JWT`;
+						// the engine takes both orders. It is a RECORD-only
+						// clause: `TYPE BEARER FOR USER WITH REFRESH` is a
+						// parse error in 3.2.3.
+						optional($.RefreshClause),
 						optional($.WithJwtClause),
+						optional($.RefreshClause),
 					),
 					// TYPE BEARER FOR USER|RECORD, whose grants are what
 					// `DURATION FOR GRANT` and `ACCESS … GRANT` act on.
@@ -1448,6 +1459,9 @@ export default grammar({
 				alias($._kw_jwt, $.Keyword),
 				$.JwtClause,
 			),
+
+		RefreshClause: ($) =>
+			seq(alias($._kw_with, $.Keyword), alias($._kw_refresh, $.Keyword)),
 
 		JwtClause: ($) =>
 			seq(
@@ -1478,15 +1492,13 @@ export default grammar({
 
 		_accessKeyValue: ($) => choice($.String, $.VariableName),
 
-		SignupClause: ($) =>
-			seq(alias($._kw_signup, $.Keyword), choice($.SubQuery, $.Block)),
-		SigninClause: ($) =>
-			seq(alias($._kw_signin, $.Keyword), choice($.SubQuery, $.Block)),
+		// Each takes a value, which already covers the SubQuery and Block
+		// spellings: `SIGNUP true` and `AUTHENTICATE true` both reach the
+		// executor in 3.2.3.
+		SignupClause: ($) => seq(alias($._kw_signup, $.Keyword), $._value),
+		SigninClause: ($) => seq(alias($._kw_signin, $.Keyword), $._value),
 		AuthenticateClause: ($) =>
-			seq(
-				alias($._kw_authenticate, $.Keyword),
-				choice($.SubQuery, $.Block),
-			),
+			seq(alias($._kw_authenticate, $.Keyword), $._value),
 		SessionClause: ($) => seq(alias($._kw_session, $.Keyword), $.Duration),
 
 		// The engine wants the FOR target on every entry, and takes NONE in
@@ -2012,7 +2024,15 @@ export default grammar({
 				seq($.Lookup, repeat($._pathElement)),
 			),
 		_pathElement: ($) =>
-			choice($.Lookup, $.Subscript, alias($._pathFilter, $.Filter)),
+			choice(
+				$.Lookup,
+				$.Subscript,
+				alias($._pathFilter, $.Filter),
+				// `...` flattens the array the path has reached. It was an
+				// idiom tail only, so `UNSET foo...` and `SELECT a...` — both
+				// of which reach the executor in 3.2.3 — were errors.
+				alias('...', $.Flatten),
+			),
 		Subscript: ($) => seq('.', $._dotPart),
 		_dotPart: ($) =>
 			choice(

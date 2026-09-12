@@ -6704,3 +6704,236 @@ RELATE $tobie->(type::table("knows"))->$jaime CONTENT { id: "bar" }
             (String)))
         (BraceClose)))))
 
+
+===============================================================
+define :: Define access JWT with an issuer key and AUTHENTICATE
+===============================================================
+
+DEFINE ACCESS a ON DATABASE TYPE JWT ALGORITHM EDDSA KEY "foo" WITH ISSUER KEY "bar" AUTHENTICATE true
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String)
+          (IssuerClause
+            (Keyword)
+            (Keyword)
+            (Keyword)
+            (String))))
+      (AuthenticateClause
+        (Keyword)
+        (Bool)))))
+
+=================================================================
+define :: Define access record with refresh before the JWT clause
+=================================================================
+
+DEFINE ACCESS a ON DB TYPE RECORD WITH REFRESH WITH JWT ALGORITHM PS512 KEY "foo" WITH ISSUER KEY "bar" DURATION FOR GRANT 10d
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (RefreshClause
+          (Keyword)
+          (Keyword))
+        (WithJwtClause
+          (Keyword)
+          (Keyword)
+          (JwtClause
+            (Keyword)
+            (Ident)
+            (Keyword)
+            (String)
+            (IssuerClause
+              (Keyword)
+              (Keyword)
+              (Keyword)
+              (String)))))
+      (DurationClause
+        (Keyword)
+        (DurationValue
+          (Keyword)
+          (Keyword)
+          (Duration
+            (DurationPart)))))))
+
+================================================================
+define :: Define access record with refresh after the JWT clause
+================================================================
+
+DEFINE ACCESS a ON DB TYPE RECORD WITH JWT ALGORITHM PS512 KEY "foo" WITH ISSUER KEY "bar" WITH REFRESH DURATION FOR GRANT 10d
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (WithJwtClause
+          (Keyword)
+          (Keyword)
+          (JwtClause
+            (Keyword)
+            (Ident)
+            (Keyword)
+            (String)
+            (IssuerClause
+              (Keyword)
+              (Keyword)
+              (Keyword)
+              (String))))
+        (RefreshClause
+          (Keyword)
+          (Keyword)))
+      (DurationClause
+        (Keyword)
+        (DurationValue
+          (Keyword)
+          (Keyword)
+          (Duration
+            (DurationPart)))))))
+
+=================================================
+define :: Define access record with value clauses
+=================================================
+
+DEFINE ACCESS a ON DB TYPE RECORD SIGNUP true SIGNIN false AUTHENTICATE true DURATION FOR SESSION 7d
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (SignupClause
+          (Keyword)
+          (Bool))
+        (SigninClause
+          (Keyword)
+          (Bool)))
+      (AuthenticateClause
+        (Keyword)
+        (Bool))
+      (DurationClause
+        (Keyword)
+        (DurationValue
+          (Keyword)
+          (Keyword)
+          (Duration
+            (DurationPart)))))))
+
+=============================================================
+update :: Unset a flattened path, a graph path and a wildcard
+=============================================================
+
+UPDATE ONLY a->b WITH INDEX index, index_2 UNSET foo..., a->b, c[*] WHERE true RETURN DIFF TIMEOUT 1s EXPLAIN FULL
+
+---
+
+(SurrealQL
+  (UpdateStatement
+    (Keyword)
+    (Keyword)
+    (Path
+      (Ident)
+      (Lookup
+        (LookupRight)
+        (Ident)))
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Ident)
+      (Ident))
+    (UnsetClause
+      (Keyword)
+      (Predicate
+        (Path
+          (Ident)
+          (Flatten)))
+      (Predicate
+        (Path
+          (Ident)
+          (Lookup
+            (LookupRight)
+            (Ident))))
+      (Predicate
+        (Path
+          (Ident)
+          (Filter
+            (Any)))))
+    (WhereClause
+      (Keyword)
+      (Bool))
+    (ReturnClause
+      (Keyword)
+      (Literal))
+    (TimeoutClause
+      (Keyword)
+      (Duration
+        (DurationPart)))
+    (ExplainClause
+      (Keyword)
+      (Literal))))
+
+============================================================
+values :: A block whose first statement is a namespaced call
+============================================================
+
+{ fn::assert(true); RETURN "OK"; }
+
+---
+
+(SurrealQL
+  (Block
+    (BraceOpen)
+    (FunctionCall
+      (FunctionName)
+      (ArgumentList
+        (Bool)))
+    (ReturnStatement
+      (Keyword)
+      (String))
+    (BraceClose)))
+

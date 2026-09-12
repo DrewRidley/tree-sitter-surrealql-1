@@ -6945,7 +6945,31 @@
                   "members": [
                     {
                       "type": "SYMBOL",
+                      "name": "RefreshClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
                       "name": "WithJwtClause"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "RefreshClause"
                     },
                     {
                       "type": "BLANK"
@@ -7040,6 +7064,29 @@
         {
           "type": "SYMBOL",
           "name": "JwtClause"
+        }
+      ]
+    },
+    "RefreshClause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_with"
+          },
+          "named": true,
+          "value": "Keyword"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_kw_refresh"
+          },
+          "named": true,
+          "value": "Keyword"
         }
       ]
     },
@@ -7215,17 +7262,8 @@
           "value": "Keyword"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "SubQuery"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Block"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_value"
         }
       ]
     },
@@ -7242,17 +7280,8 @@
           "value": "Keyword"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "SubQuery"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Block"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_value"
         }
       ]
     },
@@ -7269,17 +7298,8 @@
           "value": "Keyword"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "SubQuery"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "Block"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "_value"
         }
       ]
     },
@@ -10033,6 +10053,15 @@
           },
           "named": true,
           "value": "Filter"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "STRING",
+            "value": "..."
+          },
+          "named": true,
+          "value": "Flatten"
         }
       ]
     },
@@ -16398,6 +16427,9 @@
     [
       "_value",
       "Path"
+    ],
+    [
+      "JwtClause"
     ]
   ],
   "precedences": [
