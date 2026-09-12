@@ -4112,6 +4112,116 @@ DELETE person EXPLAIN
     (ExplainClause
       (Keyword))))
 
+==========================
+delete :: DELETE FROM form
+==========================
+
+DELETE FROM person
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
+=====================================
+delete :: DELETE FROM ONLY with WHERE
+=====================================
+
+DELETE FROM ONLY person:tobie WHERE age > 18
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))))
+
+================================
+delete :: Delete with WITH INDEX
+================================
+
+DELETE person WITH INDEX idx WHERE age > 18
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))))
+
+================================
+update :: Update with WITH INDEX
+================================
+
+UPDATE person WITH INDEX idx SET age = 29
+
+---
+
+(SurrealQL
+  (UpdateStatement
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))))
+
+=================================
+upsert :: Upsert with WITH NOINDEX
+=================================
+
+UPSERT person WITH NOINDEX SET age = 29
+
+---
+
+(SurrealQL
+  (UpsertStatement
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))))
+
 ==================================
 update :: Update with EXPLAIN FULL
 ==================================

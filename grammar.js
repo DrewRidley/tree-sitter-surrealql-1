@@ -868,6 +868,10 @@ export default grammar({
 		DeleteStatement: ($) =>
 			seq(
 				alias($._kw_delete, $.Keyword),
+				// `DELETE FROM t` is the same statement as `DELETE t`. Only
+				// DELETE takes it: `UPDATE FROM t` and `UPSERT FROM t` are parse
+				// errors in 3.2.3.
+				optional(alias($._kw_from, $.Keyword)),
 				optional(alias($._kw_only, $.Keyword)),
 				choice(
 					$._statement,
@@ -875,6 +879,7 @@ export default grammar({
 						csep($._value),
 						repeat(
 							choice(
+								$.WithClause,
 								$.WhereClause,
 								$.ReturnClause,
 								$.TimeoutClause,
@@ -927,6 +932,7 @@ export default grammar({
 					$._statement,
 					seq(
 						csep($._value),
+						optional($.WithClause),
 						optional($._dataClause),
 						optional($.WhereClause),
 						optional($.ReturnClause),
@@ -946,6 +952,7 @@ export default grammar({
 					$._statement,
 					seq(
 						csep($._value),
+						optional($.WithClause),
 						optional($._dataClause),
 						optional($.WhereClause),
 						optional($.ReturnClause),

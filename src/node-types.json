@@ -2541,6 +2541,10 @@
         {
           "type": "WhereClause",
           "named": true
+        },
+        {
+          "type": "WithClause",
+          "named": true
         }
       ]
     }
@@ -9703,6 +9707,10 @@
         {
           "type": "WhereClause",
           "named": true
+        },
+        {
+          "type": "WithClause",
+          "named": true
         }
       ]
     }
@@ -9973,6 +9981,10 @@
         },
         {
           "type": "WhereClause",
+          "named": true
+        },
+        {
+          "type": "WithClause",
           "named": true
         }
       ]
