@@ -5581,3 +5581,130 @@ DEFINE USER u ON ROOT COMMENT "c" PASSWORD "p"
     (PasswordClause
       (Keyword)
       (String))))
+
+===============================
+access :: ACCESS GRANT FOR USER
+===============================
+
+ACCESS api ON DATABASE GRANT FOR USER tobie
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessGrantClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Ident))))
+
+=========================
+access :: ACCESS SHOW ALL
+=========================
+
+ACCESS api ON DATABASE SHOW ALL
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessShowClause
+      (Keyword)
+      (Keyword))))
+
+==========================================
+access :: ACCESS PURGE with a grace period
+==========================================
+
+ACCESS api ON DATABASE PURGE EXPIRED, REVOKED FOR 1d
+
+---
+
+(SurrealQL
+  (AccessStatement
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (AccessPurgeClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Duration
+        (DurationPart)))))
+
+=================================
+info :: INFO FOR INDEX on a table
+=================================
+
+INFO FOR INDEX idx ON t
+
+---
+
+(SurrealQL
+  (InfoForStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))))
+
+==========================================
+info :: INFO FOR USER without an ON clause
+==========================================
+
+INFO FOR USER tobie
+
+---
+
+(SurrealQL
+  (InfoForStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
+=======================
+remove :: REMOVE CONFIG
+=======================
+
+REMOVE CONFIG API
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)))
+
+================================================
+remove :: REMOVE ACCESS with the DB abbreviation
+================================================
+
+REMOVE ACCESS api ON DB
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))))
