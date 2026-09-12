@@ -3811,6 +3811,25 @@
     "fields": {}
   },
   {
+    "type": "GraphFieldClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "GraphFieldSelection",
     "named": true,
     "fields": {},
@@ -3895,7 +3914,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
@@ -3940,6 +3959,10 @@
         },
         {
           "type": "FunctionJs",
+          "named": true
+        },
+        {
+          "type": "GraphFieldClause",
           "named": true
         },
         {

@@ -5913,3 +5913,166 @@ ALTER INDEX idx ON person DROP COMMENT
       (Ident))
     (Keyword)
     (Keyword)))
+
+==============================================================
+references :: A reverse reference names the field it traverses
+==============================================================
+
+chat:general<~(message FIELD chat)
+
+---
+
+(SurrealQL
+  (Path
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (Lookup
+      (LookupLeft)
+      (LookupSelection
+        (GraphPredicate
+          (Ident)
+          (GraphFieldClause
+            (Keyword)
+            (Ident)))))))
+
+=================================================================
+references :: Each predicate in a selection carries its own field
+=================================================================
+
+chat:general<~(message FIELD chat, note FIELD thread)
+
+---
+
+(SurrealQL
+  (Path
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (Lookup
+      (LookupLeft)
+      (LookupSelection
+        (GraphPredicate
+          (Ident)
+          (GraphFieldClause
+            (Keyword)
+            (Ident)))
+        (GraphPredicate
+          (Ident)
+          (GraphFieldClause
+            (Keyword)
+            (Ident)))))))
+
+==============================================================
+references :: A reverse reference with a selection and clauses
+==============================================================
+
+chat:general<~(SELECT id FROM message FIELD chat WHERE author = user:alice ORDER BY id LIMIT 2)
+
+---
+
+(SurrealQL
+  (Path
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (Lookup
+      (LookupLeft)
+      (LookupSelection
+        (GraphFieldSelection
+          (Keyword)
+          (Fields
+            (Predicate
+              (Ident)))
+          (Keyword))
+        (GraphPredicate
+          (Ident)
+          (GraphFieldClause
+            (Keyword)
+            (Ident)))
+        (WhereClause
+          (Keyword)
+          (BinaryExpression
+            (Ident)
+            (Operator)
+            (RecordId
+              (RecordTbIdent)
+              (Colon)
+              (RecordIdIdent))))
+        (GraphOrderClause
+          (Keyword)
+          (Keyword)
+          (Order
+            (Idiom
+              (Ident))))
+        (GraphLimitStartComboClause
+          (LimitClause
+            (Keyword)
+            (Number
+              (Int))))))))
+
+=====================================================
+references :: A reverse reference over a record range
+=====================================================
+
+chat:bla<~(message:1>..=3 FIELD chat).message
+
+---
+
+(SurrealQL
+  (Path
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (Lookup
+      (LookupLeft)
+      (LookupSelection
+        (GraphPredicate
+          (RecordId
+            (RecordTbIdent)
+            (Colon)
+            (RecordIdRange
+              (RecordIdIdent)
+              (RangeOp)
+              (RecordIdIdent)))
+          (GraphFieldClause
+            (Keyword)
+            (Ident)))))
+    (Subscript
+      (Ident))))
+
+=====================================================
+references :: A reverse reference as a computed field
+=====================================================
+
+DEFINE FIELD OVERWRITE profiles ON TABLE account COMPUTED <~(profile FIELD account)
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (OverwriteClause
+      (Keyword))
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (ComputedClause
+      (Keyword)
+      (Path
+        (Lookup
+          (LookupLeft)
+          (LookupSelection
+            (GraphPredicate
+              (Ident)
+              (GraphFieldClause
+                (Keyword)
+                (Ident)))))))))

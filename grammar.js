@@ -1952,7 +1952,13 @@ export default grammar({
 				$.Fields,
 				alias($._kw_from, $.Keyword),
 			),
-		GraphPredicate: ($) => choice($._value, $.Any),
+		// `FIELD <name>` names the referencing field to traverse, and binds to
+		// the predicate it follows rather than to the selection as a whole:
+		// `(message FIELD author, b FIELD c)` gives each table its own field.
+		// The name is an Ident and only an Ident -- no path, no param.
+		GraphPredicate: ($) =>
+			choice(seq($._value, optional($.GraphFieldClause)), $.Any),
+		GraphFieldClause: ($) => seq(alias($._kw_field, $.Keyword), $.Ident),
 
 		Destructure: ($) =>
 			seq(
