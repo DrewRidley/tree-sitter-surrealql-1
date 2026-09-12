@@ -216,26 +216,22 @@ create bla set true = 1, false = 2, null = 3, none = 4
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int)))
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int)))
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int)))
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))))
@@ -244,6 +240,8 @@ create bla set true = 1, false = 2, null = 3, none = 4
 javascript :: JavaScript function with args
 ===========================================
 
+-- Same leaf `JavaScriptBlock` as above. The nested `{` inside a string is
+-- the point of this case: the scanner must not end the block there.
 function(123, 1d2h) {
 	const number = 123;
 	if (test("{")) {
@@ -254,6 +252,8 @@ function(123, 1d2h) {
 ---
 
 (SurrealQL
+  (Comment)
+  (Comment)
   (FunctionJs
     (FunctionName)
     (ArgumentList
@@ -262,15 +262,15 @@ function(123, 1d2h) {
       (Duration
         (DurationPart)
         (DurationPart)))
-    (JavaScriptBlock
-      (BraceOpen)
-      (JavaScriptContent)
-      (BraceClose))))
+    (JavaScriptBlock)))
 
 ========================================
 javascript :: Simple JavaScript function
 ========================================
 
+-- `JavaScriptBlock` is a leaf: the external scanner consumes the whole
+-- `{ ... }` as one token, and `grammar.js` says why it cannot hand back
+-- BraceOpen / JavaScriptContent / BraceClose separately.
 function() {
 	return 42;
 }
@@ -278,13 +278,13 @@ function() {
 ---
 
 (SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
   (FunctionJs
     (FunctionName)
     (ArgumentList)
-    (JavaScriptBlock
-      (BraceOpen)
-      (JavaScriptContent)
-      (BraceClose))))
+    (JavaScriptBlock)))
 
 =====================
 operators :: Addition
@@ -331,6 +331,42 @@ operators :: Subtraction without space
     (Number
       (Int))
     (Operator)
+    (Number
+      (Int))))
+
+=========================================================
+operators :: A sign separated from its digits is a prefix
+=========================================================
+
+-- `-5` is one signed `Number` token; `- 5` is a prefix applied to `5`.
+-- The engine answers -5 either way; joining the sign lexically is what
+-- keeps the two readings out of the parser.
+RETURN - 5
+
+---
+
+(SurrealQL
+  (Comment)
+  (Comment)
+  (Comment)
+  (ReturnStatement
+    (Keyword)
+    (PrefixExpression
+      (Operator)
+      (Number
+        (Int)))))
+
+======================================================
+operators :: A sign joined to its digits is one Number
+======================================================
+
+RETURN -5
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
     (Number
       (Int))))
 

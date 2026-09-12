@@ -323,6 +323,23 @@ casting :: Sized array type cast
       (Number
         (Float)))))
 
+==================================================
+casting :: Sized array type cast with a zero bound
+==================================================
+
+<array<float, 0>> []
+
+---
+
+(SurrealQL
+  (TypeCast
+    (ParameterizedType
+      (TypeName)
+      (TypeName)
+      (Number
+        (Int)))
+    (Array)))
+
 =========================================
 casting :: Complex union object type cast
 =========================================
@@ -482,6 +499,25 @@ closures :: Closure with bracketed union param type
           (TypeName)
           (Pipe)
           (TypeName))))
+    (Pipe)
+    (VariableName)))
+
+===============================================
+closures :: Closure with a bracketed param type
+===============================================
+
+|$x: <int>| $x
+
+---
+
+(SurrealQL
+  (Closure
+    (Pipe)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (TypeName)))
     (Pipe)
     (VariableName)))
 

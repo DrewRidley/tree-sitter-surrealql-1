@@ -9505,32 +9505,59 @@
         {
           "type": "REPEAT",
           "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "."
-              },
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "Ident"
-                  },
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "STRING",
-                      "value": "*"
-                    },
-                    "named": true,
-                    "value": "Any"
-                  }
-                ]
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_idiomTail"
           }
+        }
+      ]
+    },
+    "_idiomTail": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "."
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "Ident"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "STRING",
+                    "value": "*"
+                  },
+                  "named": true,
+                  "value": "Any"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_pathFilter"
+          },
+          "named": true,
+          "value": "Filter"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "STRING",
+            "value": "..."
+          },
+          "named": true,
+          "value": "Flatten"
         }
       ]
     },
@@ -11181,8 +11208,22 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "Idiom"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "Ident"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_pathAssignTarget"
+              },
+              "named": true,
+              "value": "Idiom"
+            }
+          ]
         },
         {
           "type": "ALIAS",
@@ -11205,6 +11246,22 @@
               "name": "_value"
             }
           ]
+        }
+      ]
+    },
+    "_pathAssignTarget": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "Ident"
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_idiomTail"
+          }
         }
       ]
     },
@@ -11370,8 +11427,13 @@
                   "value": ","
                 },
                 {
-                  "type": "SYMBOL",
-                  "name": "Number"
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_sizeBound"
+                  },
+                  "named": true,
+                  "value": "Number"
                 }
               ]
             },
@@ -11383,6 +11445,33 @@
         {
           "type": "STRING",
           "value": ">"
+        }
+      ]
+    },
+    "_sizeBound": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "+"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_intImmediate"
+              },
+              "named": true,
+              "value": "Int"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "Int"
         }
       ]
     },
@@ -11660,30 +11749,26 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "PREC_DYNAMIC",
-          "value": 1,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": "-"
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "+"
-                  }
-                ]
-              },
-              {
-                "type": "SYMBOL",
-                "name": "_unsignedNumber"
-              }
-            ]
-          }
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "-"
+                },
+                {
+                  "type": "STRING",
+                  "value": "+"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_signedNumberBody"
+            }
+          ]
         },
         {
           "type": "SYMBOL",
@@ -11708,8 +11793,47 @@
         }
       ]
     },
+    "_signedNumberBody": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_decimalImmediate"
+          },
+          "named": true,
+          "value": "Decimal"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_floatImmediate"
+          },
+          "named": true,
+          "value": "Float"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_intImmediate"
+          },
+          "named": true,
+          "value": "Int"
+        }
+      ]
+    },
     "Int": {
       "type": "TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "[0-9]+(?:_[0-9]+)*"
+      }
+    },
+    "_intImmediate": {
+      "type": "IMMEDIATE_TOKEN",
       "content": {
         "type": "PATTERN",
         "value": "[0-9]+(?:_[0-9]+)*"
@@ -11805,6 +11929,147 @@
     },
     "Decimal": {
       "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 2,
+        "content": {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[0-9]+(?:_[0-9]+)*"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "."
+                    },
+                    {
+                      "type": "PATTERN",
+                      "value": "[0-9]+(?:_[0-9]+)*"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "PATTERN",
+                  "value": "[eE][+-]?[0-9]+(?:_[0-9]+)*"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": "dec"
+            }
+          ]
+        }
+      }
+    },
+    "_floatImmediate": {
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "PATTERN",
+                  "value": "[0-9]+(?:_[0-9]+)*"
+                },
+                {
+                  "type": "STRING",
+                  "value": "f"
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "PATTERN",
+                  "value": "[0-9]+(?:_[0-9]+)*"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "STRING",
+                          "value": "."
+                        },
+                        {
+                          "type": "PATTERN",
+                          "value": "[0-9]+(?:_[0-9]+)*"
+                        },
+                        {
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "PATTERN",
+                              "value": "[eE][+-]?[0-9]+(?:_[0-9]+)*"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "PATTERN",
+                      "value": "[eE][+-]?[0-9]+(?:_[0-9]+)*"
+                    }
+                  ]
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "f"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": "Infinity"
+            },
+            {
+              "type": "STRING",
+              "value": "NaN"
+            }
+          ]
+        }
+      }
+    },
+    "_decimalImmediate": {
+      "type": "IMMEDIATE_TOKEN",
       "content": {
         "type": "PREC",
         "value": 2,
@@ -14781,9 +15046,6 @@
     [
       "_value",
       "Path"
-    ],
-    [
-      "Number"
     ]
   ],
   "precedences": [

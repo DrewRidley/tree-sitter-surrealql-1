@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  grammar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` installs the tree-sitter-cli version package-lock.json pins.
+      # Regenerating with any other version can rewrite files this change did
+      # not touch, so the pin is the point.
+      - name: Install
+        run: npm ci
+
+      - name: Generate
+        run: npm run gen
+
+      # The generated parser is committed, so it has to match the grammar it
+      # was generated from. This is the check that makes every other result
+      # below trustworthy: without it, `npm test` can pass against a `src/`
+      # that no longer corresponds to `grammar.js`.
+      - name: src/ is up to date
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::src/ does not match grammar.js. Run 'npm ci && npm run gen' and commit the result."
+            git diff --stat
+            git diff -- src/grammar.json src/node-types.json | head -200
+            exit 1
+          fi
+
+      - name: Test
+        run: npm test
+
+      # The biome `npm ci` just installed, not a floating fetch — the point of
+      # the whole job is that it runs what the lockfile pins.
+      - name: Format
+        run: npx biome format grammar.js

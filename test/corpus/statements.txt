@@ -157,13 +157,11 @@ CREATE person SET name = "Tobie", age = 30
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String))
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))))
@@ -189,11 +187,84 @@ CREATE person SET name.first = 'John', age = 29
         (Operator)
         (String))
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))))
+
+=============================================
+create :: Create with SET on an indexed field
+=============================================
+
+CREATE t SET tags[0] = 'first'
+
+---
+
+(SurrealQL
+  (CreateStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Idiom
+          (Ident)
+          (Filter
+            (Number
+              (Int))))
+        (Operator)
+        (String)))))
+
+===============================================
+create :: Create with SET on a wildcard element
+===============================================
+
+CREATE t SET tags[*].seen = true
+
+---
+
+(SurrealQL
+  (CreateStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Idiom
+          (Ident)
+          (Filter
+            (Any))
+          (Ident))
+        (Operator)
+        (Bool)))))
+
+===============================================
+create :: Create with SET on a filtered element
+===============================================
+
+CREATE t SET tags[WHERE active = true].seen = true
+
+---
+
+(SurrealQL
+  (CreateStatement
+    (Keyword)
+    (Ident)
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Idiom
+          (Ident)
+          (Filter
+            (WhereClause
+              (Keyword)
+              (BinaryExpression
+                (Ident)
+                (Operator)
+                (Bool))))
+          (Ident))
+        (Operator)
+        (Bool)))))
 
 =============================
 create :: Create with CONTENT
@@ -278,8 +349,7 @@ CREATE person SET name = "Tobie" RETURN name
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String)))
     (ReturnClause
@@ -303,8 +373,7 @@ CREATE person SET name = "Tobie" RETURN AFTER
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String)))
     (ReturnClause
@@ -326,8 +395,7 @@ CREATE person SET name = "Tobie" RETURN BEFORE
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String)))
     (ReturnClause
@@ -349,8 +417,7 @@ CREATE person SET name = "Tobie" RETURN DIFF
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String)))
     (ReturnClause
@@ -372,8 +439,7 @@ CREATE person SET name = "Tobie" TIMEOUT 5s
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String)))
     (TimeoutClause
@@ -396,8 +462,7 @@ CREATE person SET name = "Tobie" PARALLEL
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String)))
     (ParallelClause
@@ -731,6 +796,54 @@ DEFINE FIELD data ON TABLE person FLEXIBLE TYPE object
       (Ident))
     (TypeClause
       (Keyword)
+      (Keyword)
+      (TypeName))))
+
+============================================
+define :: Define field on a wildcard element
+============================================
+
+DEFINE FIELD tags[*] ON t TYPE string
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident)
+      (Filter
+        (Any)))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
+      (Keyword)
+      (TypeName))))
+
+================================================
+define :: Define field on a nested wildcard path
+================================================
+
+DEFINE FIELD meta.tags[*].name ON t TYPE string
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident)
+      (Ident)
+      (Filter
+        (Any))
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
       (Keyword)
       (TypeName))))
 
@@ -1759,8 +1872,7 @@ DEFINE ACCESS myaccess ON DATABASE TYPE RECORD SIGNUP (CREATE user SET email = $
               (SetClause
                 (Keyword)
                 (FieldAssignment
-                  (Idiom
-                    (Ident))
+                  (Ident)
                   (Operator)
                   (VariableName))))))
         (SigninClause
@@ -1835,8 +1947,7 @@ DEFINE SCOPE account SESSION 24h SIGNUP (CREATE user SET email = $email) SIGNIN 
             (SetClause
               (Keyword)
               (FieldAssignment
-                (Idiom
-                  (Ident))
+                (Ident)
                 (Operator)
                 (VariableName))))))
       (SigninClause
@@ -2021,8 +2132,7 @@ FOR $item IN [1, 2, 3] {
         (SetClause
           (Keyword)
           (FieldAssignment
-            (Idiom
-              (Ident))
+            (Ident)
             (Operator)
             (VariableName))))
       (BraceClose))))
@@ -2051,8 +2161,7 @@ FOR $item IN $list {
         (SetClause
           (Keyword)
           (FieldAssignment
-            (Idiom
-              (Ident))
+            (Ident)
             (Operator)
             (VariableName))))
       (BraceClose))))
@@ -2111,8 +2220,7 @@ FOR $node IN SELECT * FROM node {
         (SetClause
           (Keyword)
           (FieldAssignment
-            (Idiom
-              (Ident))
+            (Ident)
             (Operator)
             (FunctionCall
               (FunctionName)
@@ -2590,8 +2698,7 @@ INSERT INTO person {name: "Tobie"} ON DUPLICATE KEY UPDATE age = 31
     (Keyword)
     (Keyword)
     (FieldAssignment
-      (Idiom
-        (Ident))
+      (Ident)
       (Operator)
       (Number
         (Int)))))
@@ -3033,8 +3140,7 @@ RELATE person:tobie->knows->person:jaime SET since = "2024-01-01"
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String)))))
 
@@ -4382,8 +4488,7 @@ UPDATE person SET age = 31
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))))
@@ -4427,8 +4532,7 @@ UPDATE pileData SET status=IF progress = 100 THEN 'Pending Approval' ELSE 'Start
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (IfElseStatement
           (Keyword)
@@ -4604,8 +4708,7 @@ UPDATE person SET age = 31 WHERE name = "Tobie"
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))
@@ -4631,8 +4734,7 @@ UPDATE person SET age = 31 RETURN AFTER
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))
@@ -4655,8 +4757,7 @@ UPDATE person SET age = 31 TIMEOUT 5s
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))
@@ -4680,8 +4781,7 @@ UPDATE person SET age = 31 PARALLEL
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))
@@ -4733,8 +4833,7 @@ UPSERT person SET name = "Tobie"
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (String)))))
 
@@ -4802,8 +4901,7 @@ UPSERT person SET age = 31 WHERE name = "Tobie"
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))
@@ -4829,8 +4927,7 @@ UPSERT person SET age = 31 RETURN AFTER
     (SetClause
       (Keyword)
       (FieldAssignment
-        (Idiom
-          (Ident))
+        (Ident)
         (Operator)
         (Number
           (Int))))

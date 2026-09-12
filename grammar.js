@@ -61,6 +61,32 @@ function piped(rule) {
 /** Digit sequence with optional underscore separators (e.g. 1_000_000) */
 const DIGITS = /[0-9]+(?:_[0-9]+)*/;
 
+/** Exponent part of a float or decimal, e.g. `e-7`. */
+const EXPONENT = /[eE][+-]?[0-9]+(?:_[0-9]+)*/;
+
+/**
+ * The bodies of the `Float` and `Decimal` tokens, written once because each is
+ * needed twice: as an ordinary token, and as a `token.immediate` twin used
+ * after a sign. See `Number`.
+ */
+const FLOAT_BODY = choice(
+	seq(DIGITS, 'f'),
+	seq(
+		DIGITS,
+		choice(seq('.', DIGITS, optional(EXPONENT)), EXPONENT),
+		optional('f'),
+	),
+	'Infinity',
+	'NaN',
+);
+
+const DECIMAL_BODY = seq(
+	DIGITS,
+	optional(seq('.', DIGITS)),
+	optional(EXPONENT),
+	'dec',
+);
+
 // ---------------------------------------------------------------------------
 // Grammar
 // ---------------------------------------------------------------------------
@@ -114,10 +140,6 @@ export default grammar({
 		[$.Legacy, $._baseValue],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
-		// `-5` is a signed literal and `-$x` a prefix negation; both start the
-		// same way, and the signed literal wins (dynamic precedence on
-		// `Number`) whenever the operand is a bare number.
-		[$.Number],
 	],
 
 	rules: {
@@ -1367,7 +1389,8 @@ export default grammar({
 			alias($._kw_keep_pruned_connections, $.Keyword),
 		IndexHashedVectorClause: ($) => alias($._kw_hashed_vector, $.Keyword),
 		IndexDegreeClause: ($) => seq(alias($._kw_degree, $.Keyword), $.Number),
-		IndexLBuildClause: ($) => seq(alias($._kw_l_build, $.Keyword), $.Number),
+		IndexLBuildClause: ($) =>
+			seq(alias($._kw_l_build, $.Keyword), $.Number),
 		IndexAlphaClause: ($) => seq(alias($._kw_alpha, $.Keyword), $.Number),
 
 		// Define table
@@ -1727,9 +1750,32 @@ export default grammar({
 				),
 			),
 
-		// Idiom
-		Idiom: ($) =>
-			seq($.Ident, repeat(seq('.', choice($.Ident, alias('*', $.Any))))),
+		// Idiom — a field path, as `DEFINE FIELD` and a `SET` target write one.
+		//
+		// The engine takes more than a dotted run here. Every one of these
+		// assigns, and every one of them declares:
+		//
+		//   SET a.b = 1        SET a.* = 1          SET tags[0] = 1
+		//   SET tags[*] = 1    SET tags[$] = 1      SET tags[$i] = 1
+		//   SET tags[WHERE x = 1] = 1               SET tags... = 1
+		//   SET a.b[0].c = 1   SET tags[*].name = 1
+		//
+		// A bracketed part is a whole expression to the engine —
+		// `SET tags[1..3] = 1` writes the key `"1..3"` — so `_pathFilter` is
+		// reused verbatim rather than a narrower list being invented. What is
+		// *not* allowed is a parameter as the root: `SET $x = 1` is
+		// ``Unexpected token `a parameter`, expected an identifier``, so the
+		// path still starts at an `Ident`.
+		//
+		// A dotted path parses to exactly the tree it did before; the other
+		// tails are new children.
+		Idiom: ($) => seq($.Ident, repeat($._idiomTail)),
+		_idiomTail: ($) =>
+			choice(
+				seq('.', choice($.Ident, alias('*', $.Any))),
+				alias($._pathFilter, $.Filter),
+				alias('...', $.Flatten),
+			),
 
 		// Binary expression
 		//
@@ -2033,16 +2079,28 @@ export default grammar({
 		// Field assignment
 		// ----------------------------------------------------------------
 
-		// The target is an `Idiom`, not a bare `Ident`: the engine assigns to a
-		// nested field, `CREATE person SET name.first = 'John'`, and
-		// `DEFINE FIELD name.first ON person` already used `Idiom` here — so
-		// without this a schema could declare a field no `SET` could assign.
+		// The engine assigns to a nested field —
+		// `CREATE person SET name.first = 'John'` — and `DEFINE FIELD
+		// name.first ON person` already used `Idiom`, so without a path here a
+		// schema could declare a field no `SET` could assign.
+		//
+		// A path, though, and only a path. A single-segment target stays the
+		// bare `Ident` it has always been: `SET age = 29` is
+		// `FieldAssignment(Ident, Operator, …)`, unchanged, and only
+		// `SET name.first = …` wraps in an `Idiom`. One token of lookahead
+		// after the first `Ident` separates them — a `.` opens a path, an
+		// assignment operator does not — so this needs no declared conflict.
 		FieldAssignment: ($) =>
 			seq(
-				$.Idiom,
+				choice($.Ident, alias($._pathAssignTarget, $.Idiom)),
 				alias($._assignmentOp, $.Operator),
 				choice($.IfElseStatement, $._value),
 			),
+		// Any idiom tail makes a target a path, not just a dotted one: the
+		// engine takes `SET d[0] = 3`, `SET tags[*].seen = true` and
+		// `SET tags... = 1` as readily as `SET a.b = 1`. A single-segment
+		// target is still the bare `Ident` it has always been.
+		_pathAssignTarget: ($) => seq($.Ident, repeat1($._idiomTail)),
 		_assignmentOp: ($) => choice('=', '+=', '-='),
 
 		// ----------------------------------------------------------------
@@ -2074,7 +2132,27 @@ export default grammar({
 		// `array<int, 3>` and `set<int, 5>` carry a length bound after the
 		// element type; nothing else takes a second argument.
 		ParameterizedType: ($) =>
-			seq($._singleType, '<', $._type, optional(seq(',', $.Number)), '>'),
+			seq(
+				$._singleType,
+				'<',
+				$._type,
+				optional(seq(',', alias($._sizeBound, $.Number))),
+				'>',
+			),
+		// A length bound is an unsigned integer and nothing else. The engine
+		// says so in as many words — `expected an unsigned integer` for a
+		// parameter or a string — and rejects the near misses distinctly:
+		// `array<int, -3>` is ``Unexpected token `-` `` and `array<int, 1.5>`
+		// is ``Unexpected character `.` starting float, only integers are
+		// allowed here``. A leading `+` it does take, and `1_0` means ten.
+		//
+		// Aliased to `Number` so a sized type keeps the `Number(Int)` child it
+		// had; only the set of literals the slot accepts is narrower.
+		// The `+` is joined to its digits lexically, exactly as a signed
+		// `Number` is: `array<int, + 3>` is not a literal any more than
+		// `- 5` is, and the engine rejects it the same way.
+		_sizeBound: ($) =>
+			choice(seq('+', alias($._intImmediate, $.Int)), $.Int),
 		_type: ($) => choice($._singleType, $.UnionType),
 		UnionType: ($) =>
 			prec.right(
@@ -2110,57 +2188,51 @@ export default grammar({
 
 		BlockComment: ($) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
-		// A signed literal stays one `Number`, unchanged from before: the
-		// dynamic precedence keeps `-1` a `Number(Int)` rather than a
-		// `PrefixExpression` wrapping one, so no existing tree is reshaped.
+		// A signed literal is one `Number`, as it has always been: `-1` is
+		// `Number(Int)`, not a `PrefixExpression` wrapping one.
+		//
+		// The sign and the digits are joined *lexically* — the signed form
+		// takes `token.immediate` twins of the three numeric tokens, so it
+		// matches only when nothing separates the two. That is what keeps this
+		// out of the parser: at a value position, `-1` offers the parser a
+		// signed `Number`, while `- 1` and `-$x` offer only a
+		// `PrefixExpression`, and one token of lookahead tells them apart. No
+		// conflict is declared, and none is needed.
+		//
+		// It was a declared `[$.Number]` conflict before, resolved by dynamic
+		// precedence, and GLR then explored both readings at every sign. On a
+		// 4,000-statement corpus of `RETURN -1 - -2 + -3 * -4;` that cost
+		// about half the throughput (9,647 -> 5,095 bytes/ms). Dropping the
+		// conflict recovers most of it (8,363, +64% against the conflict),
+		// which still sits about 13% under the pre-conflict baseline;
+		// ordinary input is unchanged either way. `bench/` holds
+		// the inputs and the method — interleave the revisions and take the
+		// median, or measurement drift will invert the result.
 		Number: ($) =>
 			choice(
-				prec.dynamic(1, seq(choice('-', '+'), $._unsignedNumber)),
+				seq(choice('-', '+'), $._signedNumberBody),
 				$._unsignedNumber,
 			),
 		_unsignedNumber: ($) => choice($.Decimal, $.Float, $.Int),
+		_signedNumberBody: ($) =>
+			choice(
+				alias($._decimalImmediate, $.Decimal),
+				alias($._floatImmediate, $.Float),
+				alias($._intImmediate, $.Int),
+			),
 
 		Int: ($) => token(DIGITS),
+		_intImmediate: ($) => token.immediate(DIGITS),
 
-		Float: ($) =>
-			token(
-				prec(
-					1,
-					choice(
-						seq(DIGITS, 'f'),
-						seq(
-							DIGITS,
-							choice(
-								seq(
-									'.',
-									DIGITS,
-									optional(/[eE][+-]?[0-9]+(?:_[0-9]+)*/),
-								),
-								/[eE][+-]?[0-9]+(?:_[0-9]+)*/,
-							),
-							optional('f'),
-						),
-						'Infinity',
-						'NaN',
-					),
-				),
-			),
+		Float: ($) => token(prec(1, FLOAT_BODY)),
 
 		// Above `Float`'s precedence, because lexical precedence outranks
 		// longest match: without it `102023.1dec` lexes as the float
 		// `102023.1` followed by a stray `dec`.
-		Decimal: ($) =>
-			token(
-				prec(
-					2,
-					seq(
-						DIGITS,
-						optional(seq('.', DIGITS)),
-						optional(/[eE][+-]?[0-9]+(?:_[0-9]+)*/),
-						'dec',
-					),
-				),
-			),
+		Decimal: ($) => token(prec(2, DECIMAL_BODY)),
+
+		_floatImmediate: ($) => token.immediate(prec(1, FLOAT_BODY)),
+		_decimalImmediate: ($) => token.immediate(prec(2, DECIMAL_BODY)),
 
 		String: ($) => choice($._stringLiteral, $._prefixedString),
 		// Lezer allows `\<newline>` and any other escape; we use [\s\S] to
