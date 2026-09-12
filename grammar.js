@@ -780,16 +780,24 @@ export default grammar({
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
 				$._value,
 				$.OnRootNsDbClause,
-				seq(
+				repeat(
 					choice(
-						alias($._kw_password, $.Keyword),
-						alias($._kw_passhash, $.Keyword),
+						$.PasswordClause,
+						$.RolesClause,
+						$.DurationClause,
+						$.CommentClause,
 					),
-					$.String,
 				),
-				seq(alias($._kw_roles, $.Keyword), csep($.Ident)),
-				optional($.DurationClause),
 			),
+		PasswordClause: ($) =>
+			seq(
+				choice(
+					alias($._kw_password, $.Keyword),
+					alias($._kw_passhash, $.Keyword),
+				),
+				$.String,
+			),
+		RolesClause: ($) => seq(alias($._kw_roles, $.Keyword), csep($.Ident)),
 
 		_defineApiOptions: ($) =>
 			seq(
@@ -1194,35 +1202,57 @@ export default grammar({
 					seq(
 						alias($._kw_record, $.Keyword),
 						repeat(choice($.SignupClause, $.SigninClause)),
-						optional(
-							seq(
-								alias($._kw_with, $.Keyword),
-								alias($._kw_jwt, $.Keyword),
-								$.JwtClause,
-								optional(
-									seq(
-										alias($._kw_with, $.Keyword),
-										alias($._kw_issuer, $.Keyword),
-										alias($._kw_key, $.Keyword),
-										$.Ident,
-									),
-								),
-							),
+						optional($.WithJwtClause),
+					),
+					// TYPE BEARER FOR USER|RECORD, whose grants are what
+					// `DURATION FOR GRANT` and `ACCESS … GRANT` act on.
+					seq(
+						alias($._kw_bearer, $.Keyword),
+						alias($._kw_for, $.Keyword),
+						choice(
+							alias($._kw_user, $.Keyword),
+							alias($._kw_record, $.Keyword),
 						),
+						optional($.WithJwtClause),
 					),
 				),
 			),
 
-		JwtClause: ($) =>
-			choice(
-				seq(
-					alias($._kw_algorithm, $.Keyword),
-					$.Ident,
-					alias($._kw_key, $.Keyword),
-					$.Ident,
-				),
-				seq(alias($._kw_url, $.Keyword), $.String),
+		WithJwtClause: ($) =>
+			seq(
+				alias($._kw_with, $.Keyword),
+				alias($._kw_jwt, $.Keyword),
+				$.JwtClause,
 			),
+
+		JwtClause: ($) =>
+			seq(
+				choice(
+					seq(
+						alias($._kw_algorithm, $.Keyword),
+						$.Ident,
+						alias($._kw_key, $.Keyword),
+						$._accessKeyValue,
+					),
+					seq(alias($._kw_url, $.Keyword), $._accessKeyValue),
+				),
+				optional($.IssuerClause),
+			),
+
+		// WITH ISSUER takes an algorithm, a key, both, or neither. The engine
+		// additionally requires the issuer algorithm to be *compatible* with
+		// the access algorithm — `ALGORITHM HS256 … WITH ISSUER ALGORITHM
+		// HS384` is a parse error there — but that is a relation between two
+		// tokens, not a shape, so it is left to the analyzer.
+		IssuerClause: ($) =>
+			seq(
+				alias($._kw_with, $.Keyword),
+				alias($._kw_issuer, $.Keyword),
+				optional(seq(alias($._kw_algorithm, $.Keyword), $.Ident)),
+				optional(seq(alias($._kw_key, $.Keyword), $._accessKeyValue)),
+			),
+
+		_accessKeyValue: ($) => choice($.String, $.VariableName),
 
 		SignupClause: ($) =>
 			seq(alias($._kw_signup, $.Keyword), choice($.SubQuery, $.Block)),
@@ -1235,29 +1265,19 @@ export default grammar({
 			),
 		SessionClause: ($) => seq(alias($._kw_session, $.Keyword), $.Duration),
 
+		// The engine wants the FOR target on every entry, and takes NONE in
+		// place of a duration to mean "never expires".
 		DurationClause: ($) =>
-			seq(
-				alias($._kw_duration, $.Keyword),
-				optional(
-					seq(
-						alias($._kw_for, $.Keyword),
-						alias($._kw_session, $.Keyword),
-					),
-				),
-				csep($.DurationValue),
-			),
+			seq(alias($._kw_duration, $.Keyword), csep($.DurationValue)),
 		DurationValue: ($) =>
-			choice(
-				seq(
-					alias($._kw_for, $.Keyword),
+			seq(
+				alias($._kw_for, $.Keyword),
+				choice(
 					alias($._kw_token, $.Keyword),
-					$.Duration,
-				),
-				seq(
-					alias($._kw_for, $.Keyword),
 					alias($._kw_session, $.Keyword),
-					$.Duration,
+					alias($._kw_grant, $.Keyword),
 				),
+				choice($.Duration, alias($._kw_none, $.None)),
 			),
 
 		TokenTypeClause: ($) => seq(alias($._kw_type, $.Keyword), $.TokenType),

@@ -611,10 +611,12 @@ DEFINE USER tobie ON ROOT PASSWORD "secret" ROLES owner
     (OnRootNsDbClause
       (Keyword)
       (Keyword))
-    (Keyword)
-    (String)
-    (Keyword)
-    (Ident)))
+    (PasswordClause
+      (Keyword)
+      (String))
+    (RolesClause
+      (Keyword)
+      (Ident))))
 
 ======================
 define :: Define event
@@ -5437,3 +5439,145 @@ REMOVE DB test
     (Keyword)
     (Keyword)
     (Ident)))
+
+================================
+define :: DEFINE ACCESS TYPE JWT
+================================
+
+DEFINE ACCESS a ON DATABASE TYPE JWT ALGORITHM HS256 KEY "secret"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String))))))
+
+============================================
+define :: DEFINE ACCESS JWT with WITH ISSUER
+============================================
+
+DEFINE ACCESS a ON DATABASE TYPE JWT ALGORITHM HS256 KEY "s" WITH ISSUER KEY "i"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (JwtClause
+          (Keyword)
+          (Ident)
+          (Keyword)
+          (String)
+          (IssuerClause
+            (Keyword)
+            (Keyword)
+            (Keyword)
+            (String)))))))
+
+===========================================================
+define :: DEFINE ACCESS TYPE BEARER with DURATION FOR GRANT
+===========================================================
+
+DEFINE ACCESS a ON DATABASE TYPE BEARER FOR USER DURATION FOR GRANT 1w
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (AccessDefinition
+      (Keyword)
+      (Ident)
+      (OnRootNsDbClause
+        (Keyword)
+        (Keyword))
+      (AccessTypeClause
+        (Keyword)
+        (Keyword)
+        (Keyword)
+        (Keyword))
+      (DurationClause
+        (Keyword)
+        (DurationValue
+          (Keyword)
+          (Keyword)
+          (Duration
+            (DurationPart)))))))
+
+=========================================================
+define :: DEFINE USER with DURATION FOR TOKEN and SESSION
+=========================================================
+
+DEFINE USER u ON ROOT PASSHASH "p" DURATION FOR TOKEN 15m, FOR SESSION 6h
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (PasswordClause
+      (Keyword)
+      (String))
+    (DurationClause
+      (Keyword)
+      (DurationValue
+        (Keyword)
+        (Keyword)
+        (Duration
+          (DurationPart)))
+      (DurationValue
+        (Keyword)
+        (Keyword)
+        (Duration
+          (DurationPart))))))
+
+==================================================
+define :: DEFINE USER with COMMENT before PASSWORD
+==================================================
+
+DEFINE USER u ON ROOT COMMENT "c" PASSWORD "p"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (CommentClause
+      (Keyword)
+      (String))
+    (PasswordClause
+      (Keyword)
+      (String))))
