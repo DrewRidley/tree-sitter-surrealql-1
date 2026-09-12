@@ -843,6 +843,10 @@ export default grammar({
 		// SELECT
 		SelectStatement: ($) =>
 			seq(
+				// `EXPLAIN SELECT …` — the prefix spelling. 3.2.3 takes the prefix
+				// bare; `EXPLAIN FULL SELECT` is a parse error there, so FULL stays
+				// a trailing-clause-only option.
+				optional(alias($._kw_explain, $.Keyword)),
 				alias($._kw_select, $.Keyword),
 				$.Fields,
 				optional($.OmitClause),
@@ -869,6 +873,7 @@ export default grammar({
 								$.ReturnClause,
 								$.TimeoutClause,
 								$.ParallelClause,
+								$.ExplainClause,
 							),
 						),
 					),
@@ -921,6 +926,7 @@ export default grammar({
 						optional($.ReturnClause),
 						optional($.TimeoutClause),
 						optional($.ParallelClause),
+						optional($.ExplainClause),
 					),
 				),
 			),
@@ -939,6 +945,7 @@ export default grammar({
 						optional($.ReturnClause),
 						optional($.TimeoutClause),
 						optional($.ParallelClause),
+						optional($.ExplainClause),
 					),
 				),
 			),
