@@ -672,10 +672,11 @@ DEFINE EVENT e ON TABLE file WHEN $event = 'DELETE' ASYNC THEN { };
         (VariableName)
         (Operator)
         (String)))
+    (AsyncClause
+      (Keyword))
     (ThenClause
       (Keyword)
-      (Keyword)
-      (Block
+      (Object
         (BraceOpen)
         (BraceClose)))))
 
@@ -6272,4 +6273,131 @@ DEFINE FIELD name ON TABLE person ASSERT IF $input THEN true ELSE true END VALUE
           (Keyword)
           (VariableName)
           (Keyword))))))
+
+
+=========================================
+define :: Define event with a RETURN body
+=========================================
+
+DEFINE EVENT event ON TABLE TB WHEN true THEN RETURN 'foo'
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (WhenClause
+      (Keyword)
+      (Bool))
+    (ThenClause
+      (Keyword)
+      (ReturnStatement
+        (Keyword)
+        (String)))))
+
+===========================================================
+define :: Define event with a bare value body and a comment
+===========================================================
+
+DEFINE EVENT ev ON tab WHEN a == "b" THEN bla COMMENT "comment"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (WhenClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator)
+        (String)))
+    (ThenClause
+      (Keyword)
+      (Ident))
+    (CommentClause
+      (Keyword)
+      (String))))
+
+====================================================
+define :: Define event async with retry and maxdepth
+====================================================
+
+DEFINE EVENT event ON TABLE tb WHEN null THEN null, none ASYNC RETRY 5 MAXDEPTH 64
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (WhenClause
+      (Keyword)
+      (None))
+    (ThenClause
+      (Keyword)
+      (None)
+      (None))
+    (AsyncClause
+      (Keyword)
+      (EventRetryClause
+        (Keyword)
+        (Number
+          (Int)))
+      (EventMaxDepthClause
+        (Keyword)
+        (Number
+          (Int))))))
+
+===================================================
+define :: Define event async before the when clause
+===================================================
+
+DEFINE EVENT test ON user ASYNC RETRY 2 MAXDEPTH 6 WHEN true THEN (CREATE activity)
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (AsyncClause
+      (Keyword)
+      (EventRetryClause
+        (Keyword)
+        (Number
+          (Int)))
+      (EventMaxDepthClause
+        (Keyword)
+        (Number
+          (Int))))
+    (WhenClause
+      (Keyword)
+      (Bool))
+    (ThenClause
+      (Keyword)
+      (SubQuery
+        (CreateStatement
+          (Keyword)
+          (Ident))))))
 

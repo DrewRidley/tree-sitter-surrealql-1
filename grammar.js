@@ -783,7 +783,14 @@ export default grammar({
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
 				$._value,
 				$.OnTableClause,
-				repeat(choice($.WhenClause, $.ThenClause, $.CommentClause)),
+				repeat(
+					choice(
+						$.WhenClause,
+						$.ThenClause,
+						$.AsyncClause,
+						$.CommentClause,
+					),
+				),
 			),
 
 		_defineDatabaseOptions: ($) =>
@@ -1705,12 +1712,39 @@ export default grammar({
 			),
 
 		WhenClause: ($) => seq(alias($._kw_when, $.Keyword), $._value),
+		// THEN takes a comma-separated list of values, and `_value` already
+		// covers the SubQuery and Block spellings. A bare `RETURN`/`THROW`
+		// body is admitted by name.
+		//
+		// The body cannot be an arbitrary statement, although 3.2.3 parses
+		// one: DEFINE and ALTER own a COMMENT of their own, so a trailing
+		// COMMENT would belong either to them or to the event, and admitting
+		// them costs 14 GLR conflicts and doubles the parser table. Write
+		// those bodies as a block. Each body is a named rule under the alias:
+		// aliasing a bare `seq` renames its members instead of wrapping them.
 		ThenClause: ($) =>
 			seq(
-				optional(alias($._kw_async, $.Keyword)),
 				alias($._kw_then, $.Keyword),
-				csep(choice($.SubQuery, $.Block)),
+				choice(
+					csep($._value),
+					alias($._thenReturn, $.ReturnStatement),
+					alias($._thenThrow, $.ThrowStatement),
+				),
 			),
+		_thenReturn: ($) => seq(alias($._kw_return, $.Keyword), $._value),
+		_thenThrow: ($) => seq(alias($._kw_throw, $.Keyword), $._value),
+
+		// RETRY and MAXDEPTH exist only behind ASYNC — 3.2.3 parse-errors on
+		// `DEFINE EVENT … RETRY 2 WHEN …` — but may follow it in either
+		// order. ASYNC itself is position-free among the event's clauses.
+		AsyncClause: ($) =>
+			seq(
+				alias($._kw_async, $.Keyword),
+				repeat(choice($.EventRetryClause, $.EventMaxDepthClause)),
+			),
+		EventRetryClause: ($) => seq(alias($._kw_retry, $.Keyword), $.Number),
+		EventMaxDepthClause: ($) =>
+			seq(alias($._kw_maxdepth, $.Keyword), $.Number),
 
 		TokenizersClause: ($) =>
 			seq(alias($._kw_tokenizers, $.Keyword), csep($.AnalyzerTokenizer)),
@@ -3115,6 +3149,8 @@ export default grammar({
 		_kw_batch: ($) => kw('batch'),
 		_kw_matches: ($) => kw('matches'),
 		_kw_original: ($) => kw('original'),
+		_kw_retry: ($) => kw('retry'),
+		_kw_maxdepth: ($) => kw('maxdepth'),
 		_kw_prepare: ($) => kw('prepare'),
 		_kw_future: ($) => kw('future'),
 		_kw_import: ($) => kw('import'),
@@ -3255,6 +3291,8 @@ export default grammar({
 				$._kw_postings_cache,
 				$._kw_postings_order,
 				$._kw_prepare,
+				$._kw_retry,
+				$._kw_maxdepth,
 				$._kw_put,
 				$._kw_readonly,
 				$._kw_rebuild,
