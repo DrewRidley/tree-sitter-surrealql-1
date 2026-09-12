@@ -2236,6 +2236,14 @@
           "named": true
         },
         {
+          "type": "SequenceBatchClause",
+          "named": true
+        },
+        {
+          "type": "SequenceStartClause",
+          "named": true
+        },
+        {
           "type": "Set",
           "named": true
         },
@@ -2257,6 +2265,10 @@
         },
         {
           "type": "ThenClause",
+          "named": true
+        },
+        {
+          "type": "TimeoutClause",
           "named": true
         },
         {
@@ -2540,6 +2552,10 @@
         },
         {
           "type": "WhereClause",
+          "named": true
+        },
+        {
+          "type": "WithClause",
           "named": true
         }
       ]
@@ -8014,6 +8030,44 @@
     }
   },
   {
+    "type": "SequenceBatchClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "Number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "SequenceStartClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "Number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "SessionClause",
     "named": true,
     "fields": {},
@@ -9703,6 +9757,10 @@
         {
           "type": "WhereClause",
           "named": true
+        },
+        {
+          "type": "WithClause",
+          "named": true
         }
       ]
     }
@@ -9973,6 +10031,10 @@
         },
         {
           "type": "WhereClause",
+          "named": true
+        },
+        {
+          "type": "WithClause",
           "named": true
         }
       ]

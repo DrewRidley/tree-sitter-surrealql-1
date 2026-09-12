@@ -4112,6 +4112,116 @@ DELETE person EXPLAIN
     (ExplainClause
       (Keyword))))
 
+==========================
+delete :: DELETE FROM form
+==========================
+
+DELETE FROM person
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
+=====================================
+delete :: DELETE FROM ONLY with WHERE
+=====================================
+
+DELETE FROM ONLY person:tobie WHERE age > 18
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))))
+
+================================
+delete :: Delete with WITH INDEX
+================================
+
+DELETE person WITH INDEX idx WHERE age > 18
+
+---
+
+(SurrealQL
+  (DeleteStatement
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))))
+
+================================
+update :: Update with WITH INDEX
+================================
+
+UPDATE person WITH INDEX idx SET age = 29
+
+---
+
+(SurrealQL
+  (UpdateStatement
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Ident))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))))
+
+=================================
+upsert :: Upsert with WITH NOINDEX
+=================================
+
+UPSERT person WITH NOINDEX SET age = 29
+
+---
+
+(SurrealQL
+  (UpsertStatement
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))))
+
 ==================================
 update :: Update with EXPLAIN FULL
 ==================================
@@ -5242,3 +5352,88 @@ RETURN a ?: b OR c
         (Ident)
         (Operator)
         (Ident)))))
+
+==========================
+define :: DEFINE SEQUENCE
+==========================
+
+DEFINE SEQUENCE sq
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
+=============================================
+define :: DEFINE SEQUENCE with BATCH and START
+=============================================
+
+DEFINE SEQUENCE IF NOT EXISTS sq BATCH 1000 START 100
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (IfNotExistsClause
+      (Keyword)
+      (Keyword)
+      (Keyword))
+    (Ident)
+    (SequenceBatchClause
+      (Keyword)
+      (Number
+        (Int)))
+    (SequenceStartClause
+      (Keyword)
+      (Number
+        (Int)))))
+
+=================================
+remove :: REMOVE SEQUENCE
+=================================
+
+REMOVE SEQUENCE IF EXISTS sq
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (IfExistsClause
+      (Keyword)
+      (Keyword))
+    (Ident)))
+
+===================================
+define :: DEFINE NS abbreviation
+===================================
+
+DEFINE NS test
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
+===================================
+remove :: REMOVE DB abbreviation
+===================================
+
+REMOVE DB test
+
+---
+
+(SurrealQL
+  (RemoveStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))

@@ -427,7 +427,7 @@ export default grammar({
 				alias($._kw_remove, $.Keyword),
 				choice(
 					seq(
-						alias($._kw_namespace, $.Keyword),
+						$._nsKeyword,
 						optional($.IfExistsClause),
 						$._value,
 						optional(
@@ -438,7 +438,7 @@ export default grammar({
 						),
 					),
 					seq(
-						alias($._kw_database, $.Keyword),
+						$._dbKeyword,
 						optional($.IfExistsClause),
 						$._value,
 						optional(
@@ -447,6 +447,11 @@ export default grammar({
 								alias($._kw_expunge, $.Keyword),
 							),
 						),
+					),
+					seq(
+						alias($._kw_sequence, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
 					),
 					seq(
 						alias($._kw_user, $.Keyword),
@@ -538,13 +543,11 @@ export default grammar({
 				alias($._kw_define, $.Keyword),
 				choice(
 					$.AccessDefinition,
+					seq($._nsKeyword, $._defineNamespaceOptions),
+					seq($._dbKeyword, $._defineDatabaseOptions),
 					seq(
-						alias($._kw_namespace, $.Keyword),
-						$._defineNamespaceOptions,
-					),
-					seq(
-						alias($._kw_database, $.Keyword),
-						$._defineDatabaseOptions,
+						alias($._kw_sequence, $.Keyword),
+						$._defineSequenceOptions,
 					),
 					seq(alias($._kw_user, $.Keyword), $._defineUserOptions),
 					seq(alias($._kw_token, $.Keyword), $._defineTokenOptions),
@@ -868,6 +871,10 @@ export default grammar({
 		DeleteStatement: ($) =>
 			seq(
 				alias($._kw_delete, $.Keyword),
+				// `DELETE FROM t` is the same statement as `DELETE t`. Only
+				// DELETE takes it: `UPDATE FROM t` and `UPSERT FROM t` are parse
+				// errors in 3.2.3.
+				optional(alias($._kw_from, $.Keyword)),
 				optional(alias($._kw_only, $.Keyword)),
 				choice(
 					$._statement,
@@ -875,6 +882,7 @@ export default grammar({
 						csep($._value),
 						repeat(
 							choice(
+								$.WithClause,
 								$.WhereClause,
 								$.ReturnClause,
 								$.TimeoutClause,
@@ -927,6 +935,7 @@ export default grammar({
 					$._statement,
 					seq(
 						csep($._value),
+						optional($.WithClause),
 						optional($._dataClause),
 						optional($.WhereClause),
 						optional($.ReturnClause),
@@ -946,6 +955,7 @@ export default grammar({
 					$._statement,
 					seq(
 						csep($._value),
+						optional($.WithClause),
 						optional($._dataClause),
 						optional($.WhereClause),
 						optional($.ReturnClause),
@@ -1026,6 +1036,38 @@ export default grammar({
 
 		WhereClause: ($) =>
 			seq(alias($._kw_where, $.Keyword), optional($._value)),
+
+		// `NS` and `DB` are the engine's abbreviations for NAMESPACE and
+		// DATABASE, accepted anywhere the long spelling is.
+		_nsKeyword: ($) =>
+			choice(
+				alias($._kw_ns, $.Keyword),
+				alias($._kw_namespace, $.Keyword),
+			),
+		_dbKeyword: ($) =>
+			choice(
+				alias($._kw_db, $.Keyword),
+				alias($._kw_database, $.Keyword),
+			),
+
+		// DEFINE SEQUENCE takes BATCH/START/TIMEOUT in any order; the engine
+		// has no COMMENT on this statement.
+		_defineSequenceOptions: ($) =>
+			seq(
+				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
+				$._value,
+				repeat(
+					choice(
+						$.SequenceBatchClause,
+						$.SequenceStartClause,
+						$.TimeoutClause,
+					),
+				),
+			),
+		SequenceBatchClause: ($) =>
+			seq(alias($._kw_batch, $.Keyword), $.Number),
+		SequenceStartClause: ($) =>
+			seq(alias($._kw_start, $.Keyword), $.Number),
 
 		WithClause: ($) =>
 			seq(
