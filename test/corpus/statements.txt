@@ -6934,3 +6934,226 @@ values :: A block whose first statement is a namespaced call
       (String))
     (BraceClose)))
 
+
+============================
+explain :: Explain a closure
+============================
+
+EXPLAIN |$x: int| -> int { $x * 2 }
+
+---
+
+(SurrealQL
+  (ExplainStatement
+    (Keyword)
+    (Closure
+      (Pipe)
+      (ParamDefinition
+        (VariableName)
+        (Colon)
+        (Type
+          (TypeName)))
+      (Pipe)
+      (LookupRight)
+      (TypeName)
+      (Block
+        (BraceOpen)
+        (BinaryExpression
+          (VariableName)
+          (Operator)
+          (Number
+            (Int)))
+        (BraceClose)))))
+
+===========================================
+explain :: Explain a control-flow statement
+===========================================
+
+EXPLAIN FOR $item IN [1, 2, 3] { $item }
+
+---
+
+(SurrealQL
+  (ExplainStatement
+    (Keyword)
+    (ForStatement
+      (Keyword)
+      (VariableName)
+      (Keyword)
+      (Array
+        (Number
+          (Int))
+        (Number
+          (Int))
+        (Number
+          (Int)))
+      (Block
+        (BraceOpen)
+        (VariableName)
+        (BraceClose)))))
+
+===============================
+explain :: Explain a graph path
+===============================
+
+EXPLAIN person:tobie->knows->person
+
+---
+
+(SurrealQL
+  (ExplainStatement
+    (Keyword)
+    (Path
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Lookup
+        (LookupRight)
+        (Ident))
+      (Lookup
+        (LookupRight)
+        (Ident)))))
+
+=======================================
+explain :: Explain analyze a bare value
+=======================================
+
+EXPLAIN ANALYZE 9
+
+---
+
+(SurrealQL
+  (ExplainStatement
+    (Keyword)
+    (Keyword)
+    (Number
+      (Int))))
+
+======================================
+explain :: Explain analyze format json
+======================================
+
+EXPLAIN ANALYZE FORMAT JSON SELECT * FROM t
+
+---
+
+(SurrealQL
+  (ExplainStatement
+    (Keyword)
+    (Keyword)
+    (FormatClause
+      (Keyword)
+      (Keyword))
+    (SelectStatement
+      (Keyword)
+      (Fields
+        (Any))
+      (Keyword)
+      (Ident))))
+
+=============================
+select :: Select at a version
+=============================
+
+SELECT * FROM item WHERE score >= 30 VERSION $ts
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (Ident)
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator)
+        (Number
+          (Int))))
+    (VersionClause
+      (Keyword)
+      (VariableName))))
+
+========================================
+info :: Info for a database at a version
+========================================
+
+INFO FOR DB VERSION d'2025-01-01T00:00:00Z'
+
+---
+
+(SurrealQL
+  (InfoForStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (VersionClause
+      (Keyword)
+      (String))))
+
+=============================================
+define :: Define with a parameterized comment
+=============================================
+
+DEFINE DATABASE test COMMENT $comment
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (CommentClause
+      (Keyword)
+      (VariableName))))
+
+======================================
+define :: Define param without a value
+======================================
+
+DEFINE PARAM $permissions_none PERMISSIONS NONE
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (PermissionsBasicClause
+      (Keyword)
+      (None))))
+
+==================================
+select :: Timeout from a parameter
+==================================
+
+SELECT * FROM |test:1..1000| TIMEOUT $timeout
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdRange
+          (RecordIdIdent)
+          (RangeOp)
+          (RecordIdIdent)))
+      (Pipe))
+    (TimeoutClause
+      (Keyword)
+      (VariableName))))
+

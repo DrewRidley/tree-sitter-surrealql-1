@@ -1452,6 +1452,10 @@
           "named": true
         },
         {
+          "type": "ExplainStatement",
+          "named": true
+        },
+        {
           "type": "ForStatement",
           "named": true
         },
@@ -1845,11 +1849,115 @@
       "required": true,
       "types": [
         {
+          "type": "Array",
+          "named": true
+        },
+        {
+          "type": "BinaryExpression",
+          "named": true
+        },
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "Bool",
+          "named": true
+        },
+        {
+          "type": "Closure",
+          "named": true
+        },
+        {
+          "type": "Constant",
+          "named": true
+        },
+        {
+          "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "FormatString",
+          "named": true
+        },
+        {
+          "type": "FunctionCall",
+          "named": true
+        },
+        {
+          "type": "FunctionJs",
+          "named": true
+        },
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "IfElseStatement",
+          "named": true
+        },
+        {
           "type": "Keyword",
           "named": true
         },
         {
+          "type": "None",
+          "named": true
+        },
+        {
+          "type": "Number",
+          "named": true
+        },
+        {
+          "type": "Object",
+          "named": true
+        },
+        {
+          "type": "Path",
+          "named": true
+        },
+        {
+          "type": "Point",
+          "named": true
+        },
+        {
+          "type": "PrefixExpression",
+          "named": true
+        },
+        {
+          "type": "Range",
+          "named": true
+        },
+        {
+          "type": "RangeRecordId",
+          "named": true
+        },
+        {
+          "type": "RecordId",
+          "named": true
+        },
+        {
+          "type": "Regex",
+          "named": true
+        },
+        {
+          "type": "Set",
+          "named": true
+        },
+        {
           "type": "String",
+          "named": true
+        },
+        {
+          "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "TypeCast",
+          "named": true
+        },
+        {
+          "type": "VariableName",
           "named": true
         }
       ]
@@ -2773,6 +2881,10 @@
           "named": true
         },
         {
+          "type": "ExplainStatement",
+          "named": true
+        },
+        {
           "type": "ForStatement",
           "named": true
         },
@@ -3375,6 +3487,249 @@
     }
   },
   {
+    "type": "ExplainStatement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "AccessStatement",
+          "named": true
+        },
+        {
+          "type": "AlterStatement",
+          "named": true
+        },
+        {
+          "type": "Array",
+          "named": true
+        },
+        {
+          "type": "BeginStatement",
+          "named": true
+        },
+        {
+          "type": "BinaryExpression",
+          "named": true
+        },
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "Bool",
+          "named": true
+        },
+        {
+          "type": "BreakStatement",
+          "named": true
+        },
+        {
+          "type": "CancelStatement",
+          "named": true
+        },
+        {
+          "type": "Closure",
+          "named": true
+        },
+        {
+          "type": "CommitStatement",
+          "named": true
+        },
+        {
+          "type": "Constant",
+          "named": true
+        },
+        {
+          "type": "ContinueStatement",
+          "named": true
+        },
+        {
+          "type": "CreateStatement",
+          "named": true
+        },
+        {
+          "type": "DefineStatement",
+          "named": true
+        },
+        {
+          "type": "DeleteStatement",
+          "named": true
+        },
+        {
+          "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "ExplainStatement",
+          "named": true
+        },
+        {
+          "type": "ForStatement",
+          "named": true
+        },
+        {
+          "type": "FormatClause",
+          "named": true
+        },
+        {
+          "type": "FormatString",
+          "named": true
+        },
+        {
+          "type": "FunctionCall",
+          "named": true
+        },
+        {
+          "type": "FunctionJs",
+          "named": true
+        },
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "IfElseStatement",
+          "named": true
+        },
+        {
+          "type": "InfoForStatement",
+          "named": true
+        },
+        {
+          "type": "InsertStatement",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "KillStatement",
+          "named": true
+        },
+        {
+          "type": "LetStatement",
+          "named": true
+        },
+        {
+          "type": "LiveSelectStatement",
+          "named": true
+        },
+        {
+          "type": "None",
+          "named": true
+        },
+        {
+          "type": "Number",
+          "named": true
+        },
+        {
+          "type": "Object",
+          "named": true
+        },
+        {
+          "type": "OptionStatement",
+          "named": true
+        },
+        {
+          "type": "Path",
+          "named": true
+        },
+        {
+          "type": "Point",
+          "named": true
+        },
+        {
+          "type": "PrefixExpression",
+          "named": true
+        },
+        {
+          "type": "Range",
+          "named": true
+        },
+        {
+          "type": "RangeRecordId",
+          "named": true
+        },
+        {
+          "type": "RebuildStatement",
+          "named": true
+        },
+        {
+          "type": "RecordId",
+          "named": true
+        },
+        {
+          "type": "Regex",
+          "named": true
+        },
+        {
+          "type": "RelateStatement",
+          "named": true
+        },
+        {
+          "type": "RemoveStatement",
+          "named": true
+        },
+        {
+          "type": "ReturnStatement",
+          "named": true
+        },
+        {
+          "type": "SelectStatement",
+          "named": true
+        },
+        {
+          "type": "Set",
+          "named": true
+        },
+        {
+          "type": "ShowStatement",
+          "named": true
+        },
+        {
+          "type": "SleepStatement",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
+          "type": "TypeCast",
+          "named": true
+        },
+        {
+          "type": "UpdateStatement",
+          "named": true
+        },
+        {
+          "type": "UpsertStatement",
+          "named": true
+        },
+        {
+          "type": "UseStatement",
+          "named": true
+        },
+        {
+          "type": "VariableName",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "FetchClause",
     "named": true,
     "fields": {},
@@ -3640,6 +3995,10 @@
         },
         {
           "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "ExplainStatement",
           "named": true
         },
         {
@@ -3994,6 +4353,21 @@
         },
         {
           "type": "VariableName",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "FormatClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Keyword",
           "named": true
         }
       ]
@@ -4867,6 +5241,10 @@
         {
           "type": "OnTableClause",
           "named": true
+        },
+        {
+          "type": "VersionClause",
+          "named": true
         }
       ]
     }
@@ -5088,6 +5466,10 @@
         },
         {
           "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "ExplainStatement",
           "named": true
         },
         {
@@ -8190,6 +8572,10 @@
           "named": true
         },
         {
+          "type": "ExplainStatement",
+          "named": true
+        },
+        {
           "type": "FetchClause",
           "named": true
         },
@@ -8651,6 +9037,10 @@
         },
         {
           "type": "ExplainClause",
+          "named": true
+        },
+        {
+          "type": "ExplainStatement",
           "named": true
         },
         {
@@ -9491,6 +9881,10 @@
           "named": true
         },
         {
+          "type": "ExplainStatement",
+          "named": true
+        },
+        {
           "type": "ForStatement",
           "named": true
         },
@@ -9759,6 +10153,10 @@
         },
         {
           "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "ExplainStatement",
           "named": true
         },
         {
@@ -10394,11 +10792,115 @@
       "required": true,
       "types": [
         {
+          "type": "Array",
+          "named": true
+        },
+        {
+          "type": "BinaryExpression",
+          "named": true
+        },
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "Bool",
+          "named": true
+        },
+        {
+          "type": "Closure",
+          "named": true
+        },
+        {
+          "type": "Constant",
+          "named": true
+        },
+        {
           "type": "Duration",
           "named": true
         },
         {
+          "type": "FormatString",
+          "named": true
+        },
+        {
+          "type": "FunctionCall",
+          "named": true
+        },
+        {
+          "type": "FunctionJs",
+          "named": true
+        },
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "IfElseStatement",
+          "named": true
+        },
+        {
           "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "None",
+          "named": true
+        },
+        {
+          "type": "Number",
+          "named": true
+        },
+        {
+          "type": "Object",
+          "named": true
+        },
+        {
+          "type": "Path",
+          "named": true
+        },
+        {
+          "type": "Point",
+          "named": true
+        },
+        {
+          "type": "PrefixExpression",
+          "named": true
+        },
+        {
+          "type": "Range",
+          "named": true
+        },
+        {
+          "type": "RangeRecordId",
+          "named": true
+        },
+        {
+          "type": "RecordId",
+          "named": true
+        },
+        {
+          "type": "Regex",
+          "named": true
+        },
+        {
+          "type": "Set",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "TypeCast",
+          "named": true
+        },
+        {
+          "type": "VariableName",
           "named": true
         }
       ]
@@ -10790,6 +11292,10 @@
           "named": true
         },
         {
+          "type": "ExplainStatement",
+          "named": true
+        },
+        {
           "type": "ForStatement",
           "named": true
         },
@@ -11070,6 +11576,10 @@
         },
         {
           "type": "ExplainClause",
+          "named": true
+        },
+        {
+          "type": "ExplainStatement",
           "named": true
         },
         {
@@ -11437,11 +11947,115 @@
       "required": true,
       "types": [
         {
+          "type": "Array",
+          "named": true
+        },
+        {
+          "type": "BinaryExpression",
+          "named": true
+        },
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "Bool",
+          "named": true
+        },
+        {
+          "type": "Closure",
+          "named": true
+        },
+        {
+          "type": "Constant",
+          "named": true
+        },
+        {
+          "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "FormatString",
+          "named": true
+        },
+        {
+          "type": "FunctionCall",
+          "named": true
+        },
+        {
+          "type": "FunctionJs",
+          "named": true
+        },
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "IfElseStatement",
+          "named": true
+        },
+        {
           "type": "Keyword",
           "named": true
         },
         {
+          "type": "None",
+          "named": true
+        },
+        {
+          "type": "Number",
+          "named": true
+        },
+        {
+          "type": "Object",
+          "named": true
+        },
+        {
+          "type": "Path",
+          "named": true
+        },
+        {
+          "type": "Point",
+          "named": true
+        },
+        {
+          "type": "PrefixExpression",
+          "named": true
+        },
+        {
+          "type": "Range",
+          "named": true
+        },
+        {
+          "type": "RangeRecordId",
+          "named": true
+        },
+        {
+          "type": "RecordId",
+          "named": true
+        },
+        {
+          "type": "Regex",
+          "named": true
+        },
+        {
+          "type": "Set",
+          "named": true
+        },
+        {
           "type": "String",
+          "named": true
+        },
+        {
+          "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "TypeCast",
+          "named": true
+        },
+        {
+          "type": "VariableName",
           "named": true
         }
       ]

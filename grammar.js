@@ -223,11 +223,15 @@ export default grammar({
 		// so listing it here as well would make every `IF …` in an expression
 		// position reachable two ways for the same tree.
 		_subqueryStatement: ($) =>
+			choice($.SelectStatement, $._nonSelectSubqueryStatement),
+		// Everything in `_subqueryStatement` except SELECT. Named so that
+		// `EXPLAIN` can take a statement without competing with SELECT's own
+		// `EXPLAIN` prefix — see `ExplainStatement`.
+		_nonSelectSubqueryStatement: ($) =>
 			choice(
 				$.LetStatement,
 				$.DeleteStatement,
 				$.CreateStatement,
-				$.SelectStatement,
 				$.RelateStatement,
 				$.UpdateStatement,
 				$.RemoveStatement,
@@ -239,8 +243,10 @@ export default grammar({
 				$.InsertStatement,
 			),
 
-		_statement: ($) =>
+		_statement: ($) => choice($._nonSelectStatement, $.SelectStatement),
+		_nonSelectStatement: ($) =>
 			choice(
+				$.ExplainStatement,
 				$.BeginStatement,
 				$.CancelStatement,
 				$.CommitStatement,
@@ -256,8 +262,29 @@ export default grammar({
 				$.ContinueStatement,
 				$.ForStatement,
 				$.ThrowStatement,
-				$._subqueryStatement,
+				$._nonSelectSubqueryStatement,
 			),
+
+		// EXPLAIN is a statement prefix, not a SELECT clause: 3.2.3 explains a
+		// closure, a RETURN, a FOR, a BREAK, a graph path, a bare `9`. SELECT
+		// keeps its own prefix (the tree it has always had), so the body here
+		// is every *other* expression; `FORMAT JSON` settles the one overlap,
+		// because after it even a SELECT belongs to this rule.
+		//
+		// `FORMAT` takes JSON and nothing else — `FORMAT XML` is a parse
+		// error there.
+		ExplainStatement: ($) =>
+			seq(
+				alias($._kw_explain, $.Keyword),
+				optional(alias($._kw_analyze, $.Keyword)),
+				choice(
+					seq($.FormatClause, $._expression),
+					$._nonSelectStatement,
+					$._value,
+				),
+			),
+		FormatClause: ($) =>
+			seq(alias($._kw_format, $.Keyword), alias($._kw_json, $.Keyword)),
 
 		// ----------------------------------------------------------------
 		// Transaction statements
@@ -440,6 +467,9 @@ export default grammar({
 					),
 				),
 				optional(alias($._kw_structure, $.Keyword)),
+				// A temporal read: `INFO FOR DB VERSION d'…'` reports the
+				// schema as it stood at that point.
+				optional($.VersionClause),
 			),
 
 		// LET
@@ -886,8 +916,9 @@ export default grammar({
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
 				$.VariableName,
-				alias($._kw_value, $.Keyword),
-				$._value,
+				// VALUE is optional: `DEFINE PARAM $p PERMISSIONS NONE` is
+				// accepted by 3.2.3.
+				optional(seq(alias($._kw_value, $.Keyword), $._value)),
 				repeat(choice($.PermissionsBasicClause, $.CommentClause)),
 			),
 
@@ -1371,7 +1402,11 @@ export default grammar({
 			),
 
 		FetchClause: ($) => seq(alias($._kw_fetch, $.Keyword), csep($.Idiom)),
-		TimeoutClause: ($) => seq(alias($._kw_timeout, $.Keyword), $.Duration),
+		// Each of these three takes a whole value, not just a literal: the
+		// engine evaluates it. `TIMEOUT $timeout`, `VERSION $ts` and
+		// `COMMENT $comment` are what SurrealDB's parameterized tests write,
+		// and a literal still yields exactly the tree it did before.
+		TimeoutClause: ($) => seq(alias($._kw_timeout, $.Keyword), $._value),
 		ParallelClause: ($) => alias($._kw_parallel, $.Keyword),
 		TempfilesClause: ($) => alias($._kw_tempfiles, $.Keyword),
 		ExplainClause: ($) =>
@@ -1379,7 +1414,7 @@ export default grammar({
 				alias($._kw_explain, $.Keyword),
 				optional(alias($._kw_full, $.Literal)),
 			),
-		VersionClause: ($) => seq(alias($._kw_version, $.Keyword), $.String),
+		VersionClause: ($) => seq(alias($._kw_version, $.Keyword), $._value),
 
 		ReturnClause: ($) =>
 			seq(
@@ -1895,7 +1930,7 @@ export default grammar({
 
 		MiddlewareClause: ($) =>
 			seq(alias($._kw_middleware, $.Keyword), csep($.FunctionCall)),
-		CommentClause: ($) => seq(alias($._kw_comment, $.Keyword), $.String),
+		CommentClause: ($) => seq(alias($._kw_comment, $.Keyword), $._value),
 		BackendClause: ($) => seq(alias($._kw_backend, $.Keyword), $._value),
 
 		AnalyzerFilters: ($) =>
@@ -3004,6 +3039,8 @@ export default grammar({
 		_kw_exclude: ($) => kw('exclude'),
 		_kw_exists: ($) => kw('exists'),
 		_kw_explain: ($) => kw('explain'),
+		_kw_format: ($) => kw('format'),
+		_kw_json: ($) => kw('json'),
 		_kw_expunge: ($) => kw('expunge'),
 		_kw_extend_candidates: ($) => kw('extend_candidates'),
 		_kw_fetch: ($) => kw('fetch'),
@@ -3354,6 +3391,8 @@ export default grammar({
 				$._kw_postings_cache,
 				$._kw_postings_order,
 				$._kw_prepare,
+				$._kw_format,
+				$._kw_json,
 				$._kw_retry,
 				$._kw_maxdepth,
 				$._kw_put,
