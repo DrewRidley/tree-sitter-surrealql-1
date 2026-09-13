@@ -744,7 +744,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "_value"
+                  "name": "Ident"
                 }
               ]
             },
@@ -1225,7 +1225,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "Ident"
+                  "name": "_value"
                 }
               ]
             },
@@ -2313,6 +2313,15 @@
                                 },
                                 "named": true,
                                 "value": "Keyword"
+                              },
+                              {
+                                "type": "ALIAS",
+                                "content": {
+                                  "type": "SYMBOL",
+                                  "name": "_kw_async"
+                                },
+                                "named": true,
+                                "value": "Keyword"
                               }
                             ]
                           }
@@ -3204,37 +3213,10 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SEQ",
+              "type": "CHOICE",
               "members": [
                 {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_then"
-                  },
-                  "named": true,
-                  "value": "Keyword"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "Block"
-                }
-              ]
-            },
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_kw_drop"
-                  },
-                  "named": true,
-                  "value": "Keyword"
-                },
-                {
-                  "type": "CHOICE",
+                  "type": "SEQ",
                   "members": [
                     {
                       "type": "ALIAS",
@@ -3244,10 +3226,45 @@
                       },
                       "named": true,
                       "value": "Keyword"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "Block"
+                    }
+                  ]
+                },
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_kw_drop"
+                      },
+                      "named": true,
+                      "value": "Keyword"
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "_kw_then"
+                          },
+                          "named": true,
+                          "value": "Keyword"
+                        }
+                      ]
                     }
                   ]
                 }
               ]
+            },
+            {
+              "type": "BLANK"
             }
           ]
         }
@@ -6758,6 +6775,18 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ","
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
             }
           ]
         },
@@ -8235,8 +8264,21 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "Idiom"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "Idiom"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "FunctionCall"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "VariableName"
+                }
+              ]
             },
             {
               "type": "REPEAT",
@@ -8248,8 +8290,21 @@
                     "value": ","
                   },
                   {
-                    "type": "SYMBOL",
-                    "name": "Idiom"
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "Idiom"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "FunctionCall"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "VariableName"
+                      }
+                    ]
                   }
                 ]
               }
@@ -8995,8 +9050,16 @@
                 "type": "SEQ",
                 "members": [
                   {
-                    "type": "STRING",
-                    "value": ","
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
                   },
                   {
                     "type": "SYMBOL",
@@ -9068,6 +9131,10 @@
               },
               "named": true,
               "value": "None"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "VariableName"
             }
           ]
         }
@@ -10927,7 +10994,7 @@
                         },
                         {
                           "type": "SYMBOL",
-                          "name": "Block"
+                          "name": "_value"
                         }
                       ]
                     }
@@ -11313,6 +11380,10 @@
                     {
                       "type": "SYMBOL",
                       "name": "Ident"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "String"
                     }
                   ]
                 },
@@ -11890,6 +11961,10 @@
             },
             {
               "type": "SYMBOL",
+              "name": "RecordId"
+            },
+            {
+              "type": "SYMBOL",
               "name": "Any"
             },
             {
@@ -12040,6 +12115,23 @@
           },
           "named": true,
           "value": "Keyword"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_kw_only"
+              },
+              "named": true,
+              "value": "Keyword"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
@@ -16126,6 +16218,10 @@
         {
           "type": "SYMBOL",
           "name": "_kw_lowercase"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_kw_mapper"
         }
       ]
     },
@@ -16626,6 +16722,10 @@
     "_kw_compact": {
       "type": "PATTERN",
       "value": "[cC][oO][mM][pP][aA][cC][tT]"
+    },
+    "_kw_mapper": {
+      "type": "PATTERN",
+      "value": "[mM][aA][pP][pP][eE][rR]"
     },
     "_kw_kv": {
       "type": "PATTERN",
@@ -18328,6 +18428,9 @@
     [
       "_value",
       "Path"
+    ],
+    [
+      "ApiForClause"
     ],
     [
       "AlterStatement",

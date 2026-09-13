@@ -212,6 +212,10 @@ export default grammar({
 		[$.Legacy],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
+		// After `ALTER API "/x" FOR any`, a `DROP` opens either the group's own
+		// `DROP THEN` or the statement's `DROP COMMENT`. The token after DROP
+		// decides — LR(2), not ambiguous.
+		[$.ApiForClause],
 		// `ALTER FIELD f ON t FLEXIBLE` clears the flag on its own, and
 		// `FLEXIBLE TYPE object` is one TypeClause. Which one FLEXIBLE opens
 		// is decided by the token after it — LR(2), not ambiguous.
@@ -412,9 +416,11 @@ export default grammar({
 				alias($._kw_show, $.Keyword),
 				alias($._kw_changes, $.Keyword),
 				alias($._kw_for, $.Keyword),
-				// One table, or every table in the database.
+				// One table, or every table in the database. The table is a
+				// name and only a name: 3.2.3 parse-errors
+				// `SHOW CHANGES FOR TABLE $t`.
 				choice(
-					seq(alias($._kw_table, $.Keyword), $._value),
+					seq(alias($._kw_table, $.Keyword), $.Ident),
 					$._dbKeyword,
 				),
 				optional(
@@ -488,7 +494,7 @@ export default grammar({
 					seq(alias($._kw_sc, $.Keyword), $._value),
 					seq(alias($._kw_scope, $.Keyword), $._value),
 					seq(alias($._kw_tb, $.Keyword), $._value),
-					seq(alias($._kw_table, $.Keyword), $.Ident),
+					seq(alias($._kw_table, $.Keyword), $._value),
 					// INFO FOR USER falls back to the session's level when the
 					// ON clause is left off.
 					seq(
@@ -689,7 +695,7 @@ export default grammar({
 								$.ThenClause,
 								$.AsyncClause,
 								$.CommentClause,
-								dropOf($, 'when', 'then', 'comment'),
+								dropOf($, 'when', 'then', 'comment', 'async'),
 							),
 						),
 					),
@@ -841,9 +847,13 @@ export default grammar({
 				alias($._kw_for, $.Keyword),
 				choice(alias($._kw_any, $.Keyword), csep($.HttpMethod)),
 				optional($.ApiOptions),
-				choice(
-					seq(alias($._kw_then, $.Keyword), $.Block),
-					dropOf($, 'then'),
+				// The handler is optional: a group may carry only its
+				// permissions or middleware, or drop the handler it had.
+				optional(
+					choice(
+						seq(alias($._kw_then, $.Keyword), $.Block),
+						dropOf($, 'then'),
+					),
 				),
 			),
 
@@ -1442,7 +1452,7 @@ export default grammar({
 				optional($.ReturnClause),
 			),
 		_insertSubquery: ($) => seq('(', $._subqueryStatement, ')'),
-		BulkInsert: ($) => seq('[', csep($.Object), ']'),
+		BulkInsert: ($) => seq('[', csepTrail($.Object), ']'),
 
 		// UPDATE
 		UpdateStatement: ($) =>
@@ -1679,7 +1689,12 @@ export default grammar({
 				choice($.Number, $.VariableName),
 			),
 
-		FetchClause: ($) => seq(alias($._kw_fetch, $.Keyword), csep($.Idiom)),
+		// `FETCH type::field('purchases')` names the field dynamically.
+		FetchClause: ($) =>
+			seq(
+				alias($._kw_fetch, $.Keyword),
+				csep(choice($.Idiom, $.FunctionCall, $.VariableName)),
+			),
 		// Each of these three takes a whole value, not just a literal: the
 		// engine evaluates it. `TIMEOUT $timeout`, `VERSION $ts` and
 		// `COMMENT $comment` are what SurrealDB's parameterized tests write,
@@ -1817,7 +1832,15 @@ export default grammar({
 		// The engine wants the FOR target on every entry, and takes NONE in
 		// place of a duration to mean "never expires".
 		DurationClause: ($) =>
-			seq(alias($._kw_duration, $.Keyword), csep($.DurationValue)),
+			seq(
+				alias($._kw_duration, $.Keyword),
+				// The entries run with or without commas between them, the
+				// same way permission groups do.
+				seq(
+					$.DurationValue,
+					repeat(seq(optional(','), $.DurationValue)),
+				),
+			),
 		DurationValue: ($) =>
 			seq(
 				alias($._kw_for, $.Keyword),
@@ -1826,7 +1849,8 @@ export default grammar({
 					alias($._kw_session, $.Keyword),
 					alias($._kw_grant, $.Keyword),
 				),
-				choice($.Duration, alias($._kw_none, $.None)),
+				// A duration, NONE (never expires), or a parameter holding one.
+				choice($.Duration, alias($._kw_none, $.None), $.VariableName),
 			),
 
 		TokenTypeClause: ($) => seq(alias($._kw_type, $.Keyword), $.TokenType),
@@ -2154,7 +2178,7 @@ export default grammar({
 							alias($._kw_cascade, $.Keyword),
 							alias($._kw_ignore, $.Keyword),
 							alias($._kw_unset, $.Keyword),
-							seq(alias($._kw_then, $.Keyword), $.Block),
+							seq(alias($._kw_then, $.Keyword), $._value),
 						),
 					),
 				),
@@ -2214,7 +2238,8 @@ export default grammar({
 				optional(
 					seq(
 						'(',
-						choice(seq($.Number, ',', $.Number), $.Ident),
+						// `mapper('…/lemmatization-en.txt')` names a file.
+						choice(seq($.Number, ',', $.Number), $.Ident, $.String),
 						')',
 					),
 				),
@@ -2386,10 +2411,13 @@ export default grammar({
 			),
 		_questionWhere: ($) => seq('?', $._value),
 
+		// The edge may be named by a record id or a record-id range, not only
+		// by a table: `b:1->computed_edge:[6]..=[$num - 2]` and
+		// `a:1<~lookup:1..2` both reach the executor.
 		Lookup: ($) =>
 			seq(
 				choice($.LookupRight, $.LookupLeft, $.LookupBoth),
-				choice($.Ident, $.Any, $.LookupSelection),
+				choice($.Ident, $.RecordId, $.Any, $.LookupSelection),
 			),
 
 		LookupSelection: ($) =>
@@ -2412,11 +2440,13 @@ export default grammar({
 				),
 				')',
 			),
+		// `->(SELECT * FROM ONLY knows LIMIT 1)` unwraps the single edge.
 		GraphFieldSelection: ($) =>
 			seq(
 				alias($._kw_select, $.Keyword),
 				$.Fields,
 				alias($._kw_from, $.Keyword),
+				optional(alias($._kw_only, $.Keyword)),
 			),
 		// `FIELD <name>` names the referencing field to traverse, and binds to
 		// the predicate it follows rather than to the selection as a whole:
@@ -3247,6 +3277,8 @@ export default grammar({
 				$._kw_snowball,
 				$._kw_uppercase,
 				$._kw_lowercase,
+				// `mapper('…/lemmatization-en.txt')` maps terms from a file.
+				$._kw_mapper,
 			),
 
 		AnalyzerTokenizer: ($) =>
@@ -3376,6 +3408,7 @@ export default grammar({
 		_kw_exists: ($) => kw('exists'),
 		_kw_explain: ($) => kw('explain'),
 		_kw_compact: ($) => kw('compact'),
+		_kw_mapper: ($) => kw('mapper'),
 		_kw_kv: ($) => kw('kv'),
 		_kw_no: ($) => kw('no'),
 		_kw_depth: ($) => kw('depth'),

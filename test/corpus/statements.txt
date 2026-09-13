@@ -7869,11 +7869,11 @@ info :: Info for a parameterized table, read as a value
 (SurrealQL
   (Path
     (SubQuery
-      (ERROR
+      (InfoForStatement
         (Keyword)
         (Keyword)
-        (Keyword))
-      (VariableName))
+        (Keyword)
+        (VariableName)))
     (Subscript
       (Ident))))
 
@@ -8269,4 +8269,332 @@ values :: A block called in place
           (Int)))
       (BraceClose))
     (ArgumentList)))
+
+
+===========================================
+insert :: Bulk insert with a trailing comma
+===========================================
+
+INSERT [ { id: a:1, links: [a:2, a:3] }, { id: a:2, links: [] }, ]
+
+---
+
+(SurrealQL
+  (InsertStatement
+    (Keyword)
+    (BulkInsert
+      (Object
+        (BraceOpen)
+        (ObjectContent
+          (ObjectProperty
+            (ObjectKey
+              (KeyName))
+            (Colon)
+            (RecordId
+              (RecordTbIdent)
+              (Colon)
+              (RecordIdIdent)))
+          (ObjectProperty
+            (ObjectKey
+              (KeyName))
+            (Colon)
+            (Array
+              (RecordId
+                (RecordTbIdent)
+                (Colon)
+                (RecordIdIdent))
+              (RecordId
+                (RecordTbIdent)
+                (Colon)
+                (RecordIdIdent)))))
+        (BraceClose))
+      (Object
+        (BraceOpen)
+        (ObjectContent
+          (ObjectProperty
+            (ObjectKey
+              (KeyName))
+            (Colon)
+            (RecordId
+              (RecordTbIdent)
+              (Colon)
+              (RecordIdIdent)))
+          (ObjectProperty
+            (ObjectKey
+              (KeyName))
+            (Colon)
+            (Array)))
+        (BraceClose)))))
+
+=============================================
+select :: A graph selection reading FROM ONLY
+=============================================
+
+SELECT ->(SELECT * FROM ONLY knows LIMIT 1) AS edge FROM ONLY person:alice
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Predicate
+        (Path
+          (Lookup
+            (LookupRight)
+            (LookupSelection
+              (GraphFieldSelection
+                (Keyword)
+                (Fields
+                  (Any))
+                (Keyword)
+                (Keyword))
+              (GraphPredicate
+                (Ident))
+              (GraphLimitStartComboClause
+                (LimitClause
+                  (Keyword)
+                  (Number
+                    (Int)))))))
+        (Keyword)
+        (Ident)))
+    (Keyword)
+    (Keyword)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))))
+
+============================================
+select :: A lookup through a record-id range
+============================================
+
+SELECT * FROM b:1->computed_edge:[6]..=[$num - 2]
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (Path
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent))
+      (Lookup
+        (LookupRight)
+        (RecordId
+          (RecordTbIdent)
+          (Colon)
+          (RecordIdRange
+            (Array
+              (Number
+                (Int)))
+            (RangeOp)
+            (Array
+              (BinaryExpression
+                (VariableName)
+                (Operator)
+                (Number
+                  (Int))))))))))
+
+=========================================
+select :: Fetch a dynamically named field
+=========================================
+
+SELECT *, ->(bought AS purchases) FROM user FETCH type::field('purchases'), purchases.out
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any)
+      (Predicate
+        (Path
+          (Lookup
+            (LookupRight)
+            (LookupSelection
+              (GraphPredicate
+                (Ident))
+              (Keyword)
+              (Ident))))))
+    (Keyword)
+    (Ident)
+    (FetchClause
+      (Keyword)
+      (FunctionCall
+        (FunctionName)
+        (ArgumentList
+          (String)))
+      (Idiom
+        (Ident)
+        (Ident)))))
+
+===================================================
+define :: Define user with a parameterized duration
+===================================================
+
+DEFINE USER $name ON DATABASE ROLES OWNER DURATION FOR TOKEN $token_duration FOR SESSION $session_duration COMMENT $comment
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (RolesClause
+      (Keyword)
+      (Ident))
+    (DurationClause
+      (Keyword)
+      (DurationValue
+        (Keyword)
+        (Keyword)
+        (VariableName))
+      (DurationValue
+        (Keyword)
+        (Keyword)
+        (VariableName)))
+    (CommentClause
+      (Keyword)
+      (VariableName))))
+
+====================================================
+define :: Define api with permissions and no handler
+====================================================
+
+DEFINE API $path FOR any PERMISSIONS WHERE role = $user_role COMMENT $comment
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (ApiForClause
+      (Keyword)
+      (Keyword)
+      (ApiOptions
+        (PermissionsBasicClause
+          (Keyword)
+          (WhereClause
+            (Keyword)
+            (BinaryExpression
+              (Ident)
+              (Operator)
+              (VariableName))))))
+    (CommentClause
+      (Keyword)
+      (VariableName))))
+
+=======================================
+define :: Analyzer filter naming a file
+=======================================
+
+DEFINE ANALYZER englishLemmatizer TOKENIZERS blank, class FILTERS mapper('../tests/data/lemmatization-en.txt')
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (TokenizersClause
+      (Keyword)
+      (AnalyzerTokenizer)
+      (AnalyzerTokenizer))
+    (FiltersClause
+      (Keyword)
+      (AnalyzerFilters
+        (Filter)
+        (String)))))
+
+=============================================
+define :: Reference on delete then a subquery
+=============================================
+
+DEFINE FIELD OVERWRITE tags ON post TYPE array<record<tag>> REFERENCE ON DELETE THEN (UPDATE ONLY $this SET tags -= $reference)
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (OverwriteClause
+      (Keyword))
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
+      (Keyword)
+      (ParameterizedType
+        (TypeName)
+        (ParameterizedType
+          (TypeName)
+          (TypeName))))
+    (ReferenceClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (SubQuery
+        (UpdateStatement
+          (Keyword)
+          (Keyword)
+          (VariableName)
+          (SetClause
+            (Keyword)
+            (FieldAssignment
+              (Ident)
+              (Operator)
+              (VariableName))))))))
+
+===================================
+alter :: Alter event dropping async
+===================================
+
+ALTER EVENT my_event ON test WHEN $event = "CREATE" THEN { RETURN "restored"; } DROP COMMENT DROP ASYNC
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (WhenClause
+      (Keyword)
+      (BinaryExpression
+        (VariableName)
+        (Operator)
+        (String)))
+    (ThenClause
+      (Keyword)
+      (Block
+        (BraceOpen)
+        (ReturnStatement
+          (Keyword)
+          (String))
+        (BraceClose)))
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)))
 
