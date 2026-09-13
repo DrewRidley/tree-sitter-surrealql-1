@@ -174,7 +174,11 @@ export default grammar({
 		[$.WhereClause],
 		[$._baseValue, $.Closure],
 		[$._idName, $._singleType],
-		[$.Legacy, $._baseValue],
+		// A bare RETURN or THROW as an IF-THEN body can itself contain a
+		// block-form (Modern) IF, whose ELSE chain is a dangling-else
+		// ambiguity: the ELSE either continues this chain or closes the nested
+		// one. Both are real readings; let GLR settle it.
+		[$.Modern],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
 	],
@@ -225,6 +229,7 @@ export default grammar({
 				$.CancelStatement,
 				$.CommitStatement,
 				$.InfoForStatement,
+				$.AccessStatement,
 				$.KillStatement,
 				$.LiveSelectStatement,
 				$.ShowStatement,
@@ -329,6 +334,52 @@ export default grammar({
 				optional(seq(alias($._kw_limit, $.Keyword), $.Number)),
 			),
 
+		// ACCESS — operates on the grants a bearer access has issued.
+		AccessStatement: ($) =>
+			seq(
+				alias($._kw_access, $.Keyword),
+				$.Ident,
+				optional($.OnRootNsDbClause),
+				choice(
+					$.AccessGrantClause,
+					$.AccessShowClause,
+					$.AccessRevokeClause,
+					$.AccessPurgeClause,
+				),
+			),
+		AccessGrantClause: ($) =>
+			seq(
+				alias($._kw_grant, $.Keyword),
+				alias($._kw_for, $.Keyword),
+				choice(
+					seq(alias($._kw_user, $.Keyword), $.Ident),
+					seq(alias($._kw_record, $.Keyword), $.RecordId),
+				),
+			),
+		AccessShowClause: ($) =>
+			seq(alias($._kw_show, $.Keyword), $._accessSubject),
+		AccessRevokeClause: ($) =>
+			seq(alias($._kw_revoke, $.Keyword), $._accessSubject),
+		// SHOW and REVOKE select the same way: everything, one grant by id, or
+		// a predicate over the grant records.
+		_accessSubject: ($) =>
+			choice(
+				alias($._kw_all, $.Keyword),
+				seq(alias($._kw_grant, $.Keyword), $.Ident),
+				$.WhereClause,
+			),
+		AccessPurgeClause: ($) =>
+			seq(
+				alias($._kw_purge, $.Keyword),
+				csep(
+					choice(
+						alias($._kw_expired, $.Keyword),
+						alias($._kw_revoked, $.Keyword),
+					),
+				),
+				optional(seq(alias($._kw_for, $.Keyword), $.Duration)),
+			),
+
 		// INFO FOR
 		InfoForStatement: ($) =>
 			seq(
@@ -336,14 +387,24 @@ export default grammar({
 				alias($._kw_for, $.Keyword),
 				choice(
 					alias($._kw_root, $.Keyword),
-					alias($._kw_ns, $.Keyword),
-					alias($._kw_namespace, $.Keyword),
-					alias($._kw_db, $.Keyword),
-					alias($._kw_database, $.Keyword),
+					$._nsKeyword,
+					$._dbKeyword,
 					seq(alias($._kw_sc, $.Keyword), $.Ident),
 					seq(alias($._kw_scope, $.Keyword), $.Ident),
 					seq(alias($._kw_tb, $.Keyword), $.Ident),
 					seq(alias($._kw_table, $.Keyword), $.Ident),
+					// INFO FOR USER falls back to the session's level when the
+					// ON clause is left off.
+					seq(
+						alias($._kw_user, $.Keyword),
+						$.Ident,
+						optional($.OnRootNsDbClause),
+					),
+					seq(
+						alias($._kw_index, $.Keyword),
+						$.Ident,
+						$.OnTableClause,
+					),
 				),
 				optional(alias($._kw_structure, $.Keyword)),
 			),
@@ -387,26 +448,29 @@ export default grammar({
 		// IF/ELSE
 		IfElseStatement: ($) =>
 			seq(alias($._kw_if, $.Keyword), choice($.Legacy, $.Modern)),
+		// A branch body is a value, a THROW or a RETURN, each optionally
+		// followed by a `;`. `_value` already covers Block and SubQuery, so
+		// spelling those out again would make one tree reachable two ways.
+		_ifBranchBody: ($) =>
+			seq(
+				choice($._value, $.ThrowStatement, $.ReturnStatement),
+				optional(';'),
+			),
 		Legacy: ($) =>
 			seq(
 				$._value,
 				alias($._kw_then, $.Keyword),
-				choice($.Block, $.SubQuery, $._value),
+				$._ifBranchBody,
 				repeat(
 					seq(
 						alias($._kw_else, $.Keyword),
 						alias($._kw_if, $.Keyword),
 						$._value,
 						alias($._kw_then, $.Keyword),
-						choice($.Block, $.SubQuery, $._value),
+						$._ifBranchBody,
 					),
 				),
-				optional(
-					seq(
-						alias($._kw_else, $.Keyword),
-						choice($.Block, $.SubQuery, $._value),
-					),
-				),
+				optional(seq(alias($._kw_else, $.Keyword), $._ifBranchBody)),
 				alias($._kw_end, $.Keyword),
 			),
 		Modern: ($) =>
@@ -489,6 +553,20 @@ export default grammar({
 						alias($._kw_sequence, $.Keyword),
 						optional($.IfExistsClause),
 						$._value,
+					),
+					seq(
+						alias($._kw_access, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						$.OnRootNsDbClause,
+					),
+					seq(
+						alias($._kw_config, $.Keyword),
+						optional($.IfExistsClause),
+						choice(
+							alias($._kw_graphql, $.Keyword),
+							alias($._kw_api, $.Keyword),
+						),
 					),
 					seq(
 						alias($._kw_user, $.Keyword),
@@ -1226,8 +1304,8 @@ export default grammar({
 				alias($._kw_on, $.Keyword),
 				choice(
 					alias($._kw_root, $.Keyword),
-					alias($._kw_namespace, $.Keyword),
-					alias($._kw_database, $.Keyword),
+					$._nsKeyword,
+					$._dbKeyword,
 				),
 			),
 
