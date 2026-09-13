@@ -2259,7 +2259,8 @@ strings :: Prefixed strings
 r"raw string";
 u"uuid";
 d"2024-01-01T00:00:00Z";
-b"base64data"
+b"base64data";
+s"plain string"
 
 ---
 
@@ -2267,4 +2268,77 @@ b"base64data"
   (String)
   (String)
   (String)
+  (String)
   (String))
+
+================================
+constants :: Bare math constants
+================================
+
+math::PI;
+math::E;
+math::NEG_INFINITY;
+math::TAU
+
+---
+
+(SurrealQL
+  (Constant)
+  (Constant)
+  (Constant)
+  (Constant))
+
+==========================================
+constants :: time::EPOCH and duration::MAX
+==========================================
+
+time::EPOCH;
+duration::MAX
+
+---
+
+(SurrealQL
+  (Constant)
+  (Constant))
+
+==============================================
+constants :: A constant as a function argument
+==============================================
+
+math::floor(math::PI)
+
+---
+
+(SurrealQL
+  (FunctionCall
+    (FunctionName)
+    (ArgumentList
+      (Constant))))
+
+============================
+functions :: not() is a call
+============================
+
+not(false)
+
+---
+
+(SurrealQL
+  (FunctionCall
+    (FunctionName)
+    (ArgumentList
+      (Bool))))
+
+=========================================
+functions :: IS NOT is still one operator
+=========================================
+
+a IS NOT b
+
+---
+
+(SurrealQL
+  (BinaryExpression
+    (Ident)
+    (Operator)
+    (Ident)))
