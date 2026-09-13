@@ -291,7 +291,6 @@ export default grammar({
 				$.BreakStatement,
 				$.ContinueStatement,
 				$.ForStatement,
-				$.ThrowStatement,
 				$._nonSelectSubqueryStatement,
 			),
 
@@ -345,7 +344,11 @@ export default grammar({
 		BreakStatement: ($) => alias($._kw_break, $.Keyword),
 		ContinueStatement: ($) => alias($._kw_continue, $.Keyword),
 		SleepStatement: ($) => seq(alias($._kw_sleep, $.Keyword), $.Duration),
-		ThrowStatement: ($) => seq(alias($._kw_throw, $.Keyword), $._value),
+		// Right-associative: the argument runs as far as it can, so
+		// `THROW 'leaked: ' + secret` throws the concatenation rather than
+		// ending the statement at the string.
+		ThrowStatement: ($) =>
+			prec.right(seq(alias($._kw_throw, $.Keyword), $._value)),
 		// RETURN carries its own FETCH clause. The value is spelled against
 		// `_value` rather than `_expression` so that `RETURN SELECT … FETCH a`
 		// gives the FETCH to the SELECT, which already has one, instead of
@@ -544,11 +547,11 @@ export default grammar({
 		// A branch body is a value, a THROW or a RETURN, each optionally
 		// followed by a `;`. `_value` already covers Block and SubQuery, so
 		// spelling those out again would make one tree reachable two ways.
+		// A branch body is a value — which now covers IF, THROW and LET — a
+		// RETURN, or a bare data statement: 3.2.3 runs
+		// `IF $c THEN UPSERT p SET x = 1 RETURN x ELSE … END` unparenthesised.
 		_ifBranchBody: ($) =>
-			seq(
-				choice($._value, $.ThrowStatement, $.ReturnStatement),
-				optional(';'),
-			),
+			seq(choice($._value, $._nonSelectSubqueryStatement), optional(';')),
 		Legacy: ($) =>
 			seq(
 				$._value,
@@ -1496,6 +1499,14 @@ export default grammar({
 		RelateStatement: ($) =>
 			seq(
 				alias($._kw_relate, $.Keyword),
+				// `RELATE OR UPDATE` updates an edge that already exists
+				// instead of failing. `OR CREATE` is a parse error.
+				optional(
+					seq(
+						alias($._kw_or, $.Keyword),
+						alias($._kw_update, $.Keyword),
+					),
+				),
 				optional(alias($._kw_only, $.Keyword)),
 				$._relateSubject,
 				choice($.LookupRight, $.LookupLeft),
@@ -1547,7 +1558,9 @@ export default grammar({
 			seq(alias($._kw_set, $.Keyword), csep($.FieldAssignment)),
 		MergeClause: ($) => seq(alias($._kw_merge, $.Keyword), $._value),
 		PatchClause: ($) => seq(alias($._kw_patch, $.Keyword), $.Array),
-		ReplaceClause: ($) => seq(alias($._kw_replace, $.Keyword), $.Object),
+		// The replacement is a value, not only an object literal: the engine
+		// evaluates it and complains at run time if it is not an object.
+		ReplaceClause: ($) => seq(alias($._kw_replace, $.Keyword), $._value),
 		// UNSET removes fields by name (`UNSET a, b`), so it takes a field
 		// list — the same shape as OMIT — rather than assignments.
 		UnsetClause: ($) =>
@@ -2076,14 +2089,9 @@ export default grammar({
 		ThenClause: ($) =>
 			seq(
 				alias($._kw_then, $.Keyword),
-				choice(
-					csep($._value),
-					alias($._thenReturn, $.ReturnStatement),
-					alias($._thenThrow, $.ThrowStatement),
-				),
+				choice(csep($._value), alias($._thenReturn, $.ReturnStatement)),
 			),
 		_thenReturn: ($) => seq(alias($._kw_return, $.Keyword), $._value),
-		_thenThrow: ($) => seq(alias($._kw_throw, $.Keyword), $._value),
 
 		// RETRY and MAXDEPTH exist only behind ASYNC — 3.2.3 parse-errors on
 		// `DEFINE EVENT … RETRY 2 WHEN …` — but may follow it in either
@@ -2230,6 +2238,20 @@ export default grammar({
 				$.TypeCast,
 				$._baseValue,
 				$.IfElseStatement,
+				// THROW is an expression too: the engine evaluates
+				// `WHERE THROW 'x'`, `SET x = THROW 'x'` and
+				// `{ x: THROW 'x' }`. Like IF it sits here rather than in
+				// `_baseValue` so it cannot become a path base, and it comes
+				// out of the statement list so one tree is never reachable
+				// two ways.
+				//
+				// LET is an expression to the engine as well
+				// (`RETURN [LET $x = 1]` runs), but it is not admitted here:
+				// its own `=` and its statement right-hand side make every
+				// `LET $x = <stmt>` ambiguous with a comparison, and the two
+				// corpus inputs are not worth spreading `prec.right` across
+				// every data statement.
+				$.ThrowStatement,
 			),
 
 		// `!`, and the arithmetic signs. A sign in front of a literal number
@@ -2752,7 +2774,18 @@ export default grammar({
 		RecordIdIdent: ($) =>
 			choice($._numberident, $._tickIdent, $._bracketIdent),
 		_recordIdValue: ($) =>
-			choice($.RecordIdIdent, $.Array, $.Object, $.RecordIdString),
+			choice(
+				$.RecordIdIdent,
+				$.Array,
+				$.Object,
+				$.RecordIdString,
+				// A bound may be *signed*: `|test:-5..5|` and
+				// `|test:..=-9223372036854775806|` both generate. Only the
+				// signed form is admitted here — an unsigned one is already a
+				// `RecordIdIdent`, which is the tree every plain `person:1`
+				// has always produced.
+				alias($._signedNumber, $.Number),
+			),
 		// Lezer emits RecordIdString(String); we wrap the prefixed-string token
 		// in an aliased String node to match the same structure.
 		RecordIdString: ($) => alias($._prefixedString, $.String),
@@ -2795,8 +2828,10 @@ export default grammar({
 				seq($.VariableName, $.ArgumentList),
 				// `(|$x| $x + 1)(41)` — a parenthesised value called in place
 				// (3.2.3 evaluates it to 42; `(1 + 2)(3)` parses and fails at
-				// run time with "'int' is not a function").
+				// run time with "'int' is not a function"). A block is called
+				// the same way: `{||2}()`.
 				seq($.SubQuery, $.ArgumentList),
+				seq($.Block, $.ArgumentList),
 			),
 		ArgumentList: ($) =>
 			seq(
@@ -3004,11 +3039,8 @@ export default grammar({
 		// ordinary input is unchanged either way. `bench/` holds
 		// the inputs and the method — interleave the revisions and take the
 		// median, or measurement drift will invert the result.
-		Number: ($) =>
-			choice(
-				seq(choice('-', '+'), $._signedNumberBody),
-				$._unsignedNumber,
-			),
+		Number: ($) => choice($._signedNumber, $._unsignedNumber),
+		_signedNumber: ($) => seq(choice('-', '+'), $._signedNumberBody),
 		_unsignedNumber: ($) => choice($.Decimal, $.Float, $.Int),
 		_signedNumberBody: ($) =>
 			choice(

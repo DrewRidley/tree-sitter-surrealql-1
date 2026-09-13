@@ -140,6 +140,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -545,6 +549,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TimeoutClause",
           "named": true
         },
@@ -815,6 +823,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -939,6 +951,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -1089,6 +1105,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -1243,6 +1263,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -1363,6 +1387,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -1501,6 +1529,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -1969,6 +2001,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -2097,6 +2133,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -2253,6 +2293,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -2388,6 +2432,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -2627,6 +2675,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -2921,6 +2973,10 @@
         },
         {
           "type": "ThenClause",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -3363,6 +3419,10 @@
         },
         {
           "type": "Subscript",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -4031,6 +4091,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -4510,6 +4574,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -4591,6 +4659,10 @@
       "types": [
         {
           "type": "ArgumentList",
+          "named": true
+        },
+        {
+          "type": "Block",
           "named": true
         },
         {
@@ -4876,6 +4948,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -5513,6 +5589,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -5649,6 +5729,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -6005,6 +6089,10 @@
       "required": true,
       "types": [
         {
+          "type": "AlterStatement",
+          "named": true
+        },
+        {
           "type": "Array",
           "named": true
         },
@@ -6026,6 +6114,18 @@
         },
         {
           "type": "Constant",
+          "named": true
+        },
+        {
+          "type": "CreateStatement",
+          "named": true
+        },
+        {
+          "type": "DefineStatement",
+          "named": true
+        },
+        {
+          "type": "DeleteStatement",
           "named": true
         },
         {
@@ -6053,7 +6153,15 @@
           "named": true
         },
         {
+          "type": "InsertStatement",
+          "named": true
+        },
+        {
           "type": "Keyword",
+          "named": true
+        },
+        {
+          "type": "LetStatement",
           "named": true
         },
         {
@@ -6089,11 +6197,23 @@
           "named": true
         },
         {
+          "type": "RebuildStatement",
+          "named": true
+        },
+        {
           "type": "RecordId",
           "named": true
         },
         {
           "type": "Regex",
+          "named": true
+        },
+        {
+          "type": "RelateStatement",
+          "named": true
+        },
+        {
+          "type": "RemoveStatement",
           "named": true
         },
         {
@@ -6118,6 +6238,14 @@
         },
         {
           "type": "TypeCast",
+          "named": true
+        },
+        {
+          "type": "UpdateStatement",
+          "named": true
+        },
+        {
+          "type": "UpsertStatement",
           "named": true
         },
         {
@@ -6285,6 +6413,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -6626,6 +6758,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -6768,6 +6904,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -6865,7 +7005,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "Decimal",
@@ -7061,6 +7201,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -7295,6 +7439,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -7914,6 +8062,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -8163,6 +8315,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -8256,6 +8412,10 @@
           "named": true
         },
         {
+          "type": "Number",
+          "named": true
+        },
+        {
           "type": "Object",
           "named": true
         },
@@ -8293,6 +8453,10 @@
       "types": [
         {
           "type": "Array",
+          "named": true
+        },
+        {
+          "type": "Number",
           "named": true
         },
         {
@@ -8729,6 +8893,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -8748,11 +8916,119 @@
       "required": true,
       "types": [
         {
+          "type": "Array",
+          "named": true
+        },
+        {
+          "type": "BinaryExpression",
+          "named": true
+        },
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "Bool",
+          "named": true
+        },
+        {
+          "type": "Closure",
+          "named": true
+        },
+        {
+          "type": "Constant",
+          "named": true
+        },
+        {
+          "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "FormatString",
+          "named": true
+        },
+        {
+          "type": "FunctionCall",
+          "named": true
+        },
+        {
+          "type": "FunctionJs",
+          "named": true
+        },
+        {
+          "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "IfElseStatement",
+          "named": true
+        },
+        {
           "type": "Keyword",
           "named": true
         },
         {
+          "type": "None",
+          "named": true
+        },
+        {
+          "type": "Number",
+          "named": true
+        },
+        {
           "type": "Object",
+          "named": true
+        },
+        {
+          "type": "Path",
+          "named": true
+        },
+        {
+          "type": "Point",
+          "named": true
+        },
+        {
+          "type": "PrefixExpression",
+          "named": true
+        },
+        {
+          "type": "Range",
+          "named": true
+        },
+        {
+          "type": "RangeRecordId",
+          "named": true
+        },
+        {
+          "type": "RecordId",
+          "named": true
+        },
+        {
+          "type": "Regex",
+          "named": true
+        },
+        {
+          "type": "Set",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
+          "type": "TypeCast",
+          "named": true
+        },
+        {
+          "type": "VariableName",
           "named": true
         }
       ]
@@ -9177,6 +9453,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -9661,6 +9941,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -9781,6 +10065,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -9930,6 +10218,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -10072,6 +10364,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -10195,6 +10491,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -10315,6 +10615,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -11052,6 +11356,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -11363,6 +11671,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -11483,6 +11795,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -11680,6 +11996,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {
@@ -12503,6 +12823,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -12641,6 +12965,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -12764,6 +13092,10 @@
           "named": true
         },
         {
+          "type": "ThrowStatement",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
@@ -12884,6 +13216,10 @@
         },
         {
           "type": "SubQuery",
+          "named": true
+        },
+        {
+          "type": "ThrowStatement",
           "named": true
         },
         {

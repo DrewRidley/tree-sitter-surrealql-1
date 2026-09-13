@@ -8058,3 +8058,215 @@ CREATE r'person:100'
     (Keyword)
     (String)))
 
+
+==========================
+values :: THROW as a value
+==========================
+
+SELECT * FROM accounts WHERE THROW 'leaked: ' + secret
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Any))
+    (Keyword)
+    (Ident)
+    (WhereClause
+      (Keyword)
+      (ThrowStatement
+        (Keyword)
+        (BinaryExpression
+          (String)
+          (Operator)
+          (Ident))))))
+
+================================
+values :: THROW inside an object
+================================
+
+UPDATE accounts MERGE { x: THROW 'leaked: ' + secret }
+
+---
+
+(SurrealQL
+  (UpdateStatement
+    (Keyword)
+    (Ident)
+    (MergeClause
+      (Keyword)
+      (Object
+        (BraceOpen)
+        (ObjectContent
+          (ObjectProperty
+            (ObjectKey
+              (KeyName))
+            (Colon)
+            (ThrowStatement
+              (Keyword)
+              (BinaryExpression
+                (String)
+                (Operator)
+                (Ident)))))
+        (BraceClose)))))
+
+=================================================
+if-else :: A bare data statement as a branch body
+=================================================
+
+IF $record.count THEN UPSERT person:test SET sport += 'football' RETURN sport ELSE UPSERT person:test SET sport = ['basketball'] RETURN sport END
+
+---
+
+(SurrealQL
+  (IfElseStatement
+    (Keyword)
+    (Legacy
+      (Path
+        (VariableName)
+        (Subscript
+          (Ident)))
+      (Keyword)
+      (UpsertStatement
+        (Keyword)
+        (RecordId
+          (RecordTbIdent)
+          (Colon)
+          (RecordIdIdent))
+        (SetClause
+          (Keyword)
+          (FieldAssignment
+            (Ident)
+            (Operator)
+            (String)))
+        (ReturnClause
+          (Keyword)
+          (Fields
+            (Predicate
+              (Ident)))))
+      (Keyword)
+      (UpsertStatement
+        (Keyword)
+        (RecordId
+          (RecordTbIdent)
+          (Colon)
+          (RecordIdIdent))
+        (SetClause
+          (Keyword)
+          (FieldAssignment
+            (Ident)
+            (Operator)
+            (Array
+              (String))))
+        (ReturnClause
+          (Keyword)
+          (Fields
+            (Predicate
+              (Ident)))))
+      (Keyword))))
+
+==============================
+update :: Replace with a value
+==============================
+
+UPDATE person:test REPLACE 'some content'
+
+---
+
+(SurrealQL
+  (UpdateStatement
+    (Keyword)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (ReplaceClause
+      (Keyword)
+      (String))))
+
+==================================
+record-ids :: A signed range bound
+==================================
+
+RETURN |test:..=-9223372036854775806|
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (RangeRecordId
+      (Pipe)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdRange
+          (RangeOp)
+          (Number
+            (Int))))
+      (Pipe))))
+
+==========================
+relate :: Relate or update
+==========================
+
+RELATE OR UPDATE person:one->likes:[person:one, post:one]->post:one SET note = 'explicit'
+
+---
+
+(SurrealQL
+  (RelateStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (LookupRight)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (Array
+        (RecordId
+          (RecordTbIdent)
+          (Colon)
+          (RecordIdIdent))
+        (RecordId
+          (RecordTbIdent)
+          (Colon)
+          (RecordIdIdent))))
+    (LookupRight)
+    (RecordId
+      (RecordTbIdent)
+      (Colon)
+      (RecordIdIdent))
+    (SetClause
+      (Keyword)
+      (FieldAssignment
+        (Ident)
+        (Operator)
+        (String)))))
+
+=================================
+values :: A block called in place
+=================================
+
+{||2}()
+
+---
+
+(SurrealQL
+  (FunctionCall
+    (Block
+      (BraceOpen)
+      (Closure
+        (Pipe)
+        (Pipe)
+        (Number
+          (Int)))
+      (BraceClose))
+    (ArgumentList)))
+
