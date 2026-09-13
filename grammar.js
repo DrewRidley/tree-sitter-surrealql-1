@@ -219,7 +219,11 @@ export default grammar({
 		// Top-level entry
 		// ================================================================
 
-		SurrealQL: ($) => optional($._expressions),
+		// A source is a statement list, *or* nothing but semicolons. The two
+		// do not mix: 3.2.3 accepts `;` and `;;;` and parse-errors on
+		// `SELECT 1;;`, `;SELECT 1;` and `SELECT 1; ;` alike.
+		SurrealQL: ($) => optional(choice($._expressions, $._onlySemicolons)),
+		_onlySemicolons: ($) => repeat1(';'),
 
 		_expressions: ($) =>
 			prec.right(
@@ -1058,7 +1062,7 @@ export default grammar({
 		_defineFieldOptions: ($) =>
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
-				$.Idiom,
+				$._fieldName,
 				$.OnTableClause,
 				repeat(
 					choice(
@@ -1567,9 +1571,9 @@ export default grammar({
 				),
 			),
 		SequenceBatchClause: ($) =>
-			seq(alias($._kw_batch, $.Keyword), $.Number),
+			seq(alias($._kw_batch, $.Keyword), $._value),
 		SequenceStartClause: ($) =>
-			seq(alias($._kw_start, $.Keyword), $.Number),
+			seq(alias($._kw_start, $.Keyword), $._value),
 
 		WithClause: ($) =>
 			seq(
@@ -2523,8 +2527,24 @@ export default grammar({
 				// `a IS NOT b` is one operator, never `a IS (NOT b)` — which
 				// matters now that `not` can also open a call.
 				prec(1, seq($._kw_is, $._kw_not)),
+				// The matches operator. `@@` is the bare form; the brackets may
+				// carry a reference number for `search::` highlighting, a
+				// boolean mode (`@AND@`, `@OR@`), or both (`@1,AND@`).
 				'@@',
-				seq('@', $.Number, '@'),
+				seq(
+					'@',
+					choice(
+						$.Number,
+						seq(
+							optional(seq($.Number, ',')),
+							choice(
+								alias($._kw_and, $.Keyword),
+								alias($._kw_or, $.Keyword),
+							),
+						),
+					),
+					'@',
+				),
 			),
 		// Relational family (BindingPower::Relation): ordering, membership,
 		// containment, geo, and the KNN operator.
@@ -2633,7 +2653,14 @@ export default grammar({
 			seq($.VariableName, optional(seq($.Colon, alias($._type, $.Type)))),
 
 		// Block / SubQuery
-		Block: ($) => seq($.BraceOpen, optional($._expressions), $.BraceClose),
+		// `{;}` and `{;;}` are empty blocks, on the same terms as a source:
+		// `{SELECT 1;;}` is a parse error.
+		Block: ($) =>
+			seq(
+				$.BraceOpen,
+				optional(choice($._expressions, $._onlySemicolons)),
+				$.BraceClose,
+			),
 
 		SubQuery: ($) => seq('(', $._expression, ')'),
 

@@ -7616,3 +7616,120 @@ DEFINE API "/commented" FOR any THEN { { status: 200, body: {} }; } COMMENT "Thi
       (Keyword)
       (String))))
 
+
+==========================================
+misc :: A source of nothing but semicolons
+==========================================
+
+;;
+
+---
+
+(SurrealQL)
+
+======================
+misc :: An empty block
+======================
+
+{;}
+
+---
+
+(SurrealQL
+  (Block
+    (BraceOpen)
+    (BraceClose)))
+
+==================================================
+select :: The matches operator with a boolean mode
+==================================================
+
+SELECT id FROM b WHERE t @AND@ 'hello world'
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Predicate
+        (Ident)))
+    (Keyword)
+    (Ident)
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator
+          (Keyword))
+        (String)))))
+
+==========================================================
+select :: The matches operator with a reference and a mode
+==========================================================
+
+SELECT id FROM b WHERE t @1,OR@ 'bar foo'
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Predicate
+        (Ident)))
+    (Keyword)
+    (Ident)
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (Ident)
+        (Operator
+          (Number
+            (Int))
+          (Keyword))
+        (String)))))
+
+==========================================================
+define :: Define field with a parameterized name and table
+==========================================================
+
+DEFINE FIELD $name ON $table COMMENT $comment
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (OnTableClause
+      (Keyword)
+      (VariableName))
+    (CommentClause
+      (Keyword)
+      (VariableName))))
+
+=====================================================
+define :: Define sequence with parameterized settings
+=====================================================
+
+DEFINE SEQUENCE $name BATCH $batch START $start TIMEOUT $timeout
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (SequenceBatchClause
+      (Keyword)
+      (VariableName))
+    (SequenceStartClause
+      (Keyword)
+      (VariableName))
+    (TimeoutClause
+      (Keyword)
+      (VariableName))))
+
