@@ -1,0 +1,71 @@
+# CodeQL, as an advanced setup.
+#
+# The org ruleset requires a CodeQL analysis before a pull request can merge.
+# Default setup satisfies that on `master` but produces no analysis for a pull
+# request, so every PR waits on a check that never arrives. Advanced setup runs
+# on `pull_request` as well, and — the reason this file exists — it can be told
+# what to skip.
+#
+# NOTE: default setup must be turned off first (Settings -> Code security ->
+# Code scanning -> CodeQL analysis -> Default setup -> Disable). GitHub refuses
+# to run an advanced workflow while default setup owns the configuration.
+name: CodeQL
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    # Keep the baseline fresh even in a quiet week.
+    - cron: '32 4 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # `actions` (workflow analysis) is deliberately left out: it would
+          # add a matrix leg whose failure blocks every merge, which is the
+          # problem this file exists to fix. Worth adding once the rest is
+          # green.
+          - language: javascript-typescript
+            build-mode: none
+          # `paths-ignore` does NOT apply to compiled languages — CodeQL
+          # analyses whatever the build compiles. So the build here compiles
+          # exactly one file: the hand-written scanner. The generated
+          # `src/parser.c` is never handed to the extractor, which is the
+          # whole point.
+          - language: c-cpp
+            build-mode: manual
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3.38.0
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Build the external scanner
+        if: matrix.build-mode == 'manual'
+        run: cc -c -I src src/scanner.c -o "${RUNNER_TEMP}/scanner.o"
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3.38.0
+        with:
+          category: /language:${{ matrix.language }}
