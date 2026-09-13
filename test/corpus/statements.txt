@@ -8598,3 +8598,68 @@ ALTER EVENT my_event ON test WHEN $event = "CREATE" THEN { RETURN "restored"; } 
     (Keyword)
     (Keyword)))
 
+
+==============================================
+values :: A trailing comma in an argument list
+==============================================
+
+RETURN string::concat(NONE, NULL, true, 1, 1d, [], {}, (1,2), a:b, /a/, 1..2, |$a| {}, )
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (FunctionCall
+      (FunctionName)
+      (ArgumentList
+        (None)
+        (None)
+        (Bool)
+        (Number
+          (Int))
+        (Duration
+          (DurationPart))
+        (Array)
+        (Object
+          (BraceOpen)
+          (BraceClose))
+        (Point
+          (Number
+            (Int))
+          (Number
+            (Int)))
+        (RecordId
+          (RecordTbIdent)
+          (Colon)
+          (RecordIdIdent))
+        (Regex)
+        (Range
+          (Number
+            (Int))
+          (RangeOp)
+          (Number
+            (Int)))
+        (Closure
+          (Pipe)
+          (ParamDefinition
+            (VariableName))
+          (Pipe)
+          (Object
+            (BraceOpen)
+            (BraceClose)))))))
+
+==============================================
+values :: An escaped backtick in an identifier
+==============================================
+
+DEFINE TABLE `\``
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)))
+

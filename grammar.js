@@ -2866,7 +2866,9 @@ export default grammar({
 		ArgumentList: ($) =>
 			seq(
 				'(',
-				optional(choice(csep($._value), $._subqueryStatement)),
+				// A trailing comma is allowed, as it is in an array and an
+				// object literal.
+				optional(choice(csepTrail($._value), $._subqueryStatement)),
 				')',
 			),
 		Version: ($) => seq('<', $.VersionNumber, '>'),
@@ -3200,7 +3202,8 @@ export default grammar({
 		_rawident: ($) => token(prec(-1, /[a-zA-Z_][a-zA-Z0-9_]*/)),
 		// The empty identifier is legal: `DEFINE TABLE \`\``, `CREATE \`\`:1`
 		// and `INFO FOR TB \`\`` all run on 3.2.3.
-		_tickIdent: ($) => token(seq('`', /[^`]*/, '`')),
+		_tickIdent: ($) =>
+			token(seq('`', repeat(choice(/[^`\\]/, /\\[\s\S]/)), '`')),
 		_bracketIdent: ($) => token(seq('⟨', /[^⟩]*/, '⟩')),
 		_numberident: ($) =>
 			token(choice(/[a-zA-Z_][a-zA-Z0-9_]*/, /[0-9][a-zA-Z0-9_]*/)),

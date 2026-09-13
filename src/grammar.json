@@ -14291,6 +14291,18 @@
                           }
                         ]
                       }
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "STRING",
+                          "value": ","
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -15880,8 +15892,20 @@
             "value": "`"
           },
           {
-            "type": "PATTERN",
-            "value": "[^`]*"
+            "type": "REPEAT",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "PATTERN",
+                  "value": "[^`\\\\]"
+                },
+                {
+                  "type": "PATTERN",
+                  "value": "\\\\[\\s\\S]"
+                }
+              ]
+            }
           },
           {
             "type": "STRING",
