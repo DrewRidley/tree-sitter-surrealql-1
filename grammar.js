@@ -54,6 +54,12 @@ function kwAlt(words) {
  * `time::MAX` and `duration::MIN` at parse time, so listing them exactly is
  * what keeps the grammar from being looser than the engine.
  */
+/**
+ * `time::` has three, and only three: `time::now` is a function and 3.2.3
+ * parse-errors it without an argument list.
+ */
+const TIME_CONSTANTS = ['EPOCH', 'MAXIMUM', 'MINIMUM'];
+
 const MATH_CONSTANTS = [
 	'E',
 	'FRAC_1_PI',
@@ -109,7 +115,10 @@ function piped(rule) {
 }
 
 /** Digit sequence with optional underscore separators (e.g. 1_000_000) */
-const DIGITS = /[0-9]+(?:_[0-9]+)*/;
+// 3.2.3 takes a run of underscores anywhere after the first digit, and a
+// trailing one: `1_`, `1__2`, `1_____.0_____` and
+// `00009223372036854775_____807` all evaluate.
+const DIGITS = /[0-9][0-9_]*/;
 
 /** Exponent part of a float or decimal, e.g. `e-7`. */
 const EXPONENT = /[eE][+-]?[0-9]+(?:_[0-9]+)*/;
@@ -402,7 +411,7 @@ export default grammar({
 				alias($._kw_for, $.Keyword),
 				// One table, or every table in the database.
 				choice(
-					seq(alias($._kw_table, $.Keyword), $.Ident),
+					seq(alias($._kw_table, $.Keyword), $._value),
 					$._dbKeyword,
 				),
 				optional(
@@ -468,22 +477,25 @@ export default grammar({
 				alias($._kw_for, $.Keyword),
 				choice(
 					alias($._kw_root, $.Keyword),
+					// `KV` is the key-value store itself — the level above a
+					// namespace.
+					alias($._kw_kv, $.Keyword),
 					$._nsKeyword,
 					$._dbKeyword,
-					seq(alias($._kw_sc, $.Keyword), $.Ident),
-					seq(alias($._kw_scope, $.Keyword), $.Ident),
-					seq(alias($._kw_tb, $.Keyword), $.Ident),
+					seq(alias($._kw_sc, $.Keyword), $._value),
+					seq(alias($._kw_scope, $.Keyword), $._value),
+					seq(alias($._kw_tb, $.Keyword), $._value),
 					seq(alias($._kw_table, $.Keyword), $.Ident),
 					// INFO FOR USER falls back to the session's level when the
 					// ON clause is left off.
 					seq(
 						alias($._kw_user, $.Keyword),
-						$.Ident,
+						$._value,
 						optional($.OnRootNsDbClause),
 					),
 					seq(
 						alias($._kw_index, $.Keyword),
-						$.Ident,
+						$._value,
 						$.OnTableClause,
 					),
 				),
@@ -1317,6 +1329,9 @@ export default grammar({
 						$.FunctionCall,
 						$.RecordId,
 						$.RangeRecordId,
+						// `CREATE r'person:100'` — the r-prefixed string is a
+						// record id literal.
+						$.String,
 					),
 				),
 				optional(choice($.ContentClause, $.SetClause, $.UnsetClause)),
@@ -1579,7 +1594,12 @@ export default grammar({
 			seq(
 				alias($._kw_with, $.Keyword),
 				choice(
+					// The engine spells it either way.
 					alias($._kw_noindex, $.Keyword),
+					seq(
+						alias($._kw_no, $.Keyword),
+						alias($._kw_index, $.Keyword),
+					),
 					seq(alias($._kw_index, $.Keyword), csep($.Ident)),
 				),
 			),
@@ -1588,7 +1608,8 @@ export default grammar({
 			seq(
 				alias($._kw_split, $.Keyword),
 				optional(alias($._kw_on, $.Keyword)),
-				$.Idiom,
+				// More than one field may be split at once.
+				csep($.Idiom),
 			),
 
 		GroupClause: ($) =>
@@ -1803,7 +1824,9 @@ export default grammar({
 					alias($._kw_fields, $.Keyword),
 					alias($._kw_columns, $.Keyword),
 				),
-				csep($.Idiom),
+				// `type::field($f)` and `type::fields([$a, $b])` name the
+				// fields dynamically.
+				csep(choice($.Idiom, $.FunctionCall)),
 			),
 
 		// The index kinds. SurrealDB 3 reads `UNIQUE`, `COUNT`, `FULLTEXT`,
@@ -2310,7 +2333,7 @@ export default grammar({
 				// `...` flattens the array the path has reached. It was an
 				// idiom tail only, so `UNSET foo...` and `SELECT a...` — both
 				// of which reach the executor in 3.2.3 — were errors.
-				alias('...', $.Flatten),
+				alias(choice('...', '…'), $.Flatten),
 			),
 		Subscript: ($) => seq('.', $._dotPart),
 		_dotPart: ($) =>
@@ -2461,7 +2484,7 @@ export default grammar({
 		Idiom: ($) => seq($.Ident, repeat($._idiomTail)),
 		_idiomTail: ($) =>
 			choice(
-				seq('.', choice($.Ident, alias('*', $.Any))),
+				seq('.', choice($.Ident, $.IdiomFunction, alias('*', $.Any))),
 				// `items[*]` and `items.*` are the same field path — every
 				// element — so they get the same tree: a bare `Any`, not a
 				// `Filter` wrapping one. In a *value* position `a[*]` stays a
@@ -2469,7 +2492,7 @@ export default grammar({
 				// syntax and `[0]`, `[$]`, `[WHERE …]` sit beside it.
 				seq('[', alias('*', $.Any), ']'),
 				alias($._idiomFilter, $.Filter),
-				alias('...', $.Flatten),
+				alias(choice('...', '…'), $.Flatten),
 			),
 		// An idiom rooted at `count`, for the positions where the bare keyword
 		// cannot lex as an `Ident` because a call is also on offer. Aliased to
@@ -2684,7 +2707,10 @@ export default grammar({
 					$._value,
 				),
 			),
-		ObjectKey: ($) => choice(alias($._rawident, $.KeyName), $.String),
+		// A numeric key is a key: `{ 1: 1 }` is an object with the key "1",
+		// and `'1' IN { 1: 1 }` is true.
+		ObjectKey: ($) =>
+			choice(alias($._rawident, $.KeyName), $.String, $.Number),
 
 		_objectSelectValue: ($) =>
 			seq(
@@ -2789,7 +2815,7 @@ export default grammar({
 					4,
 					new RegExp(
 						`(?:${kw('math').source}::(?:${kwAlt(MATH_CONSTANTS)})` +
-							`|${kw('time').source}::${kw('EPOCH').source}` +
+							`|${kw('time').source}::(?:${kwAlt(TIME_CONSTANTS)})` +
 							`|${kw('duration').source}::${kw('MAX').source})`,
 					),
 				),
@@ -2873,10 +2899,19 @@ export default grammar({
 				seq(alias($._kw_value, $.Keyword), $.Predicate),
 				csep($._inclusivePredicate),
 			),
+		// The alias may be a path, not just a name: `SELECT modified AS b.c`
+		// nests the value under `b` in the output, and `ORDER BY b.c` then
+		// reads it back. A single-segment alias stays the bare `Ident` it has
+		// always been — only the dotted form wraps, exactly as a `SET` target
+		// does.
 		Predicate: ($) =>
 			choice(
 				$._value,
-				seq($._value, alias($._kw_as, $.Keyword), $.Ident),
+				seq(
+					$._value,
+					alias($._kw_as, $.Keyword),
+					choice($.Ident, alias($._pathAssignTarget, $.Idiom)),
+				),
 			),
 		_inclusivePredicate: ($) => choice(alias('*', $.Any), $.Predicate),
 
@@ -3101,8 +3136,10 @@ export default grammar({
 		Ident: ($) => $._idName,
 
 		_rawident: ($) => token(prec(-1, /[a-zA-Z_][a-zA-Z0-9_]*/)),
-		_tickIdent: ($) => token(seq('`', /[^`]+/, '`')),
-		_bracketIdent: ($) => token(seq('⟨', /[^⟩]+/, '⟩')),
+		// The empty identifier is legal: `DEFINE TABLE \`\``, `CREATE \`\`:1`
+		// and `INFO FOR TB \`\`` all run on 3.2.3.
+		_tickIdent: ($) => token(seq('`', /[^`]*/, '`')),
+		_bracketIdent: ($) => token(seq('⟨', /[^⟩]*/, '⟩')),
 		_numberident: ($) =>
 			token(choice(/[a-zA-Z_][a-zA-Z0-9_]*/, /[0-9][a-zA-Z0-9_]*/)),
 
@@ -3307,6 +3344,8 @@ export default grammar({
 		_kw_exists: ($) => kw('exists'),
 		_kw_explain: ($) => kw('explain'),
 		_kw_compact: ($) => kw('compact'),
+		_kw_kv: ($) => kw('kv'),
+		_kw_no: ($) => kw('no'),
 		_kw_depth: ($) => kw('depth'),
 		_kw_complexity: ($) => kw('complexity'),
 		_kw_introspection: ($) => kw('introspection'),
@@ -3666,6 +3705,8 @@ export default grammar({
 				$._kw_prepare,
 				$._kw_format,
 				$._kw_compact,
+				$._kw_kv,
+				$._kw_no,
 				$._kw_depth,
 				$._kw_complexity,
 				$._kw_introspection,

@@ -7733,3 +7733,328 @@ DEFINE SEQUENCE $name BATCH $batch START $start TIMEOUT $timeout
       (Keyword)
       (VariableName))))
 
+
+=============================================
+select :: With no index, spelled as two words
+=============================================
+
+SELECT id FROM t WITH NO INDEX WHERE id[1] = o:1 AND b = 2025
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Predicate
+        (Ident)))
+    (Keyword)
+    (Ident)
+    (WithClause
+      (Keyword)
+      (Keyword)
+      (Keyword))
+    (WhereClause
+      (Keyword)
+      (BinaryExpression
+        (BinaryExpression
+          (Path
+            (Ident)
+            (Filter
+              (Number
+                (Int))))
+          (Operator)
+          (RecordId
+            (RecordTbIdent)
+            (Colon)
+            (RecordIdIdent)))
+        (Operator)
+        (BinaryExpression
+          (Ident)
+          (Operator)
+          (Number
+            (Int)))))))
+
+==============================
+select :: Split several fields
+==============================
+
+SELECT id, a, b FROM t SPLIT a, b
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Predicate
+        (Ident))
+      (Predicate
+        (Ident))
+      (Predicate
+        (Ident)))
+    (Keyword)
+    (Ident)
+    (SplitClause
+      (Keyword)
+      (Idiom
+        (Ident))
+      (Idiom
+        (Ident)))))
+
+=================================
+select :: An alias that is a path
+=================================
+
+SELECT id AS a, modified AS b.c FROM item ORDER BY b.c DESC LIMIT 3
+
+---
+
+(SurrealQL
+  (SelectStatement
+    (Keyword)
+    (Fields
+      (Predicate
+        (Ident)
+        (Keyword)
+        (Ident))
+      (Predicate
+        (Ident)
+        (Keyword)
+        (Idiom
+          (Ident)
+          (Ident))))
+    (Keyword)
+    (Ident)
+    (OrderClause
+      (Keyword)
+      (Keyword)
+      (Order
+        (Idiom
+          (Ident)
+          (Ident))
+        (Keyword)))
+    (LimitStartComboClause
+      (LimitClause
+        (Keyword)
+        (Number
+          (Int))))))
+
+=====================================================
+info :: Info for the key-value store, read as a value
+=====================================================
+
+(INFO FOR KV).namespaces
+
+---
+
+(SurrealQL
+  (Path
+    (SubQuery
+      (InfoForStatement
+        (Keyword)
+        (Keyword)
+        (Keyword)))
+    (Subscript
+      (Ident))))
+
+=======================================================
+info :: Info for a parameterized table, read as a value
+=======================================================
+
+(INFO FOR TABLE $table).events
+
+---
+
+(SurrealQL
+  (Path
+    (SubQuery
+      (ERROR
+        (Keyword)
+        (Keyword)
+        (Keyword))
+      (VariableName))
+    (Subscript
+      (Ident))))
+
+============================
+values :: The time constants
+============================
+
+RETURN time::maximum.year()
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (Path
+      (Constant)
+      (Subscript
+        (IdiomFunction
+          (FunctionName)
+          (ArgumentList))))))
+
+===============================================
+define :: Index fields reached through a method
+===============================================
+
+DEFINE INDEX rid_val ON test FIELDS id.id().val
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (FieldsColumnsClause
+      (Keyword)
+      (Idiom
+        (Ident)
+        (IdiomFunction
+          (FunctionName)
+          (ArgumentList))
+        (Ident)))))
+
+========================================
+define :: Index fields named dynamically
+========================================
+
+DEFINE INDEX $name ON $table FIELDS a.b, type::field($single_field), type::fields($multiple_fields)
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (OnTableClause
+      (Keyword)
+      (VariableName))
+    (FieldsColumnsClause
+      (Keyword)
+      (Idiom
+        (Ident)
+        (Ident))
+      (FunctionCall
+        (FunctionName)
+        (ArgumentList
+          (VariableName)))
+      (FunctionCall
+        (FunctionName)
+        (ArgumentList
+          (VariableName))))))
+
+==========================================================
+define :: Index fields flattened with the unicode ellipsis
+==========================================================
+
+DEFINE INDEX test ON user FIELDS account, tags…, emails.*.value… UNIQUE
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (FieldsColumnsClause
+      (Keyword)
+      (Idiom
+        (Ident))
+      (Idiom
+        (Ident)
+        (Flatten))
+      (Idiom
+        (Ident)
+        (Any)
+        (Ident)
+        (Flatten)))
+    (IndexClause
+      (UniqueClause
+        (Keyword)))))
+
+==========================================
+values :: Underscores anywhere in a number
+==========================================
+
+RETURN 00009223372036854775_____807
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (Number
+      (Int))))
+
+==============================
+values :: The empty identifier
+==============================
+
+DEFINE FIELD ``.`` ON `` TYPE number
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident)
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
+      (Keyword)
+      (TypeName))))
+
+==============================
+values :: A numeric object key
+==============================
+
+RETURN '1' IN { 1: 1 }
+
+---
+
+(SurrealQL
+  (ReturnStatement
+    (Keyword)
+    (BinaryExpression
+      (String)
+      (Operator
+        (Keyword))
+      (Object
+        (BraceOpen)
+        (ObjectContent
+          (ObjectProperty
+            (ObjectKey
+              (Number
+                (Int)))
+            (Colon)
+            (Number
+              (Int))))
+        (BraceClose)))))
+
+========================================
+create :: Create from a record-id string
+========================================
+
+CREATE r'person:100'
+
+---
+
+(SurrealQL
+  (CreateStatement
+    (Keyword)
+    (String)))
+
