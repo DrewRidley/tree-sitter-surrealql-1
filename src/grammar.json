@@ -2919,7 +2919,7 @@
                     "members": [
                       {
                         "type": "SYMBOL",
-                        "name": "ApiForClause"
+                        "name": "_apiForClause"
                       },
                       {
                         "type": "SYMBOL",
@@ -3146,7 +3146,7 @@
         }
       ]
     },
-    "ApiForClause": {
+    "_apiForClause": {
       "type": "SEQ",
       "members": [
         {
@@ -5890,7 +5890,7 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "ApiForClause"
+                "name": "_apiForClause"
               },
               {
                 "type": "SYMBOL",
@@ -18454,7 +18454,7 @@
       "Path"
     ],
     [
-      "ApiForClause"
+      "_apiForClause"
     ],
     [
       "AlterStatement",

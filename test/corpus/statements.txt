@@ -7424,22 +7424,20 @@ ALTER API "/mytest" FOR get, post THEN { RETURN "new" } FOR any DROP THEN COMMEN
     (Keyword)
     (Keyword)
     (String)
-    (ApiForClause
-      (Keyword)
-      (HttpMethod)
-      (HttpMethod)
-      (Keyword)
-      (Block
-        (BraceOpen)
-        (ReturnStatement
-          (Keyword)
-          (String))
-        (BraceClose)))
-    (ApiForClause
-      (Keyword)
-      (Keyword)
-      (Keyword)
-      (Keyword))
+    (Keyword)
+    (HttpMethod)
+    (HttpMethod)
+    (Keyword)
+    (Block
+      (BraceOpen)
+      (ReturnStatement
+        (Keyword)
+        (String))
+      (BraceClose))
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
     (CommentClause
       (Keyword)
       (String))))
@@ -7575,7 +7573,7 @@ DEFINE CONFIG DEFAULT NAMESPACE myns DATABASE mydb
     (Keyword)
     (Ident)))
 
-===================================
+==================================
 define :: Define api with a comment
 ===================================
 
@@ -7588,34 +7586,32 @@ DEFINE API "/commented" FOR any THEN { { status: 200, body: {} }; } COMMENT "Thi
     (Keyword)
     (Keyword)
     (String)
-    (ApiForClause
-      (Keyword)
-      (Keyword)
-      (Keyword)
-      (Block
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Block
+      (BraceOpen)
+      (Object
         (BraceOpen)
-        (Object
-          (BraceOpen)
-          (ObjectContent
-            (ObjectProperty
-              (ObjectKey
-                (KeyName))
-              (Colon)
-              (Number
-                (Int)))
-            (ObjectProperty
-              (ObjectKey
-                (KeyName))
-              (Colon)
-              (Object
-                (BraceOpen)
-                (BraceClose))))
-          (BraceClose))
-        (BraceClose)))
+        (ObjectContent
+          (ObjectProperty
+            (ObjectKey
+              (KeyName))
+            (Colon)
+            (Number
+              (Int)))
+          (ObjectProperty
+            (ObjectKey
+              (KeyName))
+            (Colon)
+            (Object
+              (BraceOpen)
+              (BraceClose))))
+        (BraceClose))
+      (BraceClose))
     (CommentClause
       (Keyword)
       (String))))
-
 
 ==========================================
 misc :: A source of nothing but semicolons
@@ -8468,7 +8464,7 @@ DEFINE USER $name ON DATABASE ROLES OWNER DURATION FOR TOKEN $token_duration FOR
       (Keyword)
       (VariableName))))
 
-====================================================
+===================================================
 define :: Define api with permissions and no handler
 ====================================================
 
@@ -8481,18 +8477,17 @@ DEFINE API $path FOR any PERMISSIONS WHERE role = $user_role COMMENT $comment
     (Keyword)
     (Keyword)
     (VariableName)
-    (ApiForClause
-      (Keyword)
-      (Keyword)
-      (ApiOptions
-        (PermissionsBasicClause
+    (Keyword)
+    (Keyword)
+    (ApiOptions
+      (PermissionsBasicClause
+        (Keyword)
+        (WhereClause
           (Keyword)
-          (WhereClause
-            (Keyword)
-            (BinaryExpression
-              (Ident)
-              (Operator)
-              (VariableName))))))
+          (BinaryExpression
+            (Ident)
+            (Operator)
+            (VariableName)))))
     (CommentClause
       (Keyword)
       (VariableName))))

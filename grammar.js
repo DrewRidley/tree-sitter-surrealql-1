@@ -215,7 +215,7 @@ export default grammar({
 		// After `ALTER API "/x" FOR any`, a `DROP` opens either the group's own
 		// `DROP THEN` or the statement's `DROP COMMENT`. The token after DROP
 		// decides — LR(2), not ambiguous.
-		[$.ApiForClause],
+		[$._apiForClause],
 		// `ALTER FIELD f ON t FLEXIBLE` clears the flag on its own, and
 		// `FLEXIBLE TYPE object` is one TypeClause. Which one FLEXIBLE opens
 		// is decided by the token after it — LR(2), not ambiguous.
@@ -799,7 +799,7 @@ export default grammar({
 						optional($.ApiOptions),
 						repeat(
 							choice(
-								$.ApiForClause,
+								$._apiForClause,
 								$.CommentClause,
 								dropOf($, 'comment'),
 							),
@@ -842,7 +842,10 @@ export default grammar({
 		// `DEFINE FIELD $name ON $table`.
 		_fieldName: ($) => choice($.Idiom, $.VariableName),
 
-		ApiForClause: ($) =>
+		// Hidden on purpose: its members inline into whichever statement uses
+		// it, so `DEFINE API` keeps exactly the tree it had before ALTER
+		// started sharing the rule.
+		_apiForClause: ($) =>
 			seq(
 				alias($._kw_for, $.Keyword),
 				choice(alias($._kw_any, $.Keyword), csep($.HttpMethod)),
@@ -1305,13 +1308,13 @@ export default grammar({
 
 		// The path is a value (`DEFINE API $path …` runs on 3.2.3), the method
 		// groups are optional, and the statement carries a COMMENT of its own.
-		// `ApiForClause` is shared with ALTER.
+		// `_apiForClause` is shared with ALTER.
 		_defineApiOptions: ($) =>
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
 				$._value,
 				optional($.ApiOptions),
-				repeat(choice($.ApiForClause, $.CommentClause)),
+				repeat(choice($._apiForClause, $.CommentClause)),
 			),
 
 		ApiOptions: ($) =>

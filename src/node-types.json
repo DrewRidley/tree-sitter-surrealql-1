@@ -325,10 +325,6 @@
       "required": true,
       "types": [
         {
-          "type": "ApiForClause",
-          "named": true
-        },
-        {
           "type": "ApiOptions",
           "named": true
         },
@@ -414,6 +410,10 @@
         },
         {
           "type": "FunctionName",
+          "named": true
+        },
+        {
+          "type": "HttpMethod",
           "named": true
         },
         {
@@ -627,33 +627,6 @@
     "type": "Any",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "ApiForClause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "ApiOptions",
-          "named": true
-        },
-        {
-          "type": "Block",
-          "named": true
-        },
-        {
-          "type": "HttpMethod",
-          "named": true
-        },
-        {
-          "type": "Keyword",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "ApiOptions",
@@ -2724,10 +2697,6 @@
           "named": true
         },
         {
-          "type": "ApiForClause",
-          "named": true
-        },
-        {
           "type": "ApiOptions",
           "named": true
         },
@@ -2825,6 +2794,10 @@
         },
         {
           "type": "FunctionName",
+          "named": true
+        },
+        {
+          "type": "HttpMethod",
           "named": true
         },
         {
