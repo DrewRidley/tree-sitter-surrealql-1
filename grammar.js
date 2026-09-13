@@ -80,6 +80,19 @@ const MATH_CONSTANTS = [
 	'TAU',
 ];
 
+/**
+ * `DROP <clause>` — ALTER's unset form. Each subject takes its own set, and
+ * the sets are not interchangeable: 3.2.3 parse-errors `ALTER USER … DROP
+ * DURATION`, `ALTER FIELD … DROP PERMISSIONS` and `ALTER INDEX … DROP
+ * CHANGEFEED`, all of which are legal DROPs on some *other* subject.
+ */
+function dropOf($, ...names) {
+	return seq(
+		alias($._kw_drop, $.Keyword),
+		choice(...names.map((n) => alias($[`_kw_${n}`], $.Keyword))),
+	);
+}
+
 /** Comma separated list (no trailing comma) */
 function csep(rule) {
 	return seq(rule, repeat(seq(',', rule)));
@@ -190,6 +203,10 @@ export default grammar({
 		[$.Legacy],
 		[$._prefixOperand, $.Path],
 		[$._value, $.Path],
+		// `ALTER FIELD f ON t FLEXIBLE` clears the flag on its own, and
+		// `FLEXIBLE TYPE object` is one TypeClause. Which one FLEXIBLE opens
+		// is decided by the token after it — LR(2), not ambiguous.
+		[$.AlterStatement, $.TypeClause],
 		// After `WITH JWT <jwt>` inside DEFINE ACCESS … TYPE RECORD, a `WITH`
 		// starts either the JWT clause's own `WITH ISSUER` or the type's
 		// trailing `WITH REFRESH`. Deciding needs the token after `WITH`, so
@@ -590,7 +607,8 @@ export default grammar({
 								$.ChangefeedClause,
 								$.PermissionsForClause,
 								$.CommentClause,
-								$._alterDropClause,
+								$.CompactClause,
+								dropOf($, 'comment', 'changefeed'),
 							),
 						),
 					),
@@ -600,25 +618,213 @@ export default grammar({
 					seq(
 						alias($._kw_index, $.Keyword),
 						optional($.IfExistsClause),
-						$.Ident,
+						$._value,
 						$.OnTableClause,
 						repeat1(
 							choice(
 								$.PrepareClause,
 								$.CommentClause,
-								$._alterDropClause,
+								dropOf($, 'comment'),
 							),
 						),
 					),
+					seq(
+						alias($._kw_field, $.Keyword),
+						optional($.IfExistsClause),
+						$._fieldName,
+						$.OnTableClause,
+						repeat(
+							choice(
+								$.TypeClause,
+								$.DefaultClause,
+								$.ReadonlyClause,
+								$.ValueClause,
+								$.AssertClause,
+								$.PermissionsForClause,
+								$.CommentClause,
+								$.ReferenceClause,
+								$.ComputedClause,
+								alias($._kw_flexible, $.Keyword),
+								dropOf(
+									$,
+									'type',
+									'readonly',
+									'value',
+									'assert',
+									'default',
+									'comment',
+									'reference',
+									'flexible',
+								),
+							),
+						),
+					),
+					seq(
+						alias($._kw_event, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						$.OnTableClause,
+						repeat(
+							choice(
+								$.WhenClause,
+								$.ThenClause,
+								$.AsyncClause,
+								$.CommentClause,
+								dropOf($, 'when', 'then', 'comment'),
+							),
+						),
+					),
+					seq(
+						alias($._kw_access, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						$.OnRootNsDbClause,
+						repeat(
+							choice(
+								$.DurationClause,
+								$.CommentClause,
+								dropOf($, 'comment'),
+							),
+						),
+					),
+					seq(
+						alias($._kw_user, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						$.OnRootNsDbClause,
+						repeat(
+							choice(
+								$.PasswordClause,
+								$.RolesClause,
+								$.DurationClause,
+								$.CommentClause,
+								dropOf($, 'comment'),
+							),
+						),
+					),
+					seq(
+						alias($._kw_analyzer, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						repeat(
+							choice(
+								$.TokenizersClause,
+								$.FiltersClause,
+								$.FunctionClause,
+								$.CommentClause,
+								dropOf(
+									$,
+									'tokenizers',
+									'filters',
+									'function',
+									'comment',
+								),
+							),
+						),
+					),
+					seq(
+						alias($._kw_param, $.Keyword),
+						optional($.IfExistsClause),
+						$.VariableName,
+						repeat(
+							choice(
+								seq(alias($._kw_value, $.Keyword), $._value),
+								$.PermissionsBasicClause,
+								$.CommentClause,
+								dropOf($, 'comment'),
+							),
+						),
+					),
+					seq(
+						alias($._kw_function, $.Keyword),
+						optional($.IfExistsClause),
+						$.FunctionName,
+						// The signature and the body come together or not at
+						// all: 3.2.3 parse-errors on `ALTER FUNCTION fn::f
+						// { … }` (a body with no parameter list) and on
+						// `ALTER FUNCTION fn::f()` (a list with no body).
+						optional(
+							seq(
+								'(',
+								optional(
+									csepTrail(
+										alias(
+											$._unionParamDefinition,
+											$.ParamDefinition,
+										),
+									),
+								),
+								')',
+								optional(seq($.LookupRight, $._type)),
+								$.Block,
+							),
+						),
+						repeat(
+							choice(
+								$.PermissionsBasicClause,
+								$.CommentClause,
+								dropOf($, 'comment'),
+							),
+						),
+					),
+					seq(
+						alias($._kw_api, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						optional($.ApiOptions),
+						repeat(
+							choice(
+								$.ApiForClause,
+								$.CommentClause,
+								dropOf($, 'comment'),
+							),
+						),
+					),
+					// SEQUENCE takes only TIMEOUT on ALTER: BATCH and START
+					// are parse errors there, though DEFINE takes both.
+					seq(
+						alias($._kw_sequence, $.Keyword),
+						optional($.IfExistsClause),
+						$._value,
+						repeat($.TimeoutClause),
+					),
+					seq(
+						alias($._kw_config, $.Keyword),
+						optional($.IfExistsClause),
+						$._configOptions,
+					),
+					// COMPACT and the global query timeout: the only ALTERs
+					// that name no object.
+					seq(
+						alias($._kw_system, $.Keyword),
+						choice(
+							$.CompactClause,
+							seq(
+								alias($._kw_query_timeout, $.Keyword),
+								$._value,
+							),
+							dropOf($, 'query_timeout'),
+						),
+					),
+					seq($._nsKeyword, $.CompactClause),
+					seq($._dbKeyword, $.CompactClause),
 				),
 			),
 
-		_alterDropClause: ($) =>
+		CompactClause: ($) => alias($._kw_compact, $.Keyword),
+
+		// A field path, or a parameter holding one: 3.2.3 runs
+		// `DEFINE FIELD $name ON $table`.
+		_fieldName: ($) => choice($.Idiom, $.VariableName),
+
+		ApiForClause: ($) =>
 			seq(
-				alias($._kw_drop, $.Keyword),
+				alias($._kw_for, $.Keyword),
+				choice(alias($._kw_any, $.Keyword), csep($.HttpMethod)),
+				optional($.ApiOptions),
 				choice(
-					alias($._kw_comment, $.Keyword),
-					alias($._kw_changefeed, $.Keyword),
+					seq(alias($._kw_then, $.Keyword), $.Block),
+					dropOf($, 'then'),
 				),
 			),
 
@@ -957,12 +1163,27 @@ export default grammar({
 		_defineConfigOptions: ($) =>
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
-				choice(
-					seq(
-						alias($._kw_graphql, $.Keyword),
-						$._defineConfigGraphqlOptions,
+				$._configOptions,
+			),
+		// The config subject and its settings, shared by DEFINE and ALTER.
+		// Each subject's options are optional — `DEFINE CONFIG GRAPHQL;` and
+		// `DEFINE CONFIG API;` both reach the executor.
+		_configOptions: ($) =>
+			choice(
+				seq(
+					alias($._kw_graphql, $.Keyword),
+					optional($._defineConfigGraphqlOptions),
+				),
+				seq(alias($._kw_api, $.Keyword), optional($.ApiOptions)),
+				// The DEFAULT config names where an unqualified query lands.
+				seq(
+					alias($._kw_default, $.Keyword),
+					repeat1(
+						choice(
+							seq($._nsKeyword, $._value),
+							seq($._dbKeyword, $._value),
+						),
 					),
-					seq(alias($._kw_api, $.Keyword), $.ApiOptions),
 				),
 			),
 		_defineConfigGraphqlOptions: ($) =>
@@ -981,6 +1202,30 @@ export default grammar({
 					),
 					seq(
 						alias($._kw_functions, $.Keyword),
+						choice(
+							alias($._kw_none, $.None),
+							alias($._kw_auto, $.Keyword),
+							seq(
+								alias($._kw_include, $.Keyword),
+								csep($.FunctionName),
+							),
+							seq(
+								alias($._kw_exclude, $.Keyword),
+								csep($.FunctionName),
+							),
+						),
+					),
+					// The query limits. Each takes a number or NONE.
+					seq(
+						alias($._kw_depth, $.Keyword),
+						choice($.Number, alias($._kw_none, $.None)),
+					),
+					seq(
+						alias($._kw_complexity, $.Keyword),
+						choice($.Number, alias($._kw_none, $.None)),
+					),
+					seq(
+						alias($._kw_introspection, $.Keyword),
 						choice(
 							alias($._kw_none, $.None),
 							alias($._kw_auto, $.Keyword),
@@ -1029,20 +1274,15 @@ export default grammar({
 			),
 		RolesClause: ($) => seq(alias($._kw_roles, $.Keyword), csep($.Ident)),
 
+		// The path is a value (`DEFINE API $path …` runs on 3.2.3), the method
+		// groups are optional, and the statement carries a COMMENT of its own.
+		// `ApiForClause` is shared with ALTER.
 		_defineApiOptions: ($) =>
 			seq(
 				optional(choice($.IfNotExistsClause, $.OverwriteClause)),
-				$.String,
+				$._value,
 				optional($.ApiOptions),
-				repeat1(
-					seq(
-						alias($._kw_for, $.Keyword),
-						choice(alias($._kw_any, $.Keyword), csep($.HttpMethod)),
-						optional($.ApiOptions),
-						alias($._kw_then, $.Keyword),
-						$.Block,
-					),
-				),
+				repeat(choice($.ApiForClause, $.CommentClause)),
 			),
 
 		ApiOptions: ($) =>
@@ -3039,6 +3279,12 @@ export default grammar({
 		_kw_exclude: ($) => kw('exclude'),
 		_kw_exists: ($) => kw('exists'),
 		_kw_explain: ($) => kw('explain'),
+		_kw_compact: ($) => kw('compact'),
+		_kw_depth: ($) => kw('depth'),
+		_kw_complexity: ($) => kw('complexity'),
+		_kw_introspection: ($) => kw('introspection'),
+		_kw_system: ($) => kw('system'),
+		_kw_query_timeout: ($) => kw('query_timeout'),
 		_kw_format: ($) => kw('format'),
 		_kw_json: ($) => kw('json'),
 		_kw_expunge: ($) => kw('expunge'),
@@ -3392,6 +3638,12 @@ export default grammar({
 				$._kw_postings_order,
 				$._kw_prepare,
 				$._kw_format,
+				$._kw_compact,
+				$._kw_depth,
+				$._kw_complexity,
+				$._kw_introspection,
+				$._kw_system,
+				$._kw_query_timeout,
 				$._kw_json,
 				$._kw_retry,
 				$._kw_maxdepth,

@@ -7157,3 +7157,462 @@ SELECT * FROM |test:1..1000| TIMEOUT $timeout
       (Keyword)
       (VariableName))))
 
+
+======================================
+alter :: Alter field with every clause
+======================================
+
+ALTER FIELD a ON t TYPE record<test> READONLY VALUE test:123 ASSERT true DEFAULT ALWAYS test:123 PERMISSIONS NONE COMMENT "test"
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (TypeClause
+      (Keyword)
+      (ParameterizedType
+        (TypeName)
+        (TypeName)))
+    (ReadonlyClause
+      (Keyword))
+    (ValueClause
+      (Keyword)
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent)))
+    (AssertClause
+      (Keyword)
+      (Bool))
+    (DefaultClause
+      (Keyword)
+      (DefaultAlways
+        (Keyword))
+      (RecordId
+        (RecordTbIdent)
+        (Colon)
+        (RecordIdIdent)))
+    (PermissionsForClause
+      (Keyword)
+      (None))
+    (CommentClause
+      (Keyword)
+      (String))))
+
+=====================================
+alter :: Alter field dropping clauses
+=====================================
+
+ALTER FIELD a ON t DROP TYPE DROP READONLY DROP VALUE DROP ASSERT DROP DEFAULT DROP COMMENT
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Idiom
+      (Ident))
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)))
+
+===============================
+alter :: Alter access durations
+===============================
+
+ALTER ACCESS my_access ON DATABASE DURATION FOR TOKEN 2h, FOR SESSION 48h COMMENT "updated access"
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (DurationClause
+      (Keyword)
+      (DurationValue
+        (Keyword)
+        (Keyword)
+        (Duration
+          (DurationPart)))
+      (DurationValue
+        (Keyword)
+        (Keyword)
+        (Duration
+          (DurationPart))))
+    (CommentClause
+      (Keyword)
+      (String))))
+
+===================
+alter :: Alter user
+===================
+
+ALTER USER testuser ON DATABASE PASSWORD 'pw2' ROLES EDITOR DURATION FOR TOKEN 1h DROP COMMENT
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnRootNsDbClause
+      (Keyword)
+      (Keyword))
+    (PasswordClause
+      (Keyword)
+      (String))
+    (RolesClause
+      (Keyword)
+      (Ident))
+    (DurationClause
+      (Keyword)
+      (DurationValue
+        (Keyword)
+        (Keyword)
+        (Duration
+          (DurationPart))))
+    (Keyword)
+    (Keyword)))
+
+=======================
+alter :: Alter analyzer
+=======================
+
+ALTER ANALYZER my_analyzer TOKENIZERS class FILTERS ascii COMMENT "updated analyzer"
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (TokenizersClause
+      (Keyword)
+      (AnalyzerTokenizer))
+    (FiltersClause
+      (Keyword)
+      (AnalyzerFilters
+        (Filter)))
+    (CommentClause
+      (Keyword)
+      (String))))
+
+====================
+alter :: Alter event
+====================
+
+ALTER EVENT my_event ON test WHEN $event = "UPDATE" THEN { RETURN 1 } DROP COMMENT
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (OnTableClause
+      (Keyword)
+      (Ident))
+    (WhenClause
+      (Keyword)
+      (BinaryExpression
+        (VariableName)
+        (Operator)
+        (String)))
+    (ThenClause
+      (Keyword)
+      (Block
+        (BraceOpen)
+        (ReturnStatement
+          (Keyword)
+          (Number
+            (Int)))
+        (BraceClose)))
+    (Keyword)
+    (Keyword)))
+
+====================
+alter :: Alter param
+====================
+
+ALTER PARAM $test VALUE 100 PERMISSIONS NONE DROP COMMENT
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (Keyword)
+    (Number
+      (Int))
+    (PermissionsBasicClause
+      (Keyword)
+      (None))
+    (Keyword)
+    (Keyword)))
+
+=======================
+alter :: Alter function
+=======================
+
+ALTER FUNCTION fn::greet($name: string) { RETURN $name; } COMMENT "x" PERMISSIONS FULL
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (FunctionName)
+    (ParamDefinition
+      (VariableName)
+      (Colon)
+      (Type
+        (TypeName)))
+    (Block
+      (BraceOpen)
+      (ReturnStatement
+        (Keyword)
+        (VariableName))
+      (BraceClose))
+    (CommentClause
+      (Keyword)
+      (String))
+    (PermissionsBasicClause
+      (Keyword)
+      (Literal))))
+
+==================
+alter :: Alter api
+==================
+
+ALTER API "/mytest" FOR get, post THEN { RETURN "new" } FOR any DROP THEN COMMENT "updated api"
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (String)
+    (ApiForClause
+      (Keyword)
+      (HttpMethod)
+      (HttpMethod)
+      (Keyword)
+      (Block
+        (BraceOpen)
+        (ReturnStatement
+          (Keyword)
+          (String))
+        (BraceClose)))
+    (ApiForClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Keyword))
+    (CommentClause
+      (Keyword)
+      (String))))
+
+===============================
+alter :: Alter sequence timeout
+===============================
+
+ALTER SEQUENCE seq TIMEOUT 5s
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (TimeoutClause
+      (Keyword)
+      (Duration
+        (DurationPart)))))
+
+=====================
+alter :: Alter config
+=====================
+
+ALTER CONFIG IF EXISTS DEFAULT NAMESPACE test
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (IfExistsClause
+      (Keyword)
+      (Keyword))
+    (Keyword)
+    (Keyword)
+    (Ident)))
+
+================
+alter :: Compact
+================
+
+ALTER SYSTEM COMPACT
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (CompactClause
+      (Keyword))))
+
+=======================================
+alter :: Alter the system query timeout
+=======================================
+
+ALTER SYSTEM DROP QUERY_TIMEOUT
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)))
+
+=========================================
+alter :: Alter a parameterized field name
+=========================================
+
+ALTER FIELD $prm_fld ON $prm_fld_tb COMMENT "prm-field-alt"
+
+---
+
+(SurrealQL
+  (AlterStatement
+    (Keyword)
+    (Keyword)
+    (VariableName)
+    (OnTableClause
+      (Keyword)
+      (VariableName))
+    (CommentClause
+      (Keyword)
+      (String))))
+
+===========================================
+define :: Define graphql config with limits
+===========================================
+
+DEFINE CONFIG OVERWRITE GRAPHQL TABLES AUTO DEPTH 20 COMPLEXITY 1000 INTROSPECTION NONE
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (OverwriteClause
+      (Keyword))
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Number
+      (Int))
+    (Keyword)
+    (Number
+      (Int))
+    (Keyword)
+    (None)))
+
+===================================
+define :: Define the default config
+===================================
+
+DEFINE CONFIG DEFAULT NAMESPACE myns DATABASE mydb
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Keyword)
+    (Ident)
+    (Keyword)
+    (Ident)))
+
+===================================
+define :: Define api with a comment
+===================================
+
+DEFINE API "/commented" FOR any THEN { { status: 200, body: {} }; } COMMENT "This is a test API"
+
+---
+
+(SurrealQL
+  (DefineStatement
+    (Keyword)
+    (Keyword)
+    (String)
+    (ApiForClause
+      (Keyword)
+      (Keyword)
+      (Keyword)
+      (Block
+        (BraceOpen)
+        (Object
+          (BraceOpen)
+          (ObjectContent
+            (ObjectProperty
+              (ObjectKey
+                (KeyName))
+              (Colon)
+              (Number
+                (Int)))
+            (ObjectProperty
+              (ObjectKey
+                (KeyName))
+              (Colon)
+              (Object
+                (BraceOpen)
+                (BraceClose))))
+          (BraceClose))
+        (BraceClose)))
+    (CommentClause
+      (Keyword)
+      (String))))
+

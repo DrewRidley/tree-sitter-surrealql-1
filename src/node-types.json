@@ -321,7 +321,23 @@
       "required": true,
       "types": [
         {
+          "type": "ApiForClause",
+          "named": true
+        },
+        {
+          "type": "ApiOptions",
+          "named": true
+        },
+        {
           "type": "Array",
+          "named": true
+        },
+        {
+          "type": "AssertClause",
+          "named": true
+        },
+        {
+          "type": "AsyncClause",
           "named": true
         },
         {
@@ -349,11 +365,31 @@
           "named": true
         },
         {
+          "type": "CompactClause",
+          "named": true
+        },
+        {
+          "type": "ComputedClause",
+          "named": true
+        },
+        {
           "type": "Constant",
           "named": true
         },
         {
+          "type": "DefaultClause",
+          "named": true
+        },
+        {
           "type": "Duration",
+          "named": true
+        },
+        {
+          "type": "DurationClause",
+          "named": true
+        },
+        {
+          "type": "FiltersClause",
           "named": true
         },
         {
@@ -365,11 +401,23 @@
           "named": true
         },
         {
+          "type": "FunctionClause",
+          "named": true
+        },
+        {
           "type": "FunctionJs",
           "named": true
         },
         {
+          "type": "FunctionName",
+          "named": true
+        },
+        {
           "type": "Ident",
+          "named": true
+        },
+        {
+          "type": "Idiom",
           "named": true
         },
         {
@@ -385,6 +433,14 @@
           "named": true
         },
         {
+          "type": "LiteralType",
+          "named": true
+        },
+        {
+          "type": "LookupRight",
+          "named": true
+        },
+        {
           "type": "None",
           "named": true
         },
@@ -397,11 +453,31 @@
           "named": true
         },
         {
+          "type": "OnRootNsDbClause",
+          "named": true
+        },
+        {
           "type": "OnTableClause",
           "named": true
         },
         {
+          "type": "ParamDefinition",
+          "named": true
+        },
+        {
+          "type": "ParameterizedType",
+          "named": true
+        },
+        {
+          "type": "PasswordClause",
+          "named": true
+        },
+        {
           "type": "Path",
+          "named": true
+        },
+        {
+          "type": "PermissionsBasicClause",
           "named": true
         },
         {
@@ -429,11 +505,23 @@
           "named": true
         },
         {
+          "type": "ReadonlyClause",
+          "named": true
+        },
+        {
           "type": "RecordId",
           "named": true
         },
         {
+          "type": "ReferenceClause",
+          "named": true
+        },
+        {
           "type": "Regex",
+          "named": true
+        },
+        {
+          "type": "RolesClause",
           "named": true
         },
         {
@@ -453,11 +541,43 @@
           "named": true
         },
         {
+          "type": "ThenClause",
+          "named": true
+        },
+        {
+          "type": "TimeoutClause",
+          "named": true
+        },
+        {
+          "type": "TokenizersClause",
+          "named": true
+        },
+        {
           "type": "TypeCast",
           "named": true
         },
         {
+          "type": "TypeClause",
+          "named": true
+        },
+        {
+          "type": "TypeName",
+          "named": true
+        },
+        {
+          "type": "UnionType",
+          "named": true
+        },
+        {
+          "type": "ValueClause",
+          "named": true
+        },
+        {
           "type": "VariableName",
+          "named": true
+        },
+        {
+          "type": "WhenClause",
           "named": true
         }
       ]
@@ -495,6 +615,33 @@
     "type": "Any",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "ApiForClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "ApiOptions",
+          "named": true
+        },
+        {
+          "type": "Block",
+          "named": true
+        },
+        {
+          "type": "HttpMethod",
+          "named": true
+        },
+        {
+          "type": "Keyword",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "ApiOptions",
@@ -1979,6 +2126,21 @@
     }
   },
   {
+    "type": "CompactClause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Keyword",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "ComputedClause",
     "named": true,
     "fields": {},
@@ -2502,6 +2664,10 @@
           "named": true
         },
         {
+          "type": "ApiForClause",
+          "named": true
+        },
+        {
           "type": "ApiOptions",
           "named": true
         },
@@ -2599,10 +2765,6 @@
         },
         {
           "type": "FunctionName",
-          "named": true
-        },
-        {
-          "type": "HttpMethod",
           "named": true
         },
         {
